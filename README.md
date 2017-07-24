@@ -15,12 +15,12 @@ The build creates three containers
 
 - latest version of docker-engine and docker-compose (http://docs.docker.com/compose)
 
-Usage
+## Usage
 
 1. Clone `mbi-image / containerized-xnat ` repository 
     
      ```git clone https://gitlab.erc.monash.edu.au/mbi-image/containerized-xnat.git```
-2. Configurations: The default configuration is sufficient to run the deployment. Followin files can be modified if you want to change the default configuration
+2. Configurations: The default configuration is sufficient to run the deployment. Following files can be modified if you want to change the default configuration
    
       /docker-compose.yml :
 
