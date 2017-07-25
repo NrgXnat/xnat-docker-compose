@@ -4,12 +4,23 @@ xnat-web:
     - "8081:8080"
    volumes:
      - ./webapps:/opt/tomcat/webapps
+   expose:
+    - "8080"
    links:
     - xnat-db
-
+    
 xnat-db:
    build: ./postgres
    expose:
      - "5432"
    volumes:
      - ./postgres-data:/var/lib/postgresql/data
+xnat-nginx:
+   build: ./nginx
+   ports:
+    - "80:80"
+   expose: 
+    - "80"
+   links:
+     - xnat-web
+   

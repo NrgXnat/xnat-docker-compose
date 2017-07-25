@@ -1,0 +1,20 @@
+server {
+    listen 80;
+    location / {
+        proxy_pass                          http://xnat-web:8081;
+        proxy_redirect                      http://xnat-web:8081 $scheme://localhost;
+        proxy_set_header Host               $host;
+        proxy_set_header X-Real-IP          $remote_addr;
+        proxy_set_header X-Forwarded-Host   $host;
+        proxy_set_header X-Forwarded-Server $host;
+        proxy_set_header X-Forwarded-For    $proxy_add_x_forwarded_for;
+        proxy_connect_timeout               150;
+        proxy_send_timeout                  100;
+        proxy_read_timeout                  100;
+        proxy_buffers                       4 32k;
+        client_max_body_size                0;
+        client_body_buffer_size             128k;
+    }
+    access_log /var/log/nginx/xnat.access.log;
+    error_log /var/log/nginx/xnat.error.log;
+}
