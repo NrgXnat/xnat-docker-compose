@@ -48,7 +48,7 @@ The build creates three containers
 
      `cp xnat-web-1.7.0.war webapps/`
      
-6. Browse to http://localhost:8081/xnat-web-1.7.0
+6. Browse to http://localhost/xnat-web-1.7.0
 
     
 ## Troubleshooting
