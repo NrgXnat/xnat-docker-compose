@@ -54,13 +54,13 @@ The build creates three containers
 ## Troubleshooting
     
 
-- ssh to running conatiner : 
+- get a shell in a running conatiner : 
 
      to list all container and to get container id run
 
      `docker ps`
 
-     to ssh to running container
+     to get into a running container
  
       `docker exec -it <container ID> sh`
 
