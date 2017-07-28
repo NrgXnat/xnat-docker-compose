@@ -53,5 +53,26 @@ The build creates three containers
     
 ## Troubleshooting
     
-    
-   
+
+- ssh to running conatiner : 
+
+     to list all container and to get container id run
+
+     `docker ps`
+
+     to ssh to running container
+ 
+      `docker exec -it <container ID> sh`
+
+- read tomcat logs :
+
+`docker exec -it <container id  for xnatdocker_xnat-web_1 >  tail -f  /opt/tomcat/logs/catalina.2017-07-28.log `
+
+- bring all the instance down by running
+
+`docker-compose down --rmi all`  (this will bring down all container and remove all the images)
+
+- bring xnat instance up again
+
+`docker-compose up -d `
+  
