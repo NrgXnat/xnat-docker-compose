@@ -1,5 +1,5 @@
 # Dockerized XNAT
-Use this repositiry to run XNAT instance on dev/prod environment.
+Use this repository to run XNAT instance on dev/prod environment.
 
 ## Introduction
 
