@@ -35,11 +35,15 @@ ENV PATH $PATH:$CATALINA_HOME/bin
 
 RUN adduser --disabled-password --gecos '' xnat
 
-RUN mkdir -p /data/xnat/home/config && \
-cd .. && \
-mkdir logs plugins work &&\
-cd .. &&\
-mkdir archive build cache ftp pipeline prearchive
+RUN mkdir -p /data/xnat/home/config
+
+WORKDIR /data/xnat/home
+
+RUN mkdir logs plugins work
+
+WORKDIR /data/xnat
+
+RUN mkdir archive build cache ftp pipeline prearchive
 
 ADD xnat-conf.properties /data/xnat/home/config
 
