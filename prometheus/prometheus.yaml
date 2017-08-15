@@ -9,5 +9,5 @@ scrape_configs:
 
     - job_name: 'containers-monitor'
       static_configs:
-         - targets: ['localhost:9100','cadvisor:8080']
+         - targets: ['cadvisor:8080']
            
