@@ -6,10 +6,12 @@ Use this repository to run XNAT instance on dev/prod environment.
 This repository contains files to bootstrap XNAT deployment. 
 
 Creates an assembly of docker conatiners that provides XNAT web portal, persistent database store, nginx front end proxy and Prometheus for monitoring and alerts.
-The build creates three containers
+The build creates five containers
 - **postgres**
 - **tomcat**
 - **nginx**
+- **cAdvisor**
+- **Prometheus**
 
 ## Prerequisites
 
@@ -33,6 +35,8 @@ The build creates three containers
       /tomcat-users.xml : 
    
       /xnat-conf.properties : 
+      
+      /prometheus/prometheus.yaml
    
 3. Start the system
    
@@ -54,25 +58,38 @@ The build creates three containers
 ## Troubleshooting
     
 
-- get a shell in a running conatiner : 
+- Get a shell in a running conatiner : 
 
-     to list all container and to get container id run
+     To list all containers and to get container id run
 
      `docker ps`
 
-     to get into a running container
+     To get into a running container
  
       `docker exec -it <container ID> sh`
 
-- read tomcat logs :
+- Read tomcat logs :
 
-`docker exec -it <container id  for xnatdocker_xnat-web_1 >  tail -f  /opt/tomcat/logs/catalina.2017-07-28.log `
+     `docker exec -it <container id  for xnatdocker_xnat-web_1 >  tail -f  /opt/tomcat/logs/catalina.2017-07-28.log `
 
-- bring all the instance down by running
+- Bring all the instance down by running
 
-`docker-compose down --rmi all`  (this will bring down all container and remove all the images)
+     `docker-compose down --rmi all`  (this will bring down all container and remove all the images)
 
-- bring xnat instance up again
+- Bring xnat instance up again
 
-`docker-compose up -d `
+     `docker-compose up -d `
+
+## Monitoring
+
+- Browse to  http://localhost:9090/graph
+
+     To view graph of total cpu usage for each container(nginx/tomcat/postgres.cAdvisor/Prometheus) execute following query in the query box
+     `container_cpu_usage_seconds_total{container_label_com_docker_compose_project="xnatdocker"}`
+- Browse to http://localhost:8082/docker/
+
+     Docker container running on this host are listed under Subcontainers
+     
+     
+     Click on any subcontainer to view its metrics 
   
