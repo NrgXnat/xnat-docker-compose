@@ -5,24 +5,24 @@ Use this repository to run XNAT instance on dev/prod environment.
 
 This repository contains files to bootstrap XNAT deployment. 
 
-Creates an assembly of docker conatiners that provides XNAT web portal, persistent database store, nginx front end proxy and Prometheus for monitoring and alerts.
+This repository creates an assembly of docker conatiners that provide the XNAT web portal, persistent database store, nginx front end proxy and Prometheus for monitoring and alerts.
 The build creates five containers
-- **postgres**
-- **tomcat**
+- **Postgres**
+- **Tomcat**
 - **nginx**
 - **cAdvisor**
 - **Prometheus**
 
 ## Prerequisites
 
-- latest version of docker-engine and docker-compose (http://docs.docker.com/compose)
+- Latest versions of docker-engine and docker-compose (http://docs.docker.com/compose)
 
 ## Usage
 
 1. Clone `mbi-image / containerized-xnat ` repository 
     
      ```git clone https://gitlab.erc.monash.edu.au/mbi-image/containerized-xnat.git```
-2. Configurations: The default configuration is sufficient to run the deployment. Following files can be modified if you want to change the default configuration
+2. Configurations: The default configuration is sufficient to run the deployment. The following files can be modified if you want to change the default configuration
    
       /docker-compose.yml :
 
@@ -48,7 +48,7 @@ The build creates five containers
 
     `wget --quiet --no-cookies https://bintray.com/nrgxnat/applications/download_file?file_path=xnat-web-1.7.0.war -O xnat-web-1.7.0.war`
     
-5. copy XNAT build file to containerized-xnat/webapps dirfectory
+5. Copy XNAT build file to containerized-xnat/webapps directory
 
      `cp xnat-web-1.7.0.war webapps/`
      
@@ -58,7 +58,7 @@ The build creates five containers
 ## Troubleshooting
     
 
-- Get a shell in a running conatiner : 
+- Get a shell in a running container: 
 
      To list all containers and to get container id run
 
@@ -68,28 +68,29 @@ The build creates five containers
  
       `docker exec -it <container ID> sh`
 
-- Read tomcat logs :
+- Read Tomcat logs:
 
      `docker exec -it <container id  for xnatdocker_xnat-web_1 >  tail -f  /opt/tomcat/logs/catalina.2017-07-28.log `
 
-- Bring all the instance down by running
+- Bring all the instances down by running
 
      `docker-compose down --rmi all`  (this will bring down all container and remove all the images)
 
-- Bring xnat instance up again
+- Bring XNAT instance up again
 
      `docker-compose up -d `
 
 ## Monitoring
 
-- Browse to  http://localhost:9090/graph
+- Browse to http://localhost:9090/graph
 
-     To view graph of total cpu usage for each container(nginx/tomcat/postgres.cAdvisor/Prometheus) execute following query in the query box
+     To view a graph of total cpu usage for each container (nginx/tomcat/postgres.cAdvisor/Prometheus) execute the following query in the query box
      `container_cpu_usage_seconds_total{container_label_com_docker_compose_project="xnatdocker"}`
+
 - Browse to http://localhost:8082/docker/
 
-     Docker container running on this host are listed under Subcontainers
-     
+     Docker containers running on this host are listed under Subcontainers
+
      
      Click on any subcontainer to view its metrics 
   
