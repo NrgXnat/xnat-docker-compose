@@ -28,6 +28,8 @@ rm -rf /opt/tomcat/webapps/docs
 
 # Add admin/admin user
 ADD tomcat-users.xml /opt/tomcat/conf/
+# add server.xml
+ADD server.xml /opt/tomcat/conf/
 # Add xnat.home to config
 ADD setenv.sh /opt/tomcat/bin
 ENV CATALINA_HOME /opt/tomcat
