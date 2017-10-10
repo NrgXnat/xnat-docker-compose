@@ -69,15 +69,14 @@
          Define a non-SSL HTTP/1.1 Connector on port 8080
     -->
     <Connector port="8080" protocol="HTTP/1.1"
-               connectionTimeout="20000"
+               connectionTimeout="40000"
+			   maxHttpHeadersize="65536"
+			   URIEncoding="UTF-8"
                redirectPort="8443" />
     <!-- A "Connector" using the shared thread pool-->
     <!--
     <Connector executor="tomcatThreadPool"
                port="8080" protocol="HTTP/1.1"
-               connectionTimeout="40000"
-			   maxHttpHeadersize="65536"
-			   URIEncoding="UTF-8"
                redirectPort="8443" />
     -->
     <!-- Define a SSL HTTP/1.1 Connector on port 8443
