@@ -6,6 +6,8 @@ services:
         - "8081:8080"
        volumes:
          - ./webapps:/opt/tomcat/webapps
+         - ./plugins:/data/xnat/home/plugins
+         - /var/run/docker.sock:/var/run/docker.sock
        expose:
         - "8080"
        links:
