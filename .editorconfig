@@ -9,14 +9,8 @@ end_of_line = lf
 insert_final_newline = true
 trim_trailing_whitespace = true
 
-; Salt state files, YAML format, 4 spaces
-[*.sls, *.yaml, *.yml]
-indent_style = space
-indent_size = 4
-max_line_length = 160
-
-; json files 4 spaces
-[*.json]
+; YAML format, 4 spaces
+[*.yaml, *.yml]
 indent_style = space
 indent_size = 4
 max_line_length = 160
