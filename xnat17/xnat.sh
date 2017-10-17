@@ -1,14 +1,5 @@
 #!/bin/sh
-OWD=$PWD
-
-
-mkdir -p /data/xnat/home/config 2> /dev/null
-cd /data/xnat/home
-mkdir -p logs plugins work 2> /dev/null
-cd /data/xnat
-mkdir -p archive build cache ftp pipeline prearchive 2> /dev/null
-
-cd $OWD
+mkdir -p $XNAT_HOME/config $XNAT_HOME/logs $XNAT_HOME/plugins $XNAT_HOME/work /data/xnat/archive /data/xnat/build /data/xnat/cache /data/xnat/ftp /data/xnat/pipeline /data/xnat/prearchive 2> /dev/null
 
 # generate xnat config
 if [ ! -f $XNAT_HOME/config/xnat-conf.properties ]; then
