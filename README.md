@@ -1,72 +1,58 @@
 # Dockerized XNAT
-Use this repository to run XNAT instance on dev/prod environment.
+Use this repository to quickly deploy an [XNAT](https://xnat.org/) instance on [docker](https://www.docker.com/).
 
 ## Introduction
 
-This repository contains files to bootstrap XNAT deployment. 
+This repository contains files to bootstrap XNAT deployment. The build creates five containers:
 
-This repository creates an assembly of docker conatiners that provide the XNAT web portal, persistent database store, nginx front end proxy and Prometheus for monitoring and alerts.
-The build creates five containers
-- **Postgres**
-- **Tomcat**
-- **nginx**
-- **cAdvisor**
-- **Prometheus**
+- **[Tomcat](http://tomcat.apache.org/) + XNAT**: The XNAT web application
+- [**Postgres**](https://www.postgresql.org/): The XNAT database
+- [**nginx**](https://www.nginx.com/): Web proxy sitting in front of XNAT
+- [**cAdvisor**](https://github.com/google/cadvisor/): Gathers statistics about all the other containers
+- [**Prometheus**](https://prometheus.io/): Monitoring and alerts
 
 ## Prerequisites
 
-- Latest versions of docker-engine and docker-compose (http://docs.docker.com/compose)
+* [docker](https://www.docker.com/)
+* [docker-compose](http://docs.docker.com/compose) (Which is installed along with docker if you download it from their site)
 
 ## Usage
 
-1. Clone `mbi-image / containerized-xnat ` repository 
-    
-     ```git clone https://gitlab.erc.monash.edu.au/mbi-image/containerized-xnat.git```
+1. Clone the [xnat-docker-compose](https://github.com/NrgXnat/xnat-docker-compose) repository.
 2. Configurations: The default configuration is sufficient to run the deployment. The following files can be modified if you want to change the default configuration
-   
-      /docker-compose.yml :
 
-      /postgres/XNAT.sql : 
-   
-      /tomcat/Dockerfile : 
-   
-      /tomcat/setenv.sh : 
-   
-      /tomcat-users.xml : 
-   
-      /xnat-conf.properties : 
-      
-      /prometheus/prometheus.yaml
-   
+    - **docker-compose.yml**: How the different containers are deployed.
+    - **postgres/XNAT.sql**: Database configuration. Mainly used to customize the database user or password. See [Configuring PostgreSQL for XNAT](https://wiki.xnat.org/documentation/getting-started-with-xnat-1-7/installing-xnat-1-7/configuring-postgresql-for-xnat).
+    - **tomcat/Dockerfile**: Builds the tomcat image, into which the XNAT war will be deployed.
+    - **tomcat/setenv.sh**: Tomcat's launch arguments, set through the `JAVA_OPTS` environment variable.
+    - **tomcat/tomcat-users.xml**: [Tomcat manager](https://tomcat.apache.org/tomcat-7.0-doc/manager-howto.html) settings.
+    - **tomcat/xnat-conf.properties**: XNAT database configuration properties. There is a default version
+    - **prometheus/prometheus.yaml**: Prometheus configuration
+
 3. Start the system
-   
-     `cd containerized-xnat`
 
-     `docker-compose up -d`
-    
-4. Download XNAT build file
+        $ cd containerized-xnat
+        $ docker-compose up -d
 
-    `wget --quiet --no-cookies https://bintray.com/nrgxnat/applications/download_file?file_path=xnat-web-1.7.0.war -O xnat-web-1.7.0.war`
-    
-5. Copy XNAT build file to containerized-xnat/webapps directory
+4. Download [latest XNAT WAR](https://bintray.com/nrgxnat/applications/XNAT/_latestVersion)
 
-     `cp xnat-web-1.7.0.war webapps/`
-     
-6. Browse to http://localhost/xnat-web-1.7.0
+        wget --quiet --no-cookies https://bintray.com/nrgxnat/applications/download_file?file_path=xnat-web-1.7.4.war -O webapps/xnat.war
 
-    
+Your XNAT will soon be available at http://localhost/xnat.
+
+
 ## Troubleshooting
-    
 
-- Get a shell in a running container: 
+
+- Get a shell in a running container:
 
      To list all containers and to get container id run
 
      `docker ps`
 
      To get into a running container
- 
-      `docker exec -it <container ID> sh`
+
+      `docker exec -it <container ID> bash`
 
 - Read Tomcat logs:
 
@@ -91,6 +77,6 @@ The build creates five containers
 
      Docker containers running on this host are listed under Subcontainers
 
-     
-     Click on any subcontainer to view its metrics 
-  
+
+     Click on any subcontainer to view its metrics
+
