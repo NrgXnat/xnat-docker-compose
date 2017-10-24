@@ -113,10 +113,11 @@ host-manager.2017-10-24.log  manager.2017-10-24.log
 localhost.2017-10-24.log
 ```
 
-View a particular log
+View a particular log, if you don't want to use docker-compose.
+
 
 ```
-docker exec -it $NAME  >  tail -f  /opt/tomcat/logs/catalina.2017-07-24.log
+docker exec -it $NAME cat /opt/tomcat/logs/catalina.2017-10-24.log
 ```
 
 ### Controlling Instances
