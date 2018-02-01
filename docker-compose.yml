@@ -1,5 +1,5 @@
 version: '2'
-services: 
+services:
     xnat-web:
        build: ./tomcat
        ports:
@@ -11,7 +11,7 @@ services:
        expose:
         - "8080"
        links:
-        - xnat-db    
+        - xnat-db
     xnat-db:
        build: ./postgres
        expose:
@@ -22,7 +22,7 @@ services:
        build: ./nginx
        ports:
         - "80:80"
-       expose: 
+       expose:
         - "80"
        links:
          - xnat-web
@@ -32,7 +32,7 @@ services:
        volumes:
             - ./prometheus/prometheus.yaml:/etc/prometheus/prometheus.yaml
        command:
-            - '-config.file=/etc/prometheus/prometheus.yaml'
+            - '--config.file=/etc/prometheus/prometheus.yaml'
        ports:
             - '9090:9090'
        links:
@@ -45,6 +45,6 @@ services:
           - /sys:/sys:ro
           - /var/lib/docker/:/var/lib/docker:ro
         ports:
-        - "8082:8080"        
+        - "8082:8080"
         expose:
           - 8082
