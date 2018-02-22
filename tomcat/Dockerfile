@@ -2,6 +2,8 @@ FROM manishkumr/ubuntu_jdk7_image
 
 MAINTAINER Manish Kumar <rishimanish123@gmail.com>
 
+ARG LOCALE
+
 ENV TOMCAT_VERSION 7.0.79
 
 RUN apt-get -qq update && \
@@ -9,10 +11,10 @@ RUN apt-get -qq update && \
     apt-get install -y sudo curl wget locales
 
 # Set locales
-RUN locale-gen en_AU.UTF-8
-ENV LANG en_AU.UTF-8  
-ENV LANGUAGE en_AU.UTF-8  
-ENV LC_ALL en_AU.UTF-8 
+RUN locale-gen $LOCALE.UTF-8
+ENV LANG $LOCALE.UTF-8
+ENV LANGUAGE $LOCALE.UTF-8
+ENV LC_ALL $LOCALE.UTF-8
 
 # Fix sh
 RUN rm /bin/sh && ln -s /bin/bash /bin/sh
@@ -77,7 +79,5 @@ WORKDIR /opt/tomcat
 # Launch Tomcat
 CMD ["/opt/tomcat/bin/catalina.sh", "run"]
 
-#move xnat war to webapps 
+#move xnat war to webapps
 #RUN mv /opt/tomcat/xnat-web-1.7.0.war /opt/tomcat/webapps
-
-
