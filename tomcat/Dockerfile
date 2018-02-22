@@ -2,23 +2,21 @@ FROM manishkumr/ubuntu_jdk7_image
 
 MAINTAINER Manish Kumar <rishimanish123@gmail.com>
 
-ENV TOMCAT_VERSION 7.0.79
-
 RUN apt-get -qq update && \
     apt-get -q -y upgrade && \
     apt-get install -y sudo curl wget locales
 
 # Set locales
 RUN locale-gen en_AU.UTF-8
-ENV LANG en_AU.UTF-8  
-ENV LANGUAGE en_AU.UTF-8  
-ENV LC_ALL en_AU.UTF-8 
+ENV LANG en_AU.UTF-8
+ENV LANGUAGE en_AU.UTF-8
+ENV LC_ALL en_AU.UTF-8
 
 # Fix sh
 RUN rm /bin/sh && ln -s /bin/bash /bin/sh
 
 ENV TOMCAT_MAJOR 7
-ENV TOMCAT_VERSION 7.0.82
+ENV TOMCAT_VERSION 7.0.85
 # Get Tomcat
 ENV TOMCAT_TGZ_URLS \
     https://www.apache.org/dyn/closer.cgi?action=download&filename=tomcat/tomcat-$TOMCAT_MAJOR/v$TOMCAT_VERSION/bin/apache-tomcat-$TOMCAT_VERSION.tar.gz \
@@ -71,13 +69,5 @@ VOLUME "/opt/tomcat/webapps"
 ADD setenv.sh /opt/tomcat/bin
 WORKDIR /opt/tomcat
 
-
-#RUN wget --quiet --no-cookies https://bintray.com/nrgxnat/applications/download_file?file_path=xnat-web-1.7.0.war -O /opt/tomcat/xnat-web-1.7.0.war
-
 # Launch Tomcat
 CMD ["/opt/tomcat/bin/catalina.sh", "run"]
-
-#move xnat war to webapps 
-#RUN mv /opt/tomcat/xnat-web-1.7.0.war /opt/tomcat/webapps
-
-
