@@ -1,7 +1,10 @@
 version: '2'
 services:
     xnat-web:
-       build: ./tomcat
+       build:
+         context: ./tomcat
+         args:
+           LOCALE: 'en_AU'
        ports:
         - "8081:8080"
        volumes:

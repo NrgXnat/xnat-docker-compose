@@ -2,15 +2,17 @@ FROM manishkumr/ubuntu_jdk7_image
 
 MAINTAINER Manish Kumar <rishimanish123@gmail.com>
 
+ARG LOCALE
+
 RUN apt-get -qq update && \
     apt-get -q -y upgrade && \
     apt-get install -y sudo curl wget locales
 
 # Set locales
-RUN locale-gen en_AU.UTF-8
-ENV LANG en_AU.UTF-8
-ENV LANGUAGE en_AU.UTF-8
-ENV LC_ALL en_AU.UTF-8
+RUN locale-gen $LOCALE.UTF-8
+ENV LANG $LOCALE.UTF-8
+ENV LANGUAGE $LOCALE.UTF-8
+ENV LC_ALL $LOCALE.UTF-8
 
 # Fix sh
 RUN rm /bin/sh && ln -s /bin/bash /bin/sh
