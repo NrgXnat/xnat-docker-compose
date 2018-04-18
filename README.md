@@ -20,6 +20,12 @@ This repository contains files to bootstrap XNAT deployment. The build creates f
 
 
 1. Clone the [xnat-docker-compose](https://github.com/NrgXnat/xnat-docker-compose) repository.
+
+```
+$ git clone https://github.com/NrgXnat/xnat-docker-compose
+$ cd xnat-docker-compose
+```
+
 2. Configurations: The default configuration is sufficient to run the deployment. The following files can be modified if you want to change the default configuration
 
     - **docker-compose.yml**: How the different containers are deployed.
@@ -31,16 +37,18 @@ This repository contains files to bootstrap XNAT deployment. The build creates f
     - **prometheus/prometheus.yaml**: Prometheus configuration
 
 
-3. Download [latest XNAT WAR](https://bintray.com/nrgxnat/applications/XNAT/_latestVersion)
+3. Download [latest XNAT WAR](https://download.xnat.org)
+
+Download the latest xnat tomcat war file and place it in a webapps directory that you must create.
 
 ```
-wget --quiet --no-cookies https://bintray.com/nrgxnat/applications/download_file?file_path=xnat-web-1.7.4.1.war -O webapps/xnat.war
+$ mkdir webapps
+$ wget --quiet --no-cookies https://api.bitbucket.org/2.0/repositories/xnatdev/xnat-web/downloads/xnat-web-1.7.4.1.war -O webapps/xnat.war
 ```
 
 4. Start the system
 
 ```
-$ cd xnat-docker-compose
 $ docker-compose up -d
 ```
 
