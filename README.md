@@ -3,13 +3,11 @@ Use this repository to quickly deploy an [XNAT](https://xnat.org/) instance on [
 
 ## Introduction
 
-This repository contains files to bootstrap XNAT deployment. The build creates five containers:
+This repository contains files to bootstrap XNAT deployment. The build creates three containers:
 
 - **[Tomcat](http://tomcat.apache.org/) + XNAT**: The XNAT web application
 - [**Postgres**](https://www.postgresql.org/): The XNAT database
 - [**nginx**](https://www.nginx.com/): Web proxy sitting in front of XNAT
-- [**cAdvisor**](https://github.com/google/cadvisor/): Gathers statistics about all the other containers
-- [**Prometheus**](https://prometheus.io/): Monitoring and alerts
 
 ## Prerequisites
 
@@ -28,31 +26,19 @@ $ cd xnat-docker-compose
 
 2. Configurations: The default configuration is sufficient to run the deployment. The following files can be modified if you want to change the default configuration
 
-    - **docker-compose.yml**: How the different containers are deployed.
-    - **postgres/XNAT.sql**: Database configuration. Mainly used to customize the database user or password. See [Configuring PostgreSQL for XNAT](https://wiki.xnat.org/documentation/getting-started-with-xnat-1-7/installing-xnat-1-7/configuring-postgresql-for-xnat).
-    - **tomcat/Dockerfile**: Builds the tomcat image, into which the XNAT war will be deployed.
-    - **tomcat/setenv.sh**: Tomcat's launch arguments, set through the `JAVA_OPTS` environment variable.
-    - **tomcat/tomcat-users.xml**: [Tomcat manager](https://tomcat.apache.org/tomcat-7.0-doc/manager-howto.html) settings. It is highly recommended to change the login from "admin" with password "admin" to the server if it is going live.
-    - **tomcat/xnat-conf.properties**: XNAT database configuration properties. There is a default version
-    - **prometheus/prometheus.yaml**: Prometheus configuration
+    - **docker-compose.yml**: How the different containers are deployed. There is a section of build arguments (under `services → xnat-web → build → args`) to control some aspects of the build.
+        * If you want to download a different version of XNAT, you can change the `XNAT_VER` variable to some other release.
+        * The `TOMCAT_XNAT_FOLDER` build argument is set to `ROOT` by default; this means the XNAT will be available at `http://localhost`. If, instead, you wish it to be at `http://localhost/xnat` or, more generally, at `http://localhost/{something}`, you can set `TOMCAT_XNAT_FOLDER` to the value `something`.
+        * If you need to control some arguments that get sent to tomcat on startup, you can modify the `CATALINA_OPTS` environment variable (under `services → xnat-web → environment`).
+    - **xnat/Dockerfile**: Builds the xnat-web image from a tomcat docker image.
 
-
-3. Download [latest XNAT WAR](https://download.xnat.org)
-
-Download the latest xnat tomcat war file and place it in a webapps directory that you must create.
-
-```
-$ mkdir webapps
-$ wget --quiet --no-cookies https://api.bitbucket.org/2.0/repositories/xnatdev/xnat-web/downloads/xnat-web-1.7.4.1.war -O webapps/xnat.war
-```
-
-4. Start the system
+3. Start the system
 
 ```
 $ docker-compose up -d
 ```
 
-Note that at this point, if you go to `localhost/xnat` you won't see a working web application. It takes upwards of a minute
+Note that at this point, if you go to `localhost` you won't see a working web application. It takes upwards of a minute
 to initialize the database, and you can follow progress by reading the docker compose log of the server:
 
 ```
@@ -80,81 +66,96 @@ xnat-web_1    | Oct 24, 2017 3:18:27 PM org.apache.catalina.startup.Catalina sta
 xnat-web_1    | INFO: Server startup in 84925 ms
 ```
 
-Your XNAT will soon be available at http://localhost/xnat.
+Your XNAT will soon be available at http://localhost.
+
+## Mounted Data
+
+When you bring up XNAT with `docker-compose up`, several directories are created (if they don't exist already) to store the persistant data.
+
+* **postgres-data** - Contains the XNAT database
+* **xnat-data/archive** - Contains the XNAT archive
+* **xnat-data/build** - Contains the XNAT build space. This is useful when running the container service plugin.
+* **xnat-data/home/logs** - Contains the XNAT logs.
+* **xnat-data/home/plugins** - Initially contains nothing. However, you can customize your XNAT with plugins by placing jars into this directory and restarting XNAT.
 
 
 ## Troubleshooting
 
-
 ### Get a shell in a running container
-To list all containers and to get container id run
+Say you want to examine some files in the running `xnat-web` container. You can `exec` a command in that container to open a shell.
 
 ```
-docker ps
+$ docker-compose exec xnat-web bash
 ```
 
-You can also grab the name and put it into ane environment variable:
-
-
-```
-$ NAME=$(docker ps -aqf "name=xnatdockercompose_xnat-web")
-$ echo $NAME
-42d07bc7710b
-```
-
-To get into a running container
-
-```
-docker exec -it <container ID> bash
-docker exec -it $NAME bash
-```
+* The `docker-compose exec` part of the command is what tells docker-compose that you want to execute a command inside a container.
+* The `xnat-web` part says you want to execute the command in whatever container is running for your xnat-web service. If, instead, you want to open a shell on the database container, you would use `xnat-db` instead.
+* The `bash` part is the command that will be executed in the container. It could really be anything, but in this case we want to open a shell. Running `bash` will do just that. You will get a command prompt, and any further commands you issue will be run inside this container.
 
 ### Read Tomcat logs
 
 List available logs
 
 ```
-$ docker exec -it $NAME ls  /opt/tomcat/logs/
+$ docker-compose exec xnat-web ls /usr/local/tomcat/logs
 
-catalina.2017-10-24.log      localhost_access_log.2017-10-24.txt
-host-manager.2017-10-24.log  manager.2017-10-24.log
-localhost.2017-10-24.log
+catalina.2018-10-03.log      localhost_access_log.2018-10-03.txt
+host-manager.2018-10-03.log  manager.2018-10-03.log
+localhost.2018-10-03.log
 ```
 
-View a particular log, if you don't want to use docker-compose.
-
+View a particular log
 
 ```
-docker exec -it $NAME cat /opt/tomcat/logs/catalina.2017-10-24.log
+$ docker-compose exec xnat-web cat /usr/local/tomcat/logs/catalina.2018-10-03.log
 ```
 
 ### Controlling Instances
 
 #### Stop Instances
-Bring all the instances down (this will bring down all container and remove all the images) by running
+Bring all the instances down by running
 
 ```
-docker-compose down --rmi all
+$ docker-compose down
+```
+
+If you want to bring everything down *and* remove all the images that were built, you can run
+
+```
+$ docker-compose down --rmi all
 ```
 
 #### Bring up instances
 This will bring all instances up again. The `-d` means "detached" so you won't see any output to the terminal.
 
 ```
-docker-compose up -d
+$ docker-compose up -d
 ```
 
+(If you like seeing the terminal output, you can leave off the `-d` option. The various containers will print output to the terminal as they come up. If you close this connection with `Ctrl+C`, the containers will be stopped or killed.)
 
-## Monitoring
+#### Restart
+If an instance is having problems, you can restart it.
+```
+$ docker-compose restart xnat-web
+```
 
-- Browse to http://localhost:9090/graph
+#### Rebuild after making changes
+If you have changed a `Dockerfile`, you will need to rebuild an image before the changes are picked up.
 
-     To view a graph of total cpu usage for each container (nginx/tomcat/postgres.cAdvisor/Prometheus) execute the following query in the query box
-     `container_cpu_usage_seconds_total{container_label_com_docker_compose_project="xnatdocker"}`
+```
+$ docker-compose build xnat-web
+```
 
-- Browse to http://localhost:8082/docker/
+It is possible that you will need to use the `--no-cache` argument, if you have only changed local files and not the `Dockerfile` itself.
 
-     Docker containers running on this host are listed under Subcontainers
+## Notes on using the Container Service
 
+The Container Service plugin needs some additional configuration to use with the XNAT created by this project.
 
-     Click on any subcontainer to view its metrics
+First, a bit of background on the problem that arises. The container service connects to the docker socket in the xnat-web container which, by default, is mounted in from the host. When you launch a container from XNAT, the container service will run that container on your host machine. One of the key requirements of the container service is that the XNAT archive and build spaces be available wherever the containers run. That shouldn't be a problem, because they *are* available on your host machine and inside the container since we have mounted them in. Right? Well, the problem is that the archive and build space inside the xnat-web container are at different paths than they are on your host machine. When the container service wants to mount files inside the archive, it finds the path under `/data/xnat/archive`; then it tells docker *on your host machine* to mount files at `/data/xnat/archive`. But on your host machine, the files are not there.
+
+We can solve this problem in two ways:
+
+* In container service versions greater that 1.5.2 (which, as of writing, has not yet been released, but you can get a release candidate which has this feature) you can set *Path Translation* on your docker host. Go to the container service settings `Administer → Plugin Settings → Container Server Setup` and edit the Docker Host settings. There you can set a path prefix on your XNAT server—which, in our example, is `/data/xnat`—and the matching path prefix on your docker server—in the example this is the path on the local host; in my speicifc case this is `/Users/flavin/code/xnat-docker-compose/xnat-data` but you path will likely vary. When the container service finds a path to files in the archive, it substitutes the path prefix before telling docker what to mount.
+* For prior container service versions, there is no Path Translation. You will need to create directories on your host machine at `/data/xnat/archive` and `/data/xnat/build`. If you already have data in those directories from running XNAT, you can move them. Then, in the `docker-compose.yaml` file in this project, edit the `services → xnat-web → volumes` for the archive and build spaces to `/data/xnat/archive:/data/xnat/archive` and `/data/xnat/build:/data/xnat/build`. Make sure the permissions are set correctly so that your user account haas full read/write/execute permissions on these directories.
