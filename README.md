@@ -1,6 +1,8 @@
 # Dockerized XNAT
 Use this repository to quickly deploy an [XNAT](https://xnat.org/) instance on [docker](https://www.docker.com/).
 
+This `xnat-dev` branch is specifically for deploying in-development (or `SNAPSHOT`) versions of the XNAT war file.
+
 ## Introduction
 
 This repository contains files to bootstrap XNAT deployment. The build creates three containers:
@@ -17,22 +19,24 @@ This repository contains files to bootstrap XNAT deployment. The build creates t
 ## Usage
 
 
-1. Clone the [xnat-docker-compose](https://github.com/NrgXnat/xnat-docker-compose) repository.)
+1. Clone the [xnat-docker-compose](https://github.com/NrgXnat/xnat-docker-compose) repository and checkout the xnat-dev branch.)
 
 ```
 $ git clone https://github.com/NrgXnat/xnat-docker-compose
 $ cd xnat-docker-compose
+$ git checkout xnat-dev
 ```
 
-2. Configurations: The default configuration is sufficient to run the deployment. The following files can be modified if you want to change the default configuration
+2. Inside of the `xnat` directory is a directory named `webapps`. Place into this directory your custom XNAT war. The war file in this directory will *not* be copied into the image, but will be read at runtime. Note that, if you want your XNAT to be found at `http://localhost` you must name your war file `ROOT.war`; otherwise to find your XNAT at `http://localhost/{something}` you must name your war file `something.war`.
+
+3. Configurations: The default configuration is sufficient to run the deployment. The following files can be modified if you want to change the default configuration
 
     - **docker-compose.yml**: How the different containers are deployed. There is a section of build arguments (under `services → xnat-web → build → args`) to control some aspects of the build.
         * If you want to download a different version of XNAT, you can change the `XNAT_VER` variable to some other release.
-        * The `TOMCAT_XNAT_FOLDER` build argument is set to `ROOT` by default; this means the XNAT will be available at `http://localhost`. If, instead, you wish it to be at `http://localhost/xnat` or, more generally, at `http://localhost/{something}`, you can set `TOMCAT_XNAT_FOLDER` to the value `something`.
         * If you need to control some arguments that get sent to tomcat on startup, you can modify the `CATALINA_OPTS` environment variable (under `services → xnat-web → environment`).
     - **xnat/Dockerfile**: Builds the xnat-web image from a tomcat docker image.
 
-3. Start the system
+4. Start the system
 
 ```
 $ docker-compose up -d
