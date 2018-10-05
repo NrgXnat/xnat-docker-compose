@@ -1,5 +1,6 @@
 # Created by .ignore support plugin (hsz.mobi)
 *.swp
 *.swo
-postgres-data/
-xnat-data/
+postgres-data*
+xnat-data*
+webapps/
