@@ -3,4 +3,4 @@
 *.swo
 postgres-data*
 xnat-data*
-webapps/
+webapps

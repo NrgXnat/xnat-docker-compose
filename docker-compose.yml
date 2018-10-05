@@ -5,6 +5,12 @@ services:
       context: ./xnat
       args:
         XNAT_VER: '1.7.5.3'
+        SMTP_ENABLED: 'false'
+        SMTP_HOSTNAME: fake.fake
+        SMTP_PORT:
+        AMTP_AUTH:
+        SMTP_USERNAME:
+        SMTP_PASSWORD:
         XNAT_DATASOURCE_DRIVER: 'org.postgresql.Driver'
         XNAT_DATASOURCE_URL: 'jdbc:postgresql://xnat-db/xnat'
         XNAT_DATASOURCE_USERNAME: 'xnat'
@@ -18,6 +24,7 @@ services:
       - "8000:8000"
       - "22:22"
     volumes:
+      - ./webapps:/usr/local/tomcat/webapps
       - ./xnat-data/home/logs:/data/xnat/home/logs
       - ./xnat-data/home/plugins:/data/xnat/home/plugins
       - ./xnat-data/archive:/data/xnat/archive

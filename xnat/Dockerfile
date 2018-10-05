@@ -1,7 +1,6 @@
 FROM tomcat:7-jre8-alpine
 MAINTAINER Matt Kelsey <kelseym@wustl.edu>
 
-ARG XNAT_VER
 ARG XNAT_ROOT=/data/xnat
 ARG XNAT_HOME=/data/xnat/home
 ARG XNAT_DATASOURCE_DRIVER=org.postgresql.Driver
@@ -13,10 +12,10 @@ ARG TOMCAT_XNAT_FOLDER=ROOT
 
 ADD make-xnat-config.sh /usr/local/bin/make-xnat-config.sh
 ADD wait-for-postgres.sh /usr/local/bin/wait-for-postgres.sh
+ADD ${XNAT_PATH} /webapps
 
 RUN apk add --no-cache \
         postgresql-client \
-        wget \
     && \
     rm -rf $CATALINA_HOME/webapps/* && \
     mkdir -p \
@@ -33,13 +32,7 @@ RUN apk add --no-cache \
         ${XNAT_ROOT}/prearchive \
     && \
     /usr/local/bin/make-xnat-config.sh && \
-    rm /usr/local/bin/make-xnat-config.sh && \
-    cd $CATALINA_HOME/webapps/ && \
-    wget https://api.bitbucket.org/2.0/repositories/xnatdev/xnat-web/downloads/xnat-web-${XNAT_VER}.war && \
-    cd ${TOMCAT_XNAT_FOLDER} && \
-    unzip -o ../xnat-web-${XNAT_VER}.war && \
-    rm -f ../xnat-web-${XNAT_VER}.war && \
-    apk del wget
+    rm /usr/local/bin/make-xnat-config.sh
 
 EXPOSE 8080
 ENV XNAT_HOME=${XNAT_HOME} XNAT_DATASOURCE_USERNAME=${XNAT_DATASOURCE_USERNAME}
