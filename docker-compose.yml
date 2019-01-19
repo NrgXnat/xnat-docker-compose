@@ -8,7 +8,7 @@ services:
         SMTP_ENABLED: 'false'
         SMTP_HOSTNAME: fake.fake
         SMTP_PORT:
-        AMTP_AUTH:
+        SMTP_AUTH:
         SMTP_USERNAME:
         SMTP_PASSWORD:
         XNAT_DATASOURCE_DRIVER: 'org.postgresql.Driver'
