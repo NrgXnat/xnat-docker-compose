@@ -4,7 +4,7 @@ services:
     build:
       context: ./xnat
       args:
-        XNAT_VER: '1.7.4.1'
+        XNAT_VER: '1.7.5.1'
         SMTP_ENABLED: 'false'
         SMTP_HOSTNAME: fake.fake
         SMTP_PORT:
