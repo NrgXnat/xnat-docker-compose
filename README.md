@@ -70,7 +70,7 @@ Your XNAT will soon be available at http://localhost.
 
 ## Mounted Data
 
-When you bring up XNAT with `docker-compose up`, several directories are created (if they don't exist already) to store the persistant data.
+When you bring up XNAT with `docker-compose up`, several directories are created (if they don't exist already) to store the persistent data.
 
 * **postgres-data** - Contains the XNAT database
 * **xnat-data/archive** - Contains the XNAT archive

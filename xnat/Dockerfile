@@ -1,5 +1,5 @@
 FROM tomcat:7-jre8-alpine
-MAINTAINER John Flavin <jflavin@wustl.edu>
+MAINTAINER Matt Kelsey <kelseym@wustl.edu>
 
 ARG XNAT_VER
 ARG XNAT_ROOT=/data/xnat
@@ -10,12 +10,6 @@ ARG XNAT_DATASOURCE_USERNAME=xnat
 ARG XNAT_DATASOURCE_PASSWORD=xnat
 ARG XNAT_HIBERNATE_DIALECT=org.hibernate.dialect.PostgreSQL9Dialect
 ARG TOMCAT_XNAT_FOLDER=ROOT
-ARG SMTP_ENABLED=false
-ARG SMTP_HOSTNAME=fake.fake
-ARG SMTP_PORT
-ARG SMTP_AUTH
-ARG SMTP_USERNAME
-ARG SMTP_PASSWORD
 
 ADD make-xnat-config.sh /usr/local/bin/make-xnat-config.sh
 ADD wait-for-postgres.sh /usr/local/bin/wait-for-postgres.sh

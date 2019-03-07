@@ -4,13 +4,7 @@ services:
     build:
       context: ./xnat
       args:
-        XNAT_VER: '1.7.5.1'
-        SMTP_ENABLED: 'false'
-        SMTP_HOSTNAME: fake.fake
-        SMTP_PORT:
-        SMTP_AUTH:
-        SMTP_USERNAME:
-        SMTP_PASSWORD:
+        XNAT_VER: '1.7.5.3'
         XNAT_DATASOURCE_DRIVER: 'org.postgresql.Driver'
         XNAT_DATASOURCE_URL: 'jdbc:postgresql://xnat-db/xnat'
         XNAT_DATASOURCE_USERNAME: 'xnat'
@@ -22,6 +16,7 @@ services:
     ports:
       - "8081:8080"
       - "8000:8000"
+      - "22:22"
     volumes:
       - ./xnat-data/home/logs:/data/xnat/home/logs
       - ./xnat-data/home/plugins:/data/xnat/home/plugins
