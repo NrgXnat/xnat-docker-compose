@@ -1,4 +1,4 @@
-version: '2'
+version: '2.0'
 services:
   xnat-web:
     build:
@@ -22,8 +22,7 @@ services:
     ports:
       - "80:8080"
       - "8104:8104"
-      #      - "8000:8000"
-      volumes:
+    volumes:
       - ./webapps:/usr/local/tomcat/webapps
       - ./xnat-data/home/logs:/data/xnat/home/logs
       - /home/ubuntu/demo_plugin_jars:/data/xnat/home/plugins
@@ -58,34 +57,4 @@ services:
       - ./orthanc/orthanc.json:/etc/orthanc/orthanc.json:ro
     depends_on:
       - xnat-db
-#  xnat-nginx:
-#    build: ./nginx
-#    ports:
-#      - "80:80"
-#    expose:
-#      - "80"
-#    links:
-#      - xnat-web
 
-  # prometheus:
-  #   image: prom/prometheus
-  #   volumes:
-  #     - ./prometheus/prometheus.yaml:/etc/prometheus/prometheus.yaml
-  #   command:
-  #     - '-config.file=/etc/prometheus/prometheus.yaml'
-  #   ports:
-  #     - '9090:9090'
-  #   links:
-  #     - cadvisor
-  #
-  # cadvisor:
-  #   image: google/cadvisor
-  #   volumes:
-  #     - /:/rootfs:ro
-  #     - /var/run:/var/run:rw
-  #     - /sys:/sys:ro
-  #     - /var/lib/docker/:/var/lib/docker:ro
-  #   ports:
-  #     - "8082:8080"
-  #   expose:
-  #     - 8082
