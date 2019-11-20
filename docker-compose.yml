@@ -1,4 +1,4 @@
-version: '2'
+version: '2.0'
 services:
   xnat-web:
     build:
@@ -26,7 +26,7 @@ services:
     volumes:
       - ./webapps:/usr/local/tomcat/webapps
       - ./xnat-data/home/logs:/data/xnat/home/logs
-      - ./xnat-data/home/plugins:/data/xnat/home/plugins
+      - /Users/Kelsey/Projects/XNAT/DemoBuilds/demo_plugin_jars:/data/xnat/home/plugins
       - ./xnat-data/archive:/data/xnat/archive
       - ./xnat-data/build:/data/xnat/build
       - /var/run/docker.sock:/var/run/docker.sock
@@ -42,7 +42,22 @@ services:
       - "5432"
     volumes:
       - ./postgres-data:/var/lib/postgresql/data
-
+  orthanc:
+    build:
+      context: ./orthanc
+      args:
+        XNAT_DATASOURCE_DRIVER: 'org.postgresql.Driver'
+        XNAT_DATASOURCE_URL: 'jdbc:postgresql://xnat-db/xnat'
+        XNAT_DATASOURCE_USERNAME: 'xnat'
+        XNAT_DATASOURCE_PASSWORD: 'xnat'
+    ports:
+      - "4242:4242"
+      - "8042:8042"
+    volumes:
+      - ./orthanc-data:/var/lib/orthanc/db
+      - ./orthanc/orthanc.json:/etc/orthanc/orthanc.json:ro
+    depends_on:
+      - xnat-db
   xnat-nginx:
     build: ./nginx
     ports:

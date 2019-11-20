@@ -1,0 +1,139 @@
+{
+  "Name" : "Orthanc inside Docker",
+
+  "StorageDirectory" : "/var/lib/orthanc/db",
+  "IndexDirectory"   : "/var/lib/orthanc/db",
+  "StorageCompression" : false,
+  "MaximumStorageSize" : 0,
+  "MaximumPatientCount" : 0,
+  "LuaScripts" : [
+  ],
+  "Plugins" : [
+    "/usr/share/orthanc/plugins", "/usr/local/share/orthanc/plugins"
+  ],
+
+  "ConcurrentJobs" : 2,
+
+  "HttpServerEnabled" : true,
+  "HttpPort" : 8042,
+  "HttpDescribeErrors" : true,
+  "HttpCompressionEnabled" : true,
+
+  "DicomServerEnabled" : true,
+  "DicomAet" : "ORTHANC",
+  "DicomCheckCalledAet" : false,
+  "DicomPort" : 4242,
+  "DefaultEncoding" : "Latin1",
+
+  "DeflatedTransferSyntaxAccepted"     : true,
+  "JpegTransferSyntaxAccepted"         : true,
+  "Jpeg2000TransferSyntaxAccepted"     : true,
+  "JpegLosslessTransferSyntaxAccepted" : true,
+  "JpipTransferSyntaxAccepted"         : true,
+  "Mpeg2TransferSyntaxAccepted"        : true,
+  "RleTransferSyntaxAccepted"          : true,
+
+  "UnknownSopClassAccepted"            : false,
+
+  "DicomScpTimeout" : 30,
+  "RemoteAccessAllowed" : true,
+  "SslEnabled" : false,
+  "SslCertificate" : "certificate.pem",
+  "AuthenticationEnabled" : false,
+
+  "RegisteredUsers" : {
+    "orthanc" : "orthanc"
+  },
+
+
+  // Enter any PACS or workstations here
+  "DicomModalities" : {
+  },
+
+  "DicomAlwaysAllowEcho" : true,
+  "DicomAlwaysAllowStore" : true,
+  "DicomCheckModalityHost" : false,
+  "DicomScuTimeout" : 10,
+
+  "OrthancPeers" : {},
+  "HttpProxy" : "",
+  "HttpVerbose" : false,
+  "HttpTimeout" : 10,
+  "HttpsVerifyPeers" : true,
+  "HttpsCACertificates" : "",
+
+
+
+  /**
+   * Advanced options
+   **/
+
+  // Dictionary of symbolic names for the user-defined metadata. Each
+  // entry must map an unique string to an unique number between 1024
+  // and 65535. Reserved values:
+  //  - The Orthanc whole-slide imaging plugin uses metadata 4200
+  "UserMetadata" : {
+    // "Sample" : 1024
+  },
+
+  // Dictionary of symbolic names for the user-defined types of
+  // attached files. Each entry must map an unique string to an unique
+  // number between 1024 and 65535. Optionally, a second argument can
+  // provided to specify a MIME content type for the attachment.
+  "UserContentType" : {
+    // "sample" : 1024
+    // "sample2" : [ 1025, "application/pdf" ]
+  },
+
+  // Number of seconds without receiving any instance before a
+  // patient, a study or a series is considered as stable.
+  "StableAge" : 60,
+
+  "StrictAetComparison" : false,
+  "StoreMD5ForAttachments" : true,
+  "LimitFindResults" : 0,
+  "LimitFindInstances" : 0,
+  "LimitJobs" : 10,
+  "LogExportedResources" : false,
+  "KeepAlive" : false,
+
+  "StoreDicom" : true,
+  "DicomAssociationCloseDelay" : 5,
+
+  "QueryRetrieveSize" : 10,
+
+  "CaseSensitivePN" : false,
+
+  // If set to "true", Orthanc will still handle "SOP Classes in
+  // Study" (0008,0062) in C-FIND requests, even if the "SOP Class
+  // UID" metadata is not available in the database (which is the case
+  // if the DB was previously used by Orthanc <= 1.1.0). This option
+  // is turned off by default, as it requires intensive accesses to
+  // the hard drive.
+  "AllowFindSopClassesInStudy" : false,
+
+  "LoadPrivateDictionary" : true,
+
+  // "Locale" : "en_US.UTF-8",
+
+  // Register a new tag in the dictionary of DICOM tags that are known
+  // to Orthanc. Each line must contain the tag (formatted as 2
+  // hexadecimal numbers), the value representation (2 upcase
+  // characters), a nickname for the tag, possibly the minimum
+  // multiplicity (> 0 with defaults to 1), possibly the maximum
+  // multiplicity (0 means arbitrary multiplicity, defaults to 1), and
+  // possibly the Private Creator (for private tags).
+  "Dictionary" : {
+    // "0014,1020" : [ "DA", "ValidationExpiryDate", 1, 1 ]
+    // "00e1,10c2" : [ "UI", "PET-CT Multi Modality Name", 1, 1, "ELSCINT1" ]
+    // "7053,1003" : [ "ST", "Original Image Filename", 1, 1, "Philips PET Private Group" ]
+    // "2001,5f" : [ "SQ", "StackSequence", 1, 1, "Philips Imaging DD 001" ]
+  },
+
+  "SynchronousCMove" : false,
+
+  "JobsHistorySize" : 10,
+
+  "OverwriteInstances" : true
+
+}
