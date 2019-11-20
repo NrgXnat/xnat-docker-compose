@@ -1,4 +1,4 @@
-version: '2.0'
+version: '2'
 services:
   xnat-web:
     build:
@@ -8,7 +8,7 @@ services:
         SMTP_ENABLED: 'false'
         SMTP_HOSTNAME: fake.fake
         SMTP_PORT:
-        AMTP_AUTH:
+        SMTP_AUTH:
         SMTP_USERNAME:
         SMTP_PASSWORD:
         XNAT_DATASOURCE_DRIVER: 'org.postgresql.Driver'
@@ -20,20 +20,20 @@ services:
         XNAT_ROOT: /data/xnat
         XNAT_HOME: /data/xnat/home
     ports:
-      - "8081:8080"
-      - "8000:8000"
-      - "22:22"
-    volumes:
+      - "80:8080"
+      - "8104:8104"
+      #      - "8000:8000"
+      volumes:
       - ./webapps:/usr/local/tomcat/webapps
       - ./xnat-data/home/logs:/data/xnat/home/logs
-      - /Users/Kelsey/Projects/XNAT/DemoBuilds/demo_plugin_jars:/data/xnat/home/plugins
+      - /home/ubuntu/demo_plugin_jars:/data/xnat/home/plugins
       - ./xnat-data/archive:/data/xnat/archive
       - ./xnat-data/build:/data/xnat/build
       - /var/run/docker.sock:/var/run/docker.sock
     depends_on:
       - xnat-db
     environment:
-      - CATALINA_OPTS=-Xms128m -Xmx1024m -Dxnat.home=/data/xnat/home -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=8000
+      - CATALINA_OPTS=-Xms128m -Xmx4096m -Dxnat.home=/data/xnat/home -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=8000
       - XNAT_HOME=/data/xnat/home
 
   xnat-db:
@@ -58,14 +58,14 @@ services:
       - ./orthanc/orthanc.json:/etc/orthanc/orthanc.json:ro
     depends_on:
       - xnat-db
-  xnat-nginx:
-    build: ./nginx
-    ports:
-      - "80:80"
-    expose:
-      - "80"
-    links:
-      - xnat-web
+#  xnat-nginx:
+#    build: ./nginx
+#    ports:
+#      - "80:80"
+#    expose:
+#      - "80"
+#    links:
+#      - xnat-web
 
   # prometheus:
   #   image: prom/prometheus
