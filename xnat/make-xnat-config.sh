@@ -12,6 +12,8 @@ hibernate.hbm2ddl.auto=update
 hibernate.show_sql=false
 hibernate.cache.use_second_level_cache=true
 hibernate.cache.use_query_cache=true
+spring.http.multipart.max-file-size=1073741824
+spring.http.multipart.max-request-size=1073741824
 EOF
 fi
 

@@ -48,6 +48,8 @@
 
   // Enter any PACS or workstations here
   "DicomModalities" : {
+     "XNAT" : [ "XNAT", "xnat-web", 8144 ],
+     "XDQR" : [ "XDQR", "xnat-web", 8104 ]
   },
 
   "DicomAlwaysAllowEcho" : true,
