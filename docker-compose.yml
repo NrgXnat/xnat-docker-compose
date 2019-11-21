@@ -25,6 +25,7 @@ services:
     volumes:
       - ./webapps:/usr/local/tomcat/webapps
       - ./xnat-data/home/logs:/data/xnat/home/logs
+      - ./xnat/server.xml:/usr/local/tomcat/conf/server.xml
       - /home/ubuntu/demo_plugin_jars:/data/xnat/home/plugins
       - ./xnat-data/archive:/data/xnat/archive
       - ./xnat-data/build:/data/xnat/build
