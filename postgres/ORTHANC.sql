@@ -1,3 +1,0 @@
-CREATE USER orthanc  NOCREATEDB;
-CREATE DATABASE orthanc OWNER orthanc;
-ALTER USER orthanc WITH PASSWORD 'orthanc';
