@@ -5,6 +5,7 @@ services:
   traefik:
     container_name: xnat-traefik
     image: "traefik:latest"
+    networks: [xnat-services]
     command:
       - --entrypoints.web.address=:80
       - --providers.docker=true
@@ -37,6 +38,7 @@ services:
         TOMCAT_XNAT_FOLDER: ROOT
         XNAT_ROOT: /data/xnat
         XNAT_HOME: /data/xnat/home
+    networks: [xnat-services]
     expose:
       - 8080
     ports:
@@ -61,6 +63,7 @@ services:
   xnat-db:
     container_name: xnat-db
     build: ./postgres
+    networks: [xnat-services]
     expose:
       - "5432"
     volumes:
@@ -75,6 +78,7 @@ services:
         XNAT_DATASOURCE_URL: 'jdbc:postgresql://xnat-db/xnat'
         XNAT_DATASOURCE_USERNAME: 'xnat'
         XNAT_DATASOURCE_PASSWORD: 'xnat'
+    networks: [xnat-services]
     expose:
       - 8042
     ports:
@@ -90,4 +94,9 @@ services:
       - ./orthanc/orthanc.json:/etc/orthanc/orthanc.json:ro
     depends_on:
       - xnat-db
+
+networks:
+  xnat-services:
+    name: xnat-services
+    driver: bridge
 

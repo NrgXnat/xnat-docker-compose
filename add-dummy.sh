@@ -23,8 +23,7 @@ DUMMY_NAME="dummy${INDEX}"
 DUMMY_COUNT=$(docker ps --filter name=${DUMMY_NAME} | fgrep -v "CONTAINER ID" | wc -l | tr -d ' ')
 [[ ${DUMMY_COUNT} -gt 0 ]] && { displayError 254 "A container named ${DUMMY_NAME} is already running"; }
 
-NETWORK="$(basename "$(pwd)")_default"
-
+NETWORK="xnat-services"
 echo "Launching dummy${INDEX} on network ${NETWORK}"
 
 docker run --name ${DUMMY_NAME} --detach --network ${NETWORK} --label traefik.http.services.${DUMMY_NAME}.loadbalancer.server.port=80 --label traefik.http.routers.${DUMMY_NAME}.rule=Path\(\`/dummy/${INDEX}\`\) --label traefik.http.middlewares.${DUMMY_NAME}-stripprefix.stripprefix.prefixes=/dummy/${INDEX} --label traefik.http.routers.${DUMMY_NAME}.middlewares=${DUMMY_NAME}-stripprefix@docker containous/whoami
