@@ -1,7 +1,9 @@
 # Created by .ignore support plugin (hsz.mobi)
-*.swp
 *.swo
+*.swp
+.gradle/
+activemq-data*
+orthanc-data*
 postgres-data*
-xnat-data*
 webapps
-orthanc-data
+xnat-data*

@@ -1,0 +1,23 @@
+## traefik.yml
+
+# Docker configuration backend
+providers:
+  docker:
+    defaultRule: "Host(`{{ trimPrefix `/` .Name }}.docker.localhost`)"
+    # watch: true
+    # exposedByDefault: false
+
+# API and dashboard configuration
+api:
+    # dashboard: true
+  insecure: true
+
+log:
+  # filePath: "/var/log/traefik.log"
+  level: DEBUG
+  
+  # entryPoints:
+  # web:
+  #  address: ":80"
+  # web-secure:
+    # address: ":443"

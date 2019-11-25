@@ -1,6 +1,24 @@
-version: '2.0'
+version: "3.7"
+
 services:
+
+  traefik:
+    container_name: xnat-traefik
+    image: "traefik:latest"
+    command:
+      - --entrypoints.web.address=:80
+      - --providers.docker=true
+      - --api.insecure # Don't do that in production
+    ports:
+      - "80:80"
+      - "8080:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./traefik/config/traefik.yml:/etc/traefik/traefik.yml
+      - ./traefik-data/logs:/var/log
+
   xnat-web:
+    container_name: xnat-web
     build:
       context: ./xnat
       args:
@@ -19,16 +37,20 @@ services:
         TOMCAT_XNAT_FOLDER: ROOT
         XNAT_ROOT: /data/xnat
         XNAT_HOME: /data/xnat/home
+    expose:
+      - 8080
     ports:
-      - "80:8080"
       - "8104:8104"
+    labels:
+      - traefik.http.routers.nginx1.rule=PathPrefix(`/`)
     volumes:
-      - ./webapps:/usr/local/tomcat/webapps
-      - ./xnat-data/home/logs:/data/xnat/home/logs
       - ./xnat/server.xml:/usr/local/tomcat/conf/server.xml
-      - /home/ubuntu/demo_plugin_jars:/data/xnat/home/plugins
       - ./xnat-data/archive:/data/xnat/archive
+      # - ./xnat-data/config:/data/xnat/home/config
       - ./xnat-data/build:/data/xnat/build
+      - ./xnat-data/logs:/data/xnat/home/logs
+      - ./xnat-data/plugins:/data/xnat/home/plugins
+      - ./xnat-data/webapps:/usr/local/tomcat/webapps
       - /var/run/docker.sock:/var/run/docker.sock
     depends_on:
       - xnat-db
@@ -37,12 +59,15 @@ services:
       - XNAT_HOME=/data/xnat/home
 
   xnat-db:
+    container_name: xnat-db
     build: ./postgres
     expose:
       - "5432"
     volumes:
       - ./postgres-data:/var/lib/postgresql/data
+
   orthanc:
+    container_name: xnat-orthanc
     build:
       context: ./orthanc
       args:
@@ -50,9 +75,16 @@ services:
         XNAT_DATASOURCE_URL: 'jdbc:postgresql://xnat-db/xnat'
         XNAT_DATASOURCE_USERNAME: 'xnat'
         XNAT_DATASOURCE_PASSWORD: 'xnat'
+    expose:
+      - 8042
     ports:
       - "4242:4242"
       - "8042:8042"
+    labels:
+      - traefik.http.routers.orthanc.rule=PathPrefix(`/pacs`)
+      - traefik.http.middlewares.orthanc-stripprefix.stripprefix.prefixes=/pacs
+      - traefik.http.routers.orthanc.middlewares=orthanc-stripprefix@docker 
+      - traefik.http.services.orthanc.loadbalancer.server.port=8042
     volumes:
       - ./orthanc-data:/var/lib/orthanc/db
       - ./orthanc/orthanc.json:/etc/orthanc/orthanc.json:ro

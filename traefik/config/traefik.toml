@@ -1,0 +1,14 @@
+debug = false
+
+logLevel = "ERROR"
+defaultEntryPoints = ["http"]
+
+[entryPoints]
+  [entryPoints.http]
+  address = ":80"
+
+[retry]
+
+[docker]
+exposedByDefault = false
+
