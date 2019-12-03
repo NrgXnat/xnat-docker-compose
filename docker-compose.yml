@@ -16,6 +16,13 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - ./traefik/config/traefik.yml:/etc/traefik/traefik.yml
       - ./traefik-data/logs:/var/log
+    labels:   
+      - traefik.enable=true
+      - traefik.http.routers.traefik_dash.rule=Host(`dashboard.localhost`)
+      - traefik.http.routers.traefik_dash.entrypoints=web
+      - traefik.http.routers.traefik_dash.service=api@internal
+      - traefik.http.middlewares.append-slash-to-training.redirectregex.regex=^(.+/training/[^/]+)$$
+      - traefik.http.middlewares.append-slash-to-training.redirectregex.replacement=$${1}/
 
   xnat-web:
     container_name: xnat-web
@@ -46,7 +53,6 @@ services:
     volumes:
       - ./xnat/server.xml:/usr/local/tomcat/conf/server.xml
       - ./xnat-data/archive:/data/xnat/archive
-      # - ./xnat-data/config:/data/xnat/home/config
       - ./xnat-data/build:/data/xnat/build
       - ./xnat-data/logs:/data/xnat/home/logs
       - ./xnat-data/plugins:/data/xnat/home/plugins
@@ -81,8 +87,8 @@ services:
       - "4242:4242"
       - "8042:8042"
     labels:
-      - traefik.http.routers.orthanc.rule=PathPrefix(`/pacs`)
       - traefik.http.middlewares.orthanc-stripprefix.stripprefix.prefixes=/pacs
+      - traefik.http.routers.orthanc.rule=PathPrefix(`/pacs`)
       - traefik.http.routers.orthanc.middlewares=orthanc-stripprefix@docker 
       - traefik.http.services.orthanc.loadbalancer.server.port=8042
     volumes:
