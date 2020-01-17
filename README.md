@@ -17,7 +17,7 @@ This repository contains files to bootstrap XNAT deployment. The build creates t
 ## Usage
 
 
-1. Clone the [xnat-docker-compose](https://github.com/NrgXnat/xnat-docker-compose) repository.
+1. Clone the [xnat-docker-compose](https://github.com/NrgXnat/xnat-docker-compose) repository.)
 
 ```
 $ git clone https://github.com/NrgXnat/xnat-docker-compose
@@ -73,10 +73,10 @@ Your XNAT will soon be available at http://localhost.
 When you bring up XNAT with `docker-compose up`, several directories are created (if they don't exist already) to store the persistent data.
 
 * **postgres-data** - Contains the XNAT database
+* **xnat/plugins** - Initially contains nothing. However, you can customize your XNAT with plugins by placing jars into this directory and restarting XNAT.
 * **xnat-data/archive** - Contains the XNAT archive
 * **xnat-data/build** - Contains the XNAT build space. This is useful when running the container service plugin.
 * **xnat-data/home/logs** - Contains the XNAT logs.
-* **xnat-data/home/plugins** - Initially contains nothing. However, you can customize your XNAT with plugins by placing jars into this directory and restarting XNAT.
 
 
 ## Troubleshooting
