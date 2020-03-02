@@ -53,6 +53,7 @@ services:
       - 8080
     ports:
       - "8104:8104"
+      - "8144:8144"
     labels:
       - traefik.http.routers.xnat-web.rule=PathPrefix(`/`)
     volumes:

@@ -1,5 +1,6 @@
 import groovy.json.JsonSlurper
 import java.nio.file.Paths
+import java.util.regex.Matcher
 import javax.inject.Inject
 
 plugins {
@@ -26,9 +27,25 @@ def destination = { path -> Paths.get(baseDestination, path).toString() }
 
 class CopyConfiguration extends Copy {
     @Inject
-    CopyConfiguration(String name, String destination) {
+    CopyConfiguration(def name, def destination, def references) {
+        project.configurations.create(name) {
+            transitive = false
+        }
+
         from project.configurations.getByName(name)
         into destination
+
+        references.each {
+            Matcher matcher = it =~ /^([^ >]+)\s*->\s*([^ >]+)$/
+            if (matcher.matches()) {
+                def reference = matcher[0][1]
+                def atoms = reference.split ':'
+                project.dependencies.add name, reference
+                rename "${atoms[1]}-${atoms[2]}\\.[^.]+\$", matcher[0][2]
+            } else {
+                project.dependencies.add name, it
+            }
+        }
     }
 }
 
@@ -37,22 +54,10 @@ dependencyManagement.imports {
 }
 
 json.findAll { !(it.key ==~ /^(base|version)$/) }.each { key, value ->
-    String name = "xnat${key.capitalize()}"
-    def configuration = configurations.create(name) {
-        transitive = false
-    }
-    logger.info "Handling configuration ${name}:"
-    if (value instanceof String) {
-        logger.info " * ${value}"
-        dependencies.add(name, value)
-    } else if (value instanceof List) {
-        value.each {
-            logger.info " * ${it}"
-            dependencies.add(name, it) }
-    }
     String taskName = "copy${key.capitalize()}"
-    logger.info "Creating task ${taskName}"
-    tasks.create taskName, CopyConfiguration, name, destination(key)
+    String configName = "download${key.capitalize()}"
+    def references = value instanceof List ? value : [value]
+    tasks.create taskName, CopyConfiguration, configName, destination(key), references
 }
 
 task copyAll {

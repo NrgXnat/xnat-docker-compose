@@ -1,0 +1,10 @@
+{
+    "version": "1.7.7-ML-SNAPSHOT",
+    "base": "xnat-data",
+    "webapps": "org.nrg.xnat.web:xnat-web:1.7.7-ML-SNAPSHOT -> ROOT.war",
+    "plugins": [
+        "org.nrg.xnatx:ohif-viewer:2.2.0-SNAPSHOT:fat->ohif-viewer.jar",
+        "org.nrg.xnatx.plugins:xnatx-clara:1.7.7-ML-SNAPSHOT",
+        "org.nrg.xnatx.plugins:xnatx-collection:1.0.0-SNAPSHOT"
+    ]
+}
