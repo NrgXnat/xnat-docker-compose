@@ -1,3 +1,3 @@
-FROM postgres:9.4-alpine
+FROM postgres:10.12-alpine
 
 COPY XNAT.sql /docker-entrypoint-initdb.d/

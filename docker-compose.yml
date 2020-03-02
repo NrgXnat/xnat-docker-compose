@@ -26,30 +26,35 @@ services:
 
   xnat-web:
     container_name: xnat-web
+    image: xnat-web
     build:
       context: ./xnat
       args:
-        XNAT_VER: '1.7.5.3'
-        SMTP_ENABLED: 'false'
-        SMTP_HOSTNAME: fake.fake
-        SMTP_PORT:
-        SMTP_AUTH:
-        SMTP_USERNAME:
-        SMTP_PASSWORD:
-        XNAT_DATASOURCE_DRIVER: 'org.postgresql.Driver'
-        XNAT_DATASOURCE_URL: 'jdbc:postgresql://xnat-db/xnat'
-        XNAT_DATASOURCE_USERNAME: 'xnat'
-        XNAT_DATASOURCE_PASSWORD: 'xnat'
-        XNAT_HIBERNATE_DIALECT: 'org.hibernate.dialect.PostgreSQL9Dialect'
-        TOMCAT_XNAT_FOLDER: ROOT
-        XNAT_ROOT: /data/xnat
-        XNAT_HOME: /data/xnat/home
+        XNAT_VER: ${XNAT_VER}
+        SMTP_ENABLED: ${SMTP_ENABLED}
+        SMTP_HOSTNAME: ${SMTP_HOSTNAME}
+        SMTP_PORT: ${SMTP_PORT}
+        SMTP_AUTH: ${SMTP_AUTH}
+        SMTP_USERNAME: ${SMTP_USERNAME}
+        SMTP_PASSWORD: ${SMTP_PASSWORD}
+        XNAT_DATASOURCE_DRIVER: ${XNAT_DATASOURCE_DRIVER}
+        XNAT_DATASOURCE_URL: ${XNAT_DATASOURCE_URL}
+        XNAT_DATASOURCE_USERNAME: ${XNAT_DATASOURCE_USERNAME}
+        XNAT_DATASOURCE_PASSWORD: ${XNAT_DATASOURCE_PASSWORD}
+        XNAT_HIBERNATE_DIALECT: ${XNAT_HIBERNATE_DIALECT}
+        XNAT_ACTIVEMQ_URL: ${XNAT_ACTIVEMQ_URL}
+        XNAT_ACTIVEMQ_USER: ${XNAT_ACTIVEMQ_USER}
+        XNAT_ACTIVEMQ_PASSWORD: ${XNAT_ACTIVEMQ_PASSWORD}
+        TOMCAT_XNAT_FOLDER: ${TOMCAT_XNAT_FOLDER}
+        XNAT_ROOT: ${XNAT_ROOT}
+        XNAT_HOME: ${XNAT_HOME}
+        XNAT_EMAIL: ${XNAT_EMAIL}
     expose:
       - 8080
     ports:
       - "8104:8104"
     labels:
-      - traefik.http.routers.nginx1.rule=PathPrefix(`/`)
+      - traefik.http.routers.xnat-web.rule=PathPrefix(`/`)
     volumes:
       - ./xnat/server.xml:/usr/local/tomcat/conf/server.xml
       - ./xnat-data/archive:/data/xnat/archive
@@ -64,9 +69,38 @@ services:
       - CATALINA_OPTS=-Xms128m -Xmx8192m -Dxnat.home=/data/xnat/home -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=8000
       - XNAT_HOME=/data/xnat/home
 
+  activemq:
+    container_name: xnat-activemq
+    image: webcenter/activemq:5.14.3
+    ports:
+      - "8161:8161"
+      - "61616:61616"
+    volumes:
+      # - ./activemq-data/conf:/opt/activemq/conf
+      - ./activemq-data/data:/data/activemq
+      - ./activemq-data/logs:/var/log/activemq
+    environment:
+      ACTIVEMQ_REMOVE_DEFAULT_ACCOUNT: "true"
+      ACTIVEMQ_ADMIN_LOGIN: admin
+      ACTIVEMQ_ADMIN_PASSWORD: password
+      ACTIVEMQ_WRITE_LOGIN: write
+      ACTIVEMQ_WRITE_PASSWORD: password
+      ACTIVEMQ_READ_LOGIN: read
+      ACTIVEMQ_READ_PASSWORD: password
+      ACTIVEMQ_JMX_LOGIN: jmx
+      ACTIVEMQ_JMX_PASSWORD: password
+      ACTIVEMQ_STATIC_TOPICS: archive;prearchive;automation
+      ACTIVEMQ_STATIC_QUEUES: defaultRequest;automatedScriptRequest;moveStoredFileRequest;prearchiveOperationRequest;initializeGroupRequest;dicomInboxImportRequest
+      ACTIVEMQ_ENABLED_SCHEDULER: "true"
+      ACTIVEMQ_MIN_MEMORY: 1024
+      ACTIVEMQ_MAX_MEMORY: 4096
+
   xnat-db:
     container_name: xnat-db
+    image: xnat-db
     build: ./postgres
+    environment:
+      POSTGRES_PASSWORD: ${XNAT_DATASOURCE_ADMIN_PASSWORD}
     expose:
       - "5432"
     volumes:
@@ -74,13 +108,14 @@ services:
 
   orthanc:
     container_name: xnat-orthanc
+    image: xnat-orthanc
     build:
       context: ./orthanc
       args:
-        XNAT_DATASOURCE_DRIVER: 'org.postgresql.Driver'
-        XNAT_DATASOURCE_URL: 'jdbc:postgresql://xnat-db/xnat'
-        XNAT_DATASOURCE_USERNAME: 'xnat'
-        XNAT_DATASOURCE_PASSWORD: 'xnat'
+        XNAT_DATASOURCE_DRIVER: ${XNAT_DATASOURCE_DRIVER}
+        XNAT_DATASOURCE_URL: ${XNAT_DATASOURCE_URL}
+        XNAT_DATASOURCE_USERNAME: ${XNAT_DATASOURCE_USERNAME}
+        XNAT_DATASOURCE_PASSWORD: ${XNAT_DATASOURCE_PASSWORD}
     expose:
       - 8042
     ports:

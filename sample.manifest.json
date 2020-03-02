@@ -1,0 +1,15 @@
+{
+    "version": "1.7.7-SNAPSHOT",
+    "base": "download",
+    "war": "org.nrg.xnat.web:xnat-web",
+    "plugins": [
+        "org.nrg.xnat:data-client",
+        "org.nrg.xnat:xnat-data-models",
+        "org.nrg.xdat:core",
+        "org.nrg:framework"
+    ],
+    "vogons": [
+        "org.apache.commons:commons-lang3",
+        "com.google.guava:guava"
+    ]
+}
