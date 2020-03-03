@@ -68,6 +68,7 @@ services:
       - xnat-db
     environment:
       - CATALINA_OPTS=-Xms128m -Xmx8192m -Dxnat.home=/data/xnat/home -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=8000
+      - PGPASSWORD=${XNAT_DATASOURCE_PASSWORD}
       - XNAT_HOME=/data/xnat/home
 
   activemq:
@@ -132,4 +133,6 @@ services:
       - ./orthanc/orthanc.json:/etc/orthanc/orthanc.json:ro
     depends_on:
       - xnat-db
+    environment:
+      - PGPASSWORD=${XNAT_DATASOURCE_PASSWORD}
 

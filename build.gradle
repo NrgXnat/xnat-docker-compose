@@ -71,6 +71,7 @@ dockerCompose {
         startedServices = [ "activemq", "orthanc", "traefik", "xnat-db", "xnat-web" ]
         removeImages = "All"
     }
+    tcpPortsToIgnoreWhenWaiting = [8104, 8144]
 }
 
 defaultTasks "composeUp"
