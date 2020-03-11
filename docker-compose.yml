@@ -1,4 +1,4 @@
-version: "2.0"
+version: "3.3"
 
 services:
 
@@ -23,7 +23,23 @@ services:
       - traefik.http.routers.traefik_dash.service=api@internal
       - traefik.http.middlewares.append-slash-to-training.redirectregex.regex=^(.+/training/[^/]+)$$
       - traefik.http.middlewares.append-slash-to-training.redirectregex.replacement=$${1}/
-
+  portainer:
+    image: portainer/portainer
+    ports:
+      - "9000:9000"
+      - "8000:8000"
+    restart: always
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - portainer-data:/data
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.portainer.rule=Host(`localhost`) && PathPrefix(`/portainer/`)"
+      - "traefik.http.middlewares.portainerpathstrip.stripprefix.prefixes=/portainer"
+      - "traefik.http.routers.portainer.middlewares=portainerpathstrip@docker"
+      - "traefik.http.routers.portainer.entrypoints=http"
+      - "traefik.http.routers.portainer.service=portainer"
+      - "traefik.http.services.portainer.loadbalancer.server.port=9000"
   xnat-web:
     container_name: xnat-web
     build:
@@ -48,6 +64,7 @@ services:
       - 8080
     ports:
       - "8104:8104"
+      - "8144:8144"
     labels:
       - traefik.http.routers.nginx1.rule=PathPrefix(`/`)
     volumes:
@@ -55,8 +72,8 @@ services:
       - ./xnat-data/archive:/data/xnat/archive
       - ./xnat-data/build:/data/xnat/build
       - ./xnat-data/logs:/data/xnat/home/logs
-      - ./xnat-data/plugins:/data/xnat/home/plugins
-      - ./xnat-data/webapps:/usr/local/tomcat/webapps
+      - ./xnat/plugins:/data/xnat/home/plugins
+      - ./xnat/webapps:/usr/local/tomcat/webapps
       - /var/run/docker.sock:/var/run/docker.sock
     depends_on:
       - xnat-db
@@ -66,11 +83,13 @@ services:
 
   xnat-db:
     container_name: xnat-db
+    environment:
+      - POSTGRES_HOST_AUTH_METHOD=trust
     build: ./postgres
     expose:
       - "5432"
     volumes:
-      - ./postgres-data:/var/lib/postgresql/data
+      - postgres-data:/var/lib/postgresql/data
 
   orthanc:
     container_name: xnat-orthanc
@@ -97,3 +116,6 @@ services:
     depends_on:
       - xnat-db
 
+volumes:
+  postgres-data:
+  portainer-data:
