@@ -37,5 +37,5 @@ RUNNING_CONTAINERS=($(getContainers ${CONTAINER_ID}))
 
 echo "Launching ${CONTAINER_ID} on network ${NETWORK}"
 
-docker run --name ${CONTAINER_ID} --rm --detach --network ${NETWORK} --label "traefik.http.services.${CONTAINER_ID}.loadbalancer.server.port=6006" --label "traefik.http.routers.${CONTAINER_ID}.rule=PathPrefix(\`/training/${EXPT_ID}\`)" --label "traefik.http.routers.${CONTAINER_ID}.middlewares=append-slash-to-training@docker" --volume ${EVENTS_DIR}:/input xnat/demo-tensorboard:latest tensorboard --logdir=/input --host 0.0.0.0 --path_prefix /training/${EXPT_ID}
+docker run --name ${CONTAINER_ID} --rm --detach --network ${NETWORK} --label "traefik.http.routers.${CONTAINER_ID}.rule=PathPrefix(\`/training/${EXPT_ID}\`)" --label "traefik.http.services.${CONTAINER_ID}.loadbalancer.server.port=6006" --label "traefik.http.routers.${CONTAINER_ID}.middlewares=service-redirect@docker,strip-routes@docker" --volume ${EVENTS_DIR}:/input xnat/demo-tensorboard:latest tensorboard --logdir=/input --host 0.0.0.0 --path_prefix /training/${EXPT_ID}
 
