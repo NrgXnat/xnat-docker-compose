@@ -39,6 +39,7 @@ RUN apk add --no-cache \
     /usr/local/bin/make-xnat-config.sh && \
     rm /usr/local/bin/make-xnat-config.sh
 
+EXPOSE 8000
 EXPOSE 8080
 ENV XNAT_HOME=${XNAT_HOME} XNAT_DATASOURCE_USERNAME=${XNAT_DATASOURCE_USERNAME} PGPASSWORD=${XNAT_DATASOURCE_PASSWORD}
 

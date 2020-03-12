@@ -1,10 +1,12 @@
-version: "2.0"
+version: "3.7"
 
 services:
 
   traefik:
     container_name: xnat-traefik
     image: "traefik:latest"
+    networks:
+      - xnat-services
     command:
       - --entrypoints.web.address=:80
       - --providers.docker=true
@@ -17,16 +19,20 @@ services:
       - ./traefik/config/traefik.yml:/etc/traefik/traefik.yml
       - ./traefik-data/logs:/var/log
     labels:   
-      - traefik.enable=true
-      - traefik.http.routers.traefik_dash.rule=Host(`dashboard.localhost`)
-      - traefik.http.routers.traefik_dash.entrypoints=web
-      - traefik.http.routers.traefik_dash.service=api@internal
-      - traefik.http.middlewares.append-slash-to-training.redirectregex.regex=^(.+/training/[^/]+)$$
-      - traefik.http.middlewares.append-slash-to-training.redirectregex.replacement=$${1}/
+      - "traefik.enable=true"
+      - "traefik.http.middlewares.strip-routes.stripprefix.prefixes=/pacs, /mq"
+      - "traefik.http.middlewares.service-redirect.redirectregex.regex=^(https|http)://([a-zA-Z0-9_.-]+)/([a-zA-Z0-9_.-]+)$$"
+      - "traefik.http.middlewares.service-redirect.redirectregex.replacement=$${1}://$${2}/$${3}/"
+      - "traefik.http.middlewares.append-slash-to-training.redirectregex.regex=^(.+/training/[^/]+)$$"
+      - "traefik.http.middlewares.append-slash-to-training.redirectregex.replacement=$${1}/"
+      - "traefik.http.routers.traefik_dash.rule=PathPrefix(`/dashboard`)"
+      - "traefik.http.routers.traefik_dash.middlewares=service-redirect@docker,strip-routes@docker"
+      - "traefik.http.services.traefik_dash.loadbalancer.server.port=8080"
 
   xnat-web:
     container_name: xnat-web
     image: xnat-web
+    networks: [xnat-services]
     build:
       context: ./xnat
       args:
@@ -51,11 +57,16 @@ services:
         XNAT_EMAIL: ${XNAT_EMAIL}
     expose:
       - 8080
+      - 8000
+      - 8104
+      - 8144
     ports:
+      - "8000:8000"
       - "8104:8104"
       - "8144:8144"
     labels:
-      - traefik.http.routers.xnat-web.rule=PathPrefix(`/`)
+      - "traefik.http.routers.xnat-web.rule=PathPrefix(`/`)"
+      - "traefik.http.services.xnat-web.loadbalancer.server.port=8080"
     volumes:
       - ./xnat/server.xml:/usr/local/tomcat/conf/server.xml
       - ./xnat-data/archive:/data/xnat/archive
@@ -63,22 +74,28 @@ services:
       - ./xnat-data/logs:/data/xnat/home/logs
       - ./xnat-data/plugins:/data/xnat/home/plugins
       - ./xnat-data/webapps:/usr/local/tomcat/webapps
+      - ./xnat-data/tomcat:/usr/local/tomcat/logs
       - /var/run/docker.sock:/var/run/docker.sock
-    depends_on:
-      - xnat-db
     environment:
-      - CATALINA_OPTS=-Xms128m -Xmx8192m -Dxnat.home=/data/xnat/home -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=8000
-      - PGPASSWORD=${XNAT_DATASOURCE_PASSWORD}
-      - XNAT_HOME=/data/xnat/home
-
+      CATALINA_OPTS: "-Xms128m -Xmx8192m -Dxnat.home=/data/xnat/home -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=0.0.0.0:8000"
+      PGPASSWORD: "${XNAT_DATASOURCE_PASSWORD}"
+      XNAT_HOME: "/data/xnat/home"
+      
   activemq:
     container_name: xnat-activemq
     image: webcenter/activemq:5.14.3
+    networks: [xnat-services]
+    expose:
+      - 8161
+      - 61616
     ports:
       - "8161:8161"
       - "61616:61616"
+    labels:
+      - "traefik.http.routers.activemq.rule=PathPrefix(`/mq`)"
+      - "traefik.http.services.activemq.loadbalancer.server.port=8161"
+      - "traefik.http.routers.activemq.middlewares=service-redirect@docker,strip-routes@docker"
     volumes:
-      # - ./activemq-data/conf:/opt/activemq/conf
       - ./activemq-data/data:/data/activemq
       - ./activemq-data/logs:/var/log/activemq
     environment:
@@ -100,6 +117,7 @@ services:
   xnat-db:
     container_name: xnat-db
     image: xnat-db
+    networks: [xnat-services]
     build: ./postgres
     environment:
       POSTGRES_PASSWORD: ${XNAT_DATASOURCE_ADMIN_PASSWORD}
@@ -111,6 +129,7 @@ services:
   orthanc:
     container_name: xnat-orthanc
     image: xnat-orthanc
+    networks: [xnat-services]
     build:
       context: ./orthanc
       args:
@@ -121,18 +140,21 @@ services:
     expose:
       - 8042
     ports:
-      - "4242:4242"
-      - "8042:8042"
+      - "4242"
+      - "8042"
     labels:
-      - traefik.http.middlewares.orthanc-stripprefix.stripprefix.prefixes=/pacs
-      - traefik.http.routers.orthanc.rule=PathPrefix(`/pacs`)
-      - traefik.http.routers.orthanc.middlewares=orthanc-stripprefix@docker 
-      - traefik.http.services.orthanc.loadbalancer.server.port=8042
+      - "traefik.http.routers.orthanc.rule=PathPrefix(`/pacs`)"
+      - "traefik.http.routers.orthanc.middlewares=service-redirect@docker,strip-routes@docker"
+      - "traefik.http.services.orthanc.loadbalancer.server.port=8042"
     volumes:
       - ./orthanc-data:/var/lib/orthanc/db
       - ./orthanc/orthanc.json:/etc/orthanc/orthanc.json:ro
-    depends_on:
-      - xnat-db
+    # depends_on:
+    #   - xnat-db
     environment:
-      - PGPASSWORD=${XNAT_DATASOURCE_PASSWORD}
+      PGPASSWORD: "${XNAT_DATASOURCE_PASSWORD}"
+
+networks:
+  xnat-services:
+    driver: bridge
 
