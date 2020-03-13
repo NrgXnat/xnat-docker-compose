@@ -30,12 +30,12 @@ CONTAINER_ID_REGEX="${CONTAINER_ID_TMPL}${XNAT_EXPT_ID_REGEX}"
 # exit 0
 
 EXPT_ID=${1}
-EVENTS_DIR=${2}
+EVENTS_DIR=$(realpath ${2})
 CONTAINER_ID="$(printf "${CONTAINER_ID_FORMAT}" ${EXPT_ID})"
 RUNNING_CONTAINERS=($(getContainers ${CONTAINER_ID}))
 [[ "${RUNNING_CONTAINERS[@]}" =~ "${CONTAINER_ID}" ]] && { displayError 251 "It appears that a container is already running for experiment ${EXPT_ID}."; }
 
 echo "Launching ${CONTAINER_ID} on network ${NETWORK}"
 
-docker run --name ${CONTAINER_ID} --rm --detach --network ${NETWORK} --label "traefik.http.routers.${CONTAINER_ID}.rule=PathPrefix(\`/training/${EXPT_ID}\`)" --label "traefik.http.services.${CONTAINER_ID}.loadbalancer.server.port=6006" --label "traefik.http.routers.${CONTAINER_ID}.middlewares=service-redirect@docker,strip-routes@docker" --volume ${EVENTS_DIR}:/input xnat/demo-tensorboard:latest tensorboard --logdir=/input --host 0.0.0.0 --path_prefix /training/${EXPT_ID}
+docker run --name ${CONTAINER_ID} --rm --detach --network ${NETWORK} --label "traefik.http.routers.${CONTAINER_ID}.rule=PathPrefix(\`/training/${EXPT_ID}\`)" --label "traefik.http.services.${CONTAINER_ID}.loadbalancer.server.port=6006" --label "traefik.http.routers.${CONTAINER_ID}.middlewares=append-slash-to-training@docker" --volume ${EVENTS_DIR}:/input xnat/demo-tensorboard:latest tensorboard --logdir=/input --host 0.0.0.0 --path_prefix /training/${EXPT_ID}
 
