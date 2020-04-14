@@ -15,7 +15,7 @@ hibernate.cache.use_second_level_cache=true
 hibernate.cache.use_query_cache=true
 
 spring.activemq.broker-url=$XNAT_ACTIVEMQ_URL
-spring.activemq.user=$XNAT_ACTIVEMQ_USER
+spring.activemq.user=$XNAT_ACTIVEMQ_USERNAME
 spring.activemq.password=$XNAT_ACTIVEMQ_PASSWORD
 
 spring.http.multipart.max-file-size=1073741824

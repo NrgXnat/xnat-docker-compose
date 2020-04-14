@@ -13,3 +13,5 @@ build
 # Ignore build manifests
 manifest*.json
 
+# Ignore gradle.properties to allow setting persistent property overrides
+gradle.properties

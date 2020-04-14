@@ -12,8 +12,10 @@ ARG TOMCAT_XNAT_FOLDER=ROOT
 ARG XNAT_VER=1.7.6
 ARG XNAT_EMAIL=admin@foo.bar
 ARG XNAT_ACTIVEMQ_URL=tcp://xnat-activemq:61616
-ARG XNAT_ACTIVEMQ_USER=write
+ARG XNAT_ACTIVEMQ_USERNAME=write
 ARG XNAT_ACTIVEMQ_PASSWORD=password
+ARG XNAT_GID=1001
+ARG XNAT_UID=1001
 
 ADD make-xnat-config.sh /usr/local/bin/make-xnat-config.sh
 ADD wait-for-postgres.sh /usr/local/bin/wait-for-postgres.sh
@@ -37,10 +39,19 @@ RUN apk add --no-cache \
         ${XNAT_ROOT}/prearchive \
     && \
     /usr/local/bin/make-xnat-config.sh && \
-    rm /usr/local/bin/make-xnat-config.sh
+    rm /usr/local/bin/make-xnat-config.sh && \
+    addgroup -g ${XNAT_GID} xnat && adduser -h ${CATALINA_HOME} -u ${XNAT_UID} -G xnat -s /bin/bash -D -g "XNAT User" xnat && \
+    chown -R xnat:xnat ${CATALINA_HOME} ${XNAT_ROOT} && \
+    chmod 400 ${CATALINA_HOME}/conf/* && \
+    chmod -R 300 ${CATALINA_HOME}/logs && \
+    chmod -R 600 ${CATALINA_HOME}/temp
+
 
 EXPOSE 8000
 EXPOSE 8080
+
+USER xnat
 ENV XNAT_HOME=${XNAT_HOME} XNAT_DATASOURCE_USERNAME=${XNAT_DATASOURCE_USERNAME} PGPASSWORD=${XNAT_DATASOURCE_PASSWORD}
 
 CMD ["wait-for-postgres.sh", "/usr/local/tomcat/bin/catalina.sh", "run"]
+

@@ -49,12 +49,14 @@ services:
         XNAT_DATASOURCE_PASSWORD: ${XNAT_DATASOURCE_PASSWORD}
         XNAT_HIBERNATE_DIALECT: ${XNAT_HIBERNATE_DIALECT}
         XNAT_ACTIVEMQ_URL: ${XNAT_ACTIVEMQ_URL}
-        XNAT_ACTIVEMQ_USER: ${XNAT_ACTIVEMQ_USER}
+        XNAT_ACTIVEMQ_USERNAME: ${XNAT_ACTIVEMQ_USERNAME}
         XNAT_ACTIVEMQ_PASSWORD: ${XNAT_ACTIVEMQ_PASSWORD}
         TOMCAT_XNAT_FOLDER: ${TOMCAT_XNAT_FOLDER}
         XNAT_ROOT: ${XNAT_ROOT}
         XNAT_HOME: ${XNAT_HOME}
         XNAT_EMAIL: ${XNAT_EMAIL}
+        XNAT_GID: ${XNAT_GID}
+        XNAT_UID: ${XNAT_UID}
     expose:
       - 8080
       - 8000
@@ -118,11 +120,15 @@ services:
     container_name: xnat-db
     image: xnat-db
     networks: [xnat-services]
-    build: ./postgres
+    build:
+      context: ./postgres
+      args:
+        POSTGRES_UID: ${POSTGRES_UID}
+        POSTGRES_GID: ${POSTGRES_GID}
     environment:
       POSTGRES_PASSWORD: ${XNAT_DATASOURCE_ADMIN_PASSWORD}
     expose:
-      - "5432"
+      - 5432
     volumes:
       - ./postgres-data:/var/lib/postgresql/data
 

@@ -4,7 +4,7 @@ import java.util.regex.Matcher
 import javax.inject.Inject
 
 plugins {
-    id "com.avast.gradle.docker-compose" version "0.10.9"
+    id "com.avast.gradle.docker-compose" version "0.10.10"
     id "io.spring.dependency-management" version "1.0.9.RELEASE"
 }
 
@@ -66,12 +66,27 @@ task copyAll {
 
 composeBuild.dependsOn copyAll
 
+if (!project.hasProperty("POSTGRES_GID")) {
+    ext.POSTGRES_GID = "70"
+}
+if (!project.hasProperty("POSTGRES_UID")) {
+    ext.POSTGRES_UID = "70"
+}
+if (!project.hasProperty("XNAT_GID")) {
+    ext.XNAT_GID = "1001"
+}
+if (!project.hasProperty("XNAT_UID")) {
+    ext.XNAT_UID = "1001"
+}
+
 dockerCompose {
     appOnly {
         startedServices = [ "activemq", "orthanc", "traefik", "xnat-db", "xnat-web" ]
         removeImages = "All"
     }
     tcpPortsToIgnoreWhenWaiting = [8104, 8144]
+    buildAdditionalArgs = ["--build-arg", "POSTGRES_GID=${POSTGRES_GID}", "--build-arg", "POSTGRES_UID=${POSTGRES_UID}", "--build-arg", "XNAT_GID=${XNAT_GID}", "--build-arg", "XNAT_UID=${XNAT_UID}"]
+
 }
 
 defaultTasks "composeUp"
