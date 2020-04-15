@@ -42,10 +42,8 @@ RUN apk add --no-cache \
     rm /usr/local/bin/make-xnat-config.sh && \
     addgroup -g ${XNAT_GID} xnat && adduser -h ${CATALINA_HOME} -u ${XNAT_UID} -G xnat -s /bin/bash -D -g "XNAT User" xnat && \
     chown -R xnat:xnat ${CATALINA_HOME} ${XNAT_ROOT} && \
-    chmod 400 ${CATALINA_HOME}/conf/* && \
-    chmod -R 300 ${CATALINA_HOME}/logs && \
-    chmod -R 600 ${CATALINA_HOME}/temp
-
+    find ${CATALINA_HOME} -mindepth 1 -type d | xargs chmod 755 && \
+    chmod 400 ${CATALINA_HOME}/conf/*
 
 EXPOSE 8000
 EXPOSE 8080
