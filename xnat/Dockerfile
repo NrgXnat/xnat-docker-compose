@@ -17,7 +17,6 @@ ADD wait-for-postgres.sh /usr/local/bin/wait-for-postgres.sh
 RUN apk add --no-cache \
         postgresql-client \
         wget \
-	git \
     && \
     rm -rf $CATALINA_HOME/webapps/* && \
     mkdir -p \
@@ -35,8 +34,6 @@ RUN apk add --no-cache \
     && \
     /usr/local/bin/make-xnat-config.sh && \
     rm /usr/local/bin/make-xnat-config.sh && \
-    cd ${XNAT_HOME}/plugins && \
-    git clone https://github.com/kaiser-team/jars.git . &&\
     cd $CATALINA_HOME/webapps/ && \
     wget https://api.bitbucket.org/2.0/repositories/xnatdev/xnat-web/downloads/xnat-web-${XNAT_VER}.war && \
     cd ${TOMCAT_XNAT_FOLDER} && \
