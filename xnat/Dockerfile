@@ -19,6 +19,7 @@ ARG XNAT_UID=1001
 
 ADD make-xnat-config.sh /usr/local/bin/make-xnat-config.sh
 ADD wait-for-postgres.sh /usr/local/bin/wait-for-postgres.sh
+ADD server.xml ${CATALINA_HOME}/conf/server.xml
 ADD ${XNAT_PATH} /webapps
 
 RUN apk add --no-cache \
