@@ -1,0 +1,139 @@
+version: "3.3"
+
+services:
+
+  traefik:
+    container_name: xnat-traefik
+    image: traefik:2.2
+    command:
+      - --entrypoints.web.address=:80
+ #     - --api.insecure # Don't do that in production
+      - --providers.docker=true
+      - --providers.docker.network=xnat_swarm
+      - --providers.docker.swarmMode=true
+      - --providers.docker.exposedbydefault=false
+      - --providers.docker.network=xnat_swarm
+      - --providers.docker.defaultRule=Host(`{{ trimPrefix `/` .Name }}.docker.localhost`)
+      - --log.filePath=/var/log/traefik.log
+#      - --log.level=DEBUG
+    ports:
+      - "80:80"
+      - "8080:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./traefik-data:/var/log
+    deploy:
+      placement:
+        constraints: [node.role == manager]
+      labels:
+        - traefik.enable=true
+        - traefik.http.routers.traefik_dash.rule=Host(`dashboard.localhost`)
+        - traefik.http.routers.traefik_dash.entrypoints=web
+        - traefik.http.routers.traefik_dash.service=api@internal
+        - traefik.http.middlewares.append-slash-to-training.redirectregex.regex=^(.+/training/[^/]+)$$
+        - traefik.http.middlewares.append-slash-to-training.redirectregex.replacement=$${1}/
+        - traefik.http.services.traefik.loadbalancer.server.port=8080
+    networks:
+      - xnat_swarm
+      
+  xnat-web:
+    container_name: xnat-web
+    image: 127.0.0.1:5000/xnat-web
+    build:
+      context: ./xnat
+      args:
+        XNAT_VER: '1.7.5.3'
+        SMTP_ENABLED: 'false'
+        SMTP_HOSTNAME: fake.fake
+        SMTP_PORT:
+        SMTP_AUTH:
+        SMTP_USERNAME:
+        SMTP_PASSWORD:
+        XNAT_DATASOURCE_DRIVER: 'org.postgresql.Driver'
+        XNAT_DATASOURCE_URL: 'jdbc:postgresql://xnat-db/xnat'
+        XNAT_DATASOURCE_USERNAME: 'xnat'
+        XNAT_DATASOURCE_PASSWORD: 'xnat'
+        XNAT_HIBERNATE_DIALECT: 'org.hibernate.dialect.PostgreSQL9Dialect'
+        TOMCAT_XNAT_FOLDER: ROOT
+        XNAT_ROOT: /data/xnat
+        XNAT_HOME: /data/xnat/home
+    expose:
+      - 8080
+    ports:
+      - "8104:8104"
+      - "8144:8144"
+
+    deploy:
+      labels:
+        - traefik.enable=true
+        - traefik.http.routers.xnat-web.rule=PathPrefix(`/`)
+        - traefik.http.services.xnat-web.loadbalancer.server.port=8080
+        - traefik.http.routers.xnat-web.entrypoints=web
+    volumes:
+      - ./xnat/server.xml:/usr/local/tomcat/conf/server.xml:ro
+      - ./xnat/plugins:/data/xnat/home/plugins:ro
+      - ./xnat/webapps:/usr/local/tomcat/webapps
+      - /var/run/docker.sock:/var/run/docker.sock
+      - type: bind
+        source: ./xnat-data/archive
+        target: /data/xnat/archive
+      - type: bind
+        source: ./xnat-data/build
+        target: /data/xnat/build
+      - type: bind
+        source: ./xnat-data/logs
+        target: /data/xnat/home/logs
+    environment:
+      - CATALINA_OPTS=-Xms128m -Xmx8192m -Dxnat.home=/data/xnat/home -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=8000
+      - XNAT_HOME=/data/xnat/home
+    networks:
+      - xnat_swarm
+      
+  xnat-db:
+    container_name: xnat-db
+    image: 127.0.0.1:5000/xnat-db
+    build: ./postgres
+    expose:
+      - "5432"
+    volumes:
+      - type: bind
+        source: ./postgres-data
+        target: /var/lib/postgresql/data
+    deploy:
+      replicas: 1
+      labels:
+        - traefik.http.services.xnat-db.loadbalancer.server.port=5432
+
+    networks:
+      - xnat_swarm
+
+  orthanc:
+    container_name: xnat-orthanc
+    image: 127.0.0.1:5000/xnat-orthanc
+    build:
+      context: ./orthanc
+      args:
+        XNAT_DATASOURCE_DRIVER: 'org.postgresql.Driver'
+        XNAT_DATASOURCE_URL: 'jdbc:postgresql://xnat-db/xnat'
+        XNAT_DATASOURCE_USERNAME: 'xnat'
+        XNAT_DATASOURCE_PASSWORD: 'xnat'
+    expose:
+      - 8042
+    ports:
+      - "4242:4242"
+      - "8042:8042"
+    deploy:
+      labels:
+        - traefik.http.middlewares.orthanc-stripprefix.stripprefix.prefixes=/pacs
+        - traefik.http.routers.orthanc.rule=PathPrefix(`/pacs`)
+        - traefik.http.routers.orthanc.middlewares=orthanc-stripprefix@docker 
+        - traefik.http.services.orthanc.loadbalancer.server.port=8042
+    volumes:
+      - ./orthanc-data:/var/lib/orthanc/db
+      - ./orthanc/orthanc.json:/etc/orthanc/orthanc.json:ro
+    networks:
+      - xnat_swarm
+                  
+networks:
+  xnat_swarm:
+    external: true
