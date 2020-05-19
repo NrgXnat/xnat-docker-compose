@@ -6,5 +6,4 @@ activemq-data*
 orthanc-data*
 postgres-data*
 traefik-data*
-webapps
 xnat-data*

@@ -13,7 +13,6 @@ services:
       - --providers.docker.swarmMode=true
       - --providers.docker.exposedbydefault=false
       - --providers.docker.network=xnat_swarm
-      - --providers.docker.defaultRule=Host(`{{ trimPrefix `/` .Name }}.docker.localhost`)
       - --log.filePath=/var/log/traefik.log
 #      - --log.level=DEBUG
     ports:
@@ -62,6 +61,8 @@ services:
     ports:
       - "8104:8104"
       - "8144:8144"
+#     tomcat debug port
+      - "8000:8000"
 
     deploy:
       labels:
