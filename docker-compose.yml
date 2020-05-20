@@ -73,6 +73,7 @@ services:
       - ./xnat/server.xml:/usr/local/tomcat/conf/server.xml
       - ./xnat-data/archive:/data/xnat/archive
       - ./xnat-data/build:/data/xnat/build
+      - ./xnat-data/config:/data/xnat/home/config
       - ./xnat-data/logs:/data/xnat/home/logs
       - ./xnat-data/plugins:/data/xnat/home/plugins
       - ./xnat-data/webapps:/usr/local/tomcat/webapps
