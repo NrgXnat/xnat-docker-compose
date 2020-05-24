@@ -55,8 +55,6 @@ services:
         XNAT_ROOT: ${XNAT_ROOT}
         XNAT_HOME: ${XNAT_HOME}
         XNAT_EMAIL: ${XNAT_EMAIL}
-        XNAT_GID: ${XNAT_GID}
-        XNAT_UID: ${XNAT_UID}
     expose:
       - 8080
       - 8000
@@ -70,7 +68,6 @@ services:
       - "traefik.http.routers.xnat-web.rule=PathPrefix(`/`)"
       - "traefik.http.services.xnat-web.loadbalancer.server.port=8080"
     volumes:
-      - ./xnat/server.xml:/usr/local/tomcat/conf/server.xml
       - ./xnat-data/archive:/data/xnat/archive
       - ./xnat-data/build:/data/xnat/build
       - ./xnat-data/logs:/data/xnat/home/logs
@@ -122,9 +119,6 @@ services:
     networks: [xnat-services]
     build:
       context: ./postgres
-      args:
-        POSTGRES_UID: ${POSTGRES_UID}
-        POSTGRES_GID: ${POSTGRES_GID}
     environment:
       POSTGRES_PASSWORD: ${XNAT_DATASOURCE_ADMIN_PASSWORD}
     expose:

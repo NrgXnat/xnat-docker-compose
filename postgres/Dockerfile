@@ -6,10 +6,11 @@ FROM postgres:12.2-alpine
 # $ docker-compose build --build-arg POSTGRES_UID=1001 --build-arg POSTGRES_GID=1001 xnat-db
 # $ docker-compose up --detach
 #
-ARG POSTGRES_UID=70
-ARG POSTGRES_GID=70
-RUN if [ ${POSTGRES_GID} != 70 ]; then sed -i'' -E 's/postgres:x:70:postgres/postgres:x:'${POSTGRES_GID}':postgres/' /etc/group; fi;
-RUN if [ ${POSTGRES_GID} != 70 ]; then sed -i'' -E 's/postgres:x:70:70:/postgres:x:'${POSTGRES_UID}':'${POSTGRES_GID}':/' /etc/passwd; fi;
+
+RUN if [ ! -z ${POSTGRES_GID} && ${POSTGRES_GID} != 70 ]; then \
+        sed -i'' -E 's/postgres:x:70:postgres/postgres:x:'${POSTGRES_GID}':postgres/' /etc/group; \
+        sed -i'' -E 's/postgres:x:70:70:/postgres:x:'${POSTGRES_UID}':'${POSTGRES_GID}':/' /etc/passwd; \
+    fi;
 
 ADD --chown=postgres:postgres XNAT.sql /docker-entrypoint-initdb.d/
 
