@@ -66,12 +66,28 @@ task copyAll {
 
 composeBuild.dependsOn copyAll
 
+def composeBuildArgs = []
+if (project.hasProperty("POSTGRES_UID")) {
+    composeBuildArgs << "--build-arg" << "POSTGRES_UID=${POSTGRES_UID}"
+}
+if (project.hasProperty("POSTGRES_GID")) {
+    composeBuildArgs << "--build-arg" << "POSTGRES_GID=${POSTGRES_GID}"
+}
+if (project.hasProperty("XNAT_UID")) {
+    composeBuildArgs << "--build-arg" << "XNAT_UID=${XNAT_UID}"
+}
+if (project.hasProperty("XNAT_GID")) {
+    composeBuildArgs << "--build-arg" << "XNAT_GID=${XNAT_GID}"
+}
+logger.warn "Compose build args: ${composeBuildArgs}"
+
 dockerCompose {
     appOnly {
         startedServices = [ "activemq", "orthanc", "traefik", "xnat-db", "xnat-web" ]
         removeImages = "All"
     }
     tcpPortsToIgnoreWhenWaiting = [8104, 8144]
+    buildAdditionalArgs = composeBuildArgs
 }
 
 defaultTasks "composeUp"

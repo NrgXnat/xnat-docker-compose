@@ -35,12 +35,19 @@ RUN apk add --no-cache \
         ${XNAT_ROOT}/pipeline \
         ${XNAT_ROOT}/prearchive && \
     /usr/local/bin/make-xnat-config.sh && \
-    rm /usr/local/bin/make-xnat-config.sh
+    rm /usr/local/bin/make-xnat-config.sh && \
+    if [[ ! -z ${XNAT_GID} ]]; then \
+        addgroup -g ${XNAT_GID} xnat; \
+        adduser -h ${CATALINA_HOME} -u ${XNAT_UID} -G xnat -s /bin/bash -D -g "XNAT User" xnat; \
+        chown -R xnat:xnat ${CATALINA_HOME} ${XNAT_ROOT}; \
+        find ${CATALINA_HOME} -mindepth 1 -type d | xargs chmod 755; \
+        chmod 400 ${CATALINA_HOME}/conf/*; \
+    fi
 
 EXPOSE 8000
 EXPOSE 8080
 
-ENV XNAT_HOME=${XNAT_HOME} XNAT_DATASOURCE_USERNAME=${XNAT_DATASOURCE_USERNAME} PGPASSWORD=${XNAT_DATASOURCE_PASSWORD}
+ENV XNAT_HOME=${XNAT_HOME} XNAT_DATASOURCE_USERNAME=${XNAT_DATASOURCE_USERNAME} PGPASSWORD=${XNAT_DATASOURCE_PASSWORD} XNAT_GID=${XNAT_GID} XNAT_UID=${XNAT_UID}
 
 CMD ["wait-for-postgres.sh", "/usr/local/tomcat/bin/catalina.sh", "run"]
 
