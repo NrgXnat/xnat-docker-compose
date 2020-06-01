@@ -70,6 +70,7 @@ services:
     volumes:
       - ./xnat-data/archive:/data/xnat/archive
       - ./xnat-data/build:/data/xnat/build
+      - ./xnat-data/config:/data/xnat/home/config
       - ./xnat-data/logs:/data/xnat/home/logs
       - ./xnat-data/plugins:/data/xnat/home/plugins
       - ./xnat-data/webapps:/usr/local/tomcat/webapps
@@ -140,8 +141,7 @@ services:
     expose:
       - 8042
     ports:
-      - "4242"
-      - "8042"
+      - "4242:4242"
     labels:
       - "traefik.http.routers.orthanc.rule=PathPrefix(`/pacs`)"
       - "traefik.http.routers.orthanc.middlewares=service-redirect@docker,strip-routes@docker"

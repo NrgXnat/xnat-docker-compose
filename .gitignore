@@ -15,3 +15,5 @@ manifest*.json
 
 # Ignore gradle.properties to allow setting persistent property overrides
 gradle.properties
+
+*.log

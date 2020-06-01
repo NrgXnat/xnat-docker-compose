@@ -23,6 +23,9 @@ spring.http.multipart.max-request-size=1073741824
 EOF
 fi
 
+mkdir -p /usr/local/share/xnat
+cp $XNAT_HOME/config/xnat-conf.properties /usr/local/share/xnat
+
 [[ "${INSTALL_PIPELINE}" == "false" ]] && { echo "Skipping pipeline installation"; exit 0; }
 
 wget --quiet https://ci.xnat.org/job/pipeline/job/xnat-pipeline-engine/lastSuccessfulReleaseBuild/artifact/build/libs/xnat-pipeline-$XNAT_VER.zip

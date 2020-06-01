@@ -11,7 +11,7 @@ api:
   insecure: true
 
 log:
-  level: DEBUG
+  level: INFO
   filePath: "/var/log/traefik.log"
 
 accessLog:
