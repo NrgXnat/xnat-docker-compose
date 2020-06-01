@@ -3,7 +3,7 @@
     "base": "xnat-data",
     "webapps": "org.nrg.xnat.web:xnat-web",
     "plugins": [
-        "org.nrg.xnatx:ohif-viewer:2.2.0-SNAPSHOT:fat"
+        "org.nrg.xnatx.plugins:ohif-viewer:2.2.0-SNAPSHOT:fat"
     ],
     "vogons": [
         "org.apache.commons:commons-lang3",
