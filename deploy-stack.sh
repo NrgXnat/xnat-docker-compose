@@ -10,6 +10,7 @@ mkdir -m755 {./xnat-data,./xnat-data/archive,./xnat-data/build,./xnat-data/logs}
 mkdir -m755 postgres-data
 mkdir -m755 orthanc-data
 mkdir -m755 traefik-data
+mkdir -m755 activemq-data
 # Deploy XNAT system containers to swarm
 docker stack deploy --compose-file docker-compose-stack.yml xnat_stack
 # remove local registry

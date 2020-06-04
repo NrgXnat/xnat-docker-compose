@@ -1,10 +1,12 @@
-version: "2.0"
+version: "3.7"
 
 services:
 
   traefik:
     container_name: xnat-traefik
     image: "traefik:latest"
+    networks:
+      - xnat-services
     command:
       - --entrypoints.web.address=:80
       - --providers.docker=true
@@ -16,87 +18,145 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - ./traefik/config/traefik.yml:/etc/traefik/traefik.yml
       - ./traefik-data/logs:/var/log
-    labels:
-      - traefik.enable=true
-      - traefik.http.routers.traefik_dash.rule=Host(`dashboard.localhost`)
-      - traefik.http.routers.traefik_dash.entrypoints=web
-      - traefik.http.routers.traefik_dash.service=api@internal
-      - traefik.http.middlewares.append-slash-to-training.redirectregex.regex=^(.+/training/[^/]+)$$
-      - traefik.http.middlewares.append-slash-to-training.redirectregex.replacement=$${1}/
+    labels:   
+      - "traefik.enable=true"
+      - "traefik.http.middlewares.strip-routes.stripprefix.prefixes=/pacs, /mq"
+      - "traefik.http.middlewares.service-redirect.redirectregex.regex=^(https|http)://([a-zA-Z0-9_.-]+)/([a-zA-Z0-9_.-]+)$$"
+      - "traefik.http.middlewares.service-redirect.redirectregex.replacement=$${1}://$${2}/$${3}/"
+      - "traefik.http.middlewares.append-slash-to-training.redirectregex.regex=^(.+/training/[^/]+)$$"
+      - "traefik.http.middlewares.append-slash-to-training.redirectregex.replacement=$${1}/"
+      - "traefik.http.routers.traefik_dash.rule=PathPrefix(`/dashboard`)"
+      - "traefik.http.routers.traefik_dash.middlewares=service-redirect@docker,strip-routes@docker"
+      - "traefik.http.services.traefik_dash.loadbalancer.server.port=8080"
 
   xnat-web:
     container_name: xnat-web
+    image: xnat-web
+    networks: [xnat-services]
     build:
       context: ./xnat
       args:
-        XNAT_VER: '1.7.5.3'
-        SMTP_ENABLED: 'false'
-        SMTP_HOSTNAME: fake.fake
-        SMTP_PORT:
-        SMTP_AUTH:
-        SMTP_USERNAME:
-        SMTP_PASSWORD:
-        XNAT_DATASOURCE_DRIVER: 'org.postgresql.Driver'
-        XNAT_DATASOURCE_URL: 'jdbc:postgresql://xnat-db/xnat'
-        XNAT_DATASOURCE_USERNAME: 'xnat'
-        XNAT_DATASOURCE_PASSWORD: 'xnat'
-        XNAT_HIBERNATE_DIALECT: 'org.hibernate.dialect.PostgreSQL9Dialect'
-        TOMCAT_XNAT_FOLDER: ROOT
-        XNAT_ROOT: /data/xnat
-        XNAT_HOME: /data/xnat/home
+        XNAT_VER: ${XNAT_VER}
+        SMTP_ENABLED: ${SMTP_ENABLED}
+        SMTP_HOSTNAME: ${SMTP_HOSTNAME}
+        SMTP_PORT: ${SMTP_PORT}
+        SMTP_AUTH: ${SMTP_AUTH}
+        SMTP_USERNAME: ${SMTP_USERNAME}
+        SMTP_PASSWORD: ${SMTP_PASSWORD}
+        XNAT_DATASOURCE_DRIVER: ${XNAT_DATASOURCE_DRIVER}
+        XNAT_DATASOURCE_URL: ${XNAT_DATASOURCE_URL}
+        XNAT_DATASOURCE_USERNAME: ${XNAT_DATASOURCE_USERNAME}
+        XNAT_DATASOURCE_PASSWORD: ${XNAT_DATASOURCE_PASSWORD}
+        XNAT_HIBERNATE_DIALECT: ${XNAT_HIBERNATE_DIALECT}
+        XNAT_ACTIVEMQ_URL: ${XNAT_ACTIVEMQ_URL}
+        XNAT_ACTIVEMQ_USERNAME: ${XNAT_ACTIVEMQ_USERNAME}
+        XNAT_ACTIVEMQ_PASSWORD: ${XNAT_ACTIVEMQ_PASSWORD}
+        TOMCAT_XNAT_FOLDER: ${TOMCAT_XNAT_FOLDER}
+        XNAT_ROOT: ${XNAT_ROOT}
+        XNAT_HOME: ${XNAT_HOME}
+        XNAT_EMAIL: ${XNAT_EMAIL}
     expose:
       - 8080
+      - 8000
+      - 8104
+      - 8144
     ports:
+      - "8000:8000"
       - "8104:8104"
       - "8144:8144"
     labels:
-      - traefik.http.routers.nginx1.rule=PathPrefix(`/`)
+      - "traefik.http.routers.xnat-web.rule=PathPrefix(`/`)"
+      - "traefik.http.services.xnat-web.loadbalancer.server.port=8080"
     volumes:
-      - ./xnat/server.xml:/usr/local/tomcat/conf/server.xml
       - ./xnat-data/archive:/data/xnat/archive
       - ./xnat-data/build:/data/xnat/build
       - ./xnat-data/logs:/data/xnat/home/logs
-      - ./xnat/plugins:/data/xnat/home/plugins
-      - ./xnat/webapps:/usr/local/tomcat/webapps
+      - ./xnat-data/plugins:/data/xnat/home/plugins
+      - ./xnat-data/webapps:/usr/local/tomcat/webapps
+      - ./xnat-data/tomcat:/usr/local/tomcat/logs
       - /var/run/docker.sock:/var/run/docker.sock
-    depends_on:
-      - xnat-db
     environment:
-      - CATALINA_OPTS=-Xms128m -Xmx8192m -Dxnat.home=/data/xnat/home -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=8000
-      - XNAT_HOME=/data/xnat/home
+      CATALINA_OPTS: "-Xms128m -Xmx8192m -Dxnat.home=/data/xnat/home -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=0.0.0.0:8000"
+      PGPASSWORD: "${XNAT_DATASOURCE_PASSWORD}"
+      XNAT_HOME: "/data/xnat/home"
+      
+  activemq:
+    container_name: xnat-activemq
+    image: webcenter/activemq:5.14.3
+    networks: [xnat-services]
+    expose:
+      - 8161
+      - 61616
+    ports:
+      - "8161:8161"
+      - "61616:61616"
+    labels:
+      - "traefik.http.routers.activemq.rule=PathPrefix(`/mq`)"
+      - "traefik.http.services.activemq.loadbalancer.server.port=8161"
+      - "traefik.http.routers.activemq.middlewares=service-redirect@docker,strip-routes@docker"
+    volumes:
+      - ./activemq-data/data:/data/activemq
+      - ./activemq-data/logs:/var/log/activemq
+    environment:
+      ACTIVEMQ_REMOVE_DEFAULT_ACCOUNT: "true"
+      ACTIVEMQ_ADMIN_LOGIN: admin
+      ACTIVEMQ_ADMIN_PASSWORD: password
+      ACTIVEMQ_WRITE_LOGIN: write
+      ACTIVEMQ_WRITE_PASSWORD: password
+      ACTIVEMQ_READ_LOGIN: read
+      ACTIVEMQ_READ_PASSWORD: password
+      ACTIVEMQ_JMX_LOGIN: jmx
+      ACTIVEMQ_JMX_PASSWORD: password
+      ACTIVEMQ_STATIC_TOPICS: archive;prearchive;automation
+      ACTIVEMQ_STATIC_QUEUES: defaultRequest;automatedScriptRequest;moveStoredFileRequest;prearchiveOperationRequest;initializeGroupRequest;dicomInboxImportRequest
+      ACTIVEMQ_ENABLED_SCHEDULER: "true"
+      ACTIVEMQ_MIN_MEMORY: 1024
+      ACTIVEMQ_MAX_MEMORY: 4096
 
   xnat-db:
     container_name: xnat-db
-    build: ./postgres
+    image: xnat-db
+    networks: [xnat-services]
+    build:
+      context: ./postgres
+    environment:
+      POSTGRES_PASSWORD: ${XNAT_DATASOURCE_ADMIN_PASSWORD}
     expose:
-      - "5432"
+      - 5432
     volumes:
       - postgres-data:/var/lib/postgresql/data
 
   orthanc:
     container_name: xnat-orthanc
+    image: xnat-orthanc
+    networks: [xnat-services]
     build:
       context: ./orthanc
       args:
-        XNAT_DATASOURCE_DRIVER: 'org.postgresql.Driver'
-        XNAT_DATASOURCE_URL: 'jdbc:postgresql://xnat-db/xnat'
-        XNAT_DATASOURCE_USERNAME: 'xnat'
-        XNAT_DATASOURCE_PASSWORD: 'xnat'
+        XNAT_DATASOURCE_DRIVER: ${XNAT_DATASOURCE_DRIVER}
+        XNAT_DATASOURCE_URL: ${XNAT_DATASOURCE_URL}
+        XNAT_DATASOURCE_USERNAME: ${XNAT_DATASOURCE_USERNAME}
+        XNAT_DATASOURCE_PASSWORD: ${XNAT_DATASOURCE_PASSWORD}
     expose:
       - 8042
     ports:
-      - "4242:4242"
-      - "8042:8042"
+      - "4242"
+      - "8042"
     labels:
-      - traefik.http.middlewares.orthanc-stripprefix.stripprefix.prefixes=/pacs
-      - traefik.http.routers.orthanc.rule=PathPrefix(`/pacs`)
-      - traefik.http.routers.orthanc.middlewares=orthanc-stripprefix@docker 
-      - traefik.http.services.orthanc.loadbalancer.server.port=8042
+      - "traefik.http.routers.orthanc.rule=PathPrefix(`/pacs`)"
+      - "traefik.http.routers.orthanc.middlewares=service-redirect@docker,strip-routes@docker"
+      - "traefik.http.services.orthanc.loadbalancer.server.port=8042"
     volumes:
       - ./orthanc-data:/var/lib/orthanc/db
       - ./orthanc/orthanc.json:/etc/orthanc/orthanc.json:ro
-    depends_on:
-      - xnat-db
+    # depends_on:
+    #   - xnat-db
+    environment:
+      PGPASSWORD: "${XNAT_DATASOURCE_PASSWORD}"
+
+networks:
+  xnat-services:
+    driver: bridge
 
 volumes:
   postgres-data:

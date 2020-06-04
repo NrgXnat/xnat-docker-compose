@@ -1,0 +1,12 @@
+{
+    "version": "1.7.7-SNAPSHOT",
+    "base": "xnat-data",
+    "webapps": "org.nrg.xnat.web:xnat-web",
+    "plugins": [
+        "org.nrg.xnatx.plugins:ohif-viewer:2.2.0-SNAPSHOT:fat"
+    ],
+    "vogons": [
+        "org.apache.commons:commons-lang3",
+        "com.google.guava:guava"
+    ]
+}
