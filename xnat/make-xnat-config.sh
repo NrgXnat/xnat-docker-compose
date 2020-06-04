@@ -14,9 +14,9 @@ hibernate.show_sql=false
 hibernate.cache.use_second_level_cache=true
 hibernate.cache.use_query_cache=true
 
-spring.activemq.broker-url=$XNAT_ACTIVEMQ_URL
-spring.activemq.user=$XNAT_ACTIVEMQ_USERNAME
-spring.activemq.password=$XNAT_ACTIVEMQ_PASSWORD
+#spring.activemq.broker-url=$XNAT_ACTIVEMQ_URL
+#spring.activemq.user=$XNAT_ACTIVEMQ_USERNAME
+#spring.activemq.password=$XNAT_ACTIVEMQ_PASSWORD
 
 spring.http.multipart.max-file-size=1073741824
 spring.http.multipart.max-request-size=1073741824
@@ -29,15 +29,9 @@ wget --quiet https://ci.xnat.org/job/pipeline/job/xnat-pipeline-engine/lastSucce
 unzip -qq xnat-pipeline-$XNAT_VER.zip
 cd xnat-pipeline
 
-cat > gradle.properties << GRADLE_PROPS
-xnatUrl=http://localhost
-siteName=XNAT
-adminEmail=${XNAT_EMAIL}
-smtpServer=${SMTP_HOSTNAME}
-destination=/data/xnat/pipeline
-GRADLE_PROPS
-
-./gradlew
+./gradlew -PadminEmail=${XNAT_EMAIL} -Pdestination=/data/xnat/pipeline \
+    -PsiteName=XNAT -PxnatUrl=http://localhost -PsmtpServer=${SMTP_HOSTNAME} \
+    -PpluginsDir=${XNAT_HOME}/plugins
 cd ..
 rm -rf xnat-pipeline-$XNAT_VER.zip xnat-pipeline
 
