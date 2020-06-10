@@ -1,0 +1,13 @@
+{
+    "version": "ML-BETA",
+    "base": "xnat-data",
+    "webapps": "org.nrg.xnat.web:xnat-web:ML-BETA -> ROOT.war",
+    "plugins": [
+        "org.nrg.xnatx.plugins:batch-launch:ML-BETA",
+        "org.nrg.xnatx.plugins:container-service:ML-BETA:fat",
+        "org.nrg.xnatx.plugins:dicom-query-retrieve:ML-BETA:xpl",
+        "org.nrg.xnatx.plugins:xnatx-clara:ML-BETA",
+        "org.nrg.xnatx.plugins:xnatx-collection:ML-BETA",
+        "org.nrg.xnatx.plugins:ohif-viewer:ML-BETA:fat"
+    ]
+}
