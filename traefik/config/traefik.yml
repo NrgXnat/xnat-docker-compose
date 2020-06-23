@@ -12,3 +12,8 @@ api:
 
 log:
   level: DEBUG
+  filePath: "/var/log/traefik.log"
+
+accessLog:
+  filePath: "/var/log/access.log"
+

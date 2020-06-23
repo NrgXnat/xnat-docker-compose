@@ -2,8 +2,16 @@
 *.swo
 *.swp
 .gradle/
-activemq-data*
-orthanc-data*
-postgres-data*
-traefik-data*
-xnat-data*
+*-data/
+
+# Ignore Gradle project-specific cache directory
+.gradle
+
+# Ignore Gradle build output directory
+build
+
+# Ignore build manifests
+manifest*.json
+
+# Ignore gradle.properties to allow setting persistent property overrides
+gradle.properties

@@ -1,0 +1,78 @@
+import groovy.json.JsonSlurper
+import java.nio.file.Paths
+import java.util.regex.Matcher
+import javax.inject.Inject
+
+plugins {
+    id "com.avast.gradle.docker-compose" version "0.10.10"
+    id "io.spring.dependency-management" version "1.0.9.RELEASE"
+}
+
+group "org.nrg.xnat.containers"
+version "1.7.7-ML-SNAPSHOT"
+
+def manifest = file(hasProperty("manifest") ? property("manifest") : "manifest.json")
+def json = new JsonSlurper().parse(manifest)
+
+repositories {
+    mavenLocal()
+    jcenter()
+    mavenCentral()
+    maven { url "https://nrgxnat.jfrog.io/nrgxnat/libs-release" }
+    maven { url "https://nrgxnat.jfrog.io/nrgxnat/libs-snapshot" }
+}
+
+def baseDestination = "${json.base ? (json.base.startsWith(".") ? json.base : "./" + json.base) : "."}"
+def destination = { path -> Paths.get(baseDestination, path).toString() }
+
+class CopyConfiguration extends Copy {
+    @Inject
+    CopyConfiguration(def name, def destination, def references) {
+        project.configurations.create(name) {
+            transitive = false
+        }
+
+        from project.configurations.getByName(name)
+        into destination
+
+        references.each {
+            Matcher matcher = it =~ /^([^ >]+)\s*->\s*([^ >]+)$/
+            if (matcher.matches()) {
+                def reference = matcher[0][1]
+                def atoms = reference.split ':'
+                project.dependencies.add name, reference
+                rename "${atoms[1]}-${atoms[2]}\\.[^.]+\$", matcher[0][2]
+            } else {
+                project.dependencies.add name, it
+            }
+        }
+    }
+}
+
+dependencyManagement.imports {
+    mavenBom "org.nrg:parent:${project.version}"
+}
+
+json.findAll { !(it.key ==~ /^(base|version)$/) }.each { key, value ->
+    String taskName = "copy${key.capitalize()}"
+    String configName = "download${key.capitalize()}"
+    def references = value instanceof List ? value : [value]
+    tasks.create taskName, CopyConfiguration, configName, destination(key), references
+}
+
+task copyAll {
+    dependsOn tasks.matching { Task task -> task instanceof CopyConfiguration }
+}
+
+composeBuild.dependsOn copyAll
+
+dockerCompose {
+    appOnly {
+        startedServices = [ "activemq", "orthanc", "traefik", "xnat-db", "xnat-web" ]
+        removeImages = "All"
+    }
+    tcpPortsToIgnoreWhenWaiting = [8104, 8144]
+}
+
+defaultTasks "composeUp"
+

@@ -41,21 +41,25 @@ services:
     build:
       context: ./xnat
       args:
-        XNAT_VER: '1.7.5.3'
-        SMTP_ENABLED: 'false'
-        SMTP_HOSTNAME: fake.fake
-        SMTP_PORT:
-        SMTP_AUTH:
-        SMTP_USERNAME:
-        SMTP_PASSWORD:
-        XNAT_DATASOURCE_DRIVER: 'org.postgresql.Driver'
-        XNAT_DATASOURCE_URL: 'jdbc:postgresql://xnat-db/xnat'
-        XNAT_DATASOURCE_USERNAME: 'xnat'
-        XNAT_DATASOURCE_PASSWORD: 'xnat'
-        XNAT_HIBERNATE_DIALECT: 'org.hibernate.dialect.PostgreSQL9Dialect'
-        TOMCAT_XNAT_FOLDER: ROOT
-        XNAT_ROOT: /data/xnat
-        XNAT_HOME: /data/xnat/home
+        XNAT_VER: ${XNAT_VER}
+        SMTP_ENABLED: ${SMTP_ENABLED}
+        SMTP_HOSTNAME: ${SMTP_HOSTNAME}
+        SMTP_PORT: ${SMTP_PORT}
+        SMTP_AUTH: ${SMTP_AUTH}
+        SMTP_USERNAME: ${SMTP_USERNAME}
+        SMTP_PASSWORD: ${SMTP_PASSWORD}
+        XNAT_DATASOURCE_DRIVER: ${XNAT_DATASOURCE_DRIVER}
+        XNAT_DATASOURCE_URL: ${XNAT_DATASOURCE_URL}
+        XNAT_DATASOURCE_USERNAME: ${XNAT_DATASOURCE_USERNAME}
+        XNAT_DATASOURCE_PASSWORD: ${XNAT_DATASOURCE_PASSWORD}
+        XNAT_HIBERNATE_DIALECT: ${XNAT_HIBERNATE_DIALECT}
+        XNAT_ACTIVEMQ_URL: ${XNAT_ACTIVEMQ_URL}
+        XNAT_ACTIVEMQ_USERNAME: ${XNAT_ACTIVEMQ_USERNAME}
+        XNAT_ACTIVEMQ_PASSWORD: ${XNAT_ACTIVEMQ_PASSWORD}
+        TOMCAT_XNAT_FOLDER: ${TOMCAT_XNAT_FOLDER}
+        XNAT_ROOT: ${XNAT_ROOT}
+        XNAT_HOME: ${XNAT_HOME}
+        XNAT_EMAIL: ${XNAT_EMAIL}
     expose:
       - 8080
     ports:
@@ -72,8 +76,8 @@ services:
         - traefik.http.routers.xnat-web.entrypoints=web
     volumes:
       - ./xnat/server.xml:/usr/local/tomcat/conf/server.xml:ro
-      - ./xnat/plugins:/data/xnat/home/plugins:ro
-      - ./xnat/webapps:/usr/local/tomcat/webapps
+      - ./xnat-data/plugins:/data/xnat/home/plugins:ro
+      - ./xnat-data/webapps:/usr/local/tomcat/webapps
       - /var/run/docker.sock:/var/run/docker.sock
       - type: bind
         source: ./xnat-data/archive
@@ -114,10 +118,10 @@ services:
     build:
       context: ./orthanc
       args:
-        XNAT_DATASOURCE_DRIVER: 'org.postgresql.Driver'
-        XNAT_DATASOURCE_URL: 'jdbc:postgresql://xnat-db/xnat'
-        XNAT_DATASOURCE_USERNAME: 'xnat'
-        XNAT_DATASOURCE_PASSWORD: 'xnat'
+        XNAT_DATASOURCE_DRIVER: ${XNAT_DATASOURCE_DRIVER}
+        XNAT_DATASOURCE_URL: ${XNAT_DATASOURCE_URL}
+        XNAT_DATASOURCE_USERNAME: ${XNAT_DATASOURCE_USERNAME}
+        XNAT_DATASOURCE_PASSWORD: ${XNAT_DATASOURCE_PASSWORD}
     expose:
       - 8042
     ports:
@@ -134,7 +138,7 @@ services:
       - ./orthanc/orthanc.json:/etc/orthanc/orthanc.json:ro
     networks:
       - xnat_swarm
-                  
+
 networks:
   xnat_swarm:
     external: true
