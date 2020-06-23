@@ -1,6 +1,8 @@
 # Created by .ignore support plugin (hsz.mobi)
 *.swp
 *.swo
-postgres-data*
-xnat-data*
+*-data/
 xnat/plugins
+*.log
+.gradle/
+manifest.json
