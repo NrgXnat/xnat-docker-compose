@@ -13,9 +13,6 @@ services:
         TOMCAT_XNAT_FOLDER: ${TOMCAT_XNAT_FOLDER}
         XNAT_ROOT: ${XNAT_ROOT}
         XNAT_HOME: ${XNAT_HOME}
-    ports:
-      - "8080:8080"
-      - "8000:8000"
     volumes:
       - ./xnat/plugins:/data/xnat/home/plugins
       - ./xnat-data/home/logs:/data/xnat/home/logs
@@ -25,7 +22,7 @@ services:
     depends_on:
       - xnat-db
     environment:
-      - CATALINA_OPTS=-Xms128m -Xmx2048m -Dxnat.home=/data/xnat/home -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=8000
+      - CATALINA_OPTS=-Xms${XNAT_MIN_HEAP} -Xmx${XNAT_MAX_HEAP} -Dxnat.home=/data/xnat/home
       - XNAT_HOME=/data/xnat/home
 
   xnat-db:
