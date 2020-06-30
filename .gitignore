@@ -17,3 +17,5 @@ manifest*.json
 gradle.properties
 
 *.log
+*.env
+

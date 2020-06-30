@@ -2,7 +2,7 @@ version: "3.7"
 
 services:
 
-  traefik:
+  xnat-traefik:
     container_name: xnat-traefik
     image: "traefik:latest"
     networks:
@@ -77,11 +77,11 @@ services:
       - ./xnat-data/tomcat:/usr/local/tomcat/logs
       - /var/run/docker.sock:/var/run/docker.sock
     environment:
-      CATALINA_OPTS: "-Xms128m -Xmx8192m -Dxnat.home=/data/xnat/home -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=0.0.0.0:8000"
+      CATALINA_OPTS: "-Xms${XNAT_MIN_HEAP} -Xmx${XNAT_MAX_HEAP} -Dxnat.home=/data/xnat/home -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=0.0.0.0:8000"
       PGPASSWORD: "${XNAT_DATASOURCE_PASSWORD}"
       XNAT_HOME: "/data/xnat/home"
       
-  activemq:
+  xnat-activemq:
     container_name: xnat-activemq
     image: webcenter/activemq:5.14.3
     networks: [xnat-services]
@@ -127,9 +127,9 @@ services:
     volumes:
       - ./postgres-data:/var/lib/postgresql/data
 
-  orthanc:
-    container_name: xnat-orthanc
-    image: xnat-orthanc
+  xnat-pacs:
+    container_name: xnat-pacs
+    image: xnat-pacs
     networks: [xnat-services]
     build:
       context: ./orthanc
@@ -149,8 +149,6 @@ services:
     volumes:
       - ./orthanc-data:/var/lib/orthanc/db
       - ./orthanc/orthanc.json:/etc/orthanc/orthanc.json:ro
-    # depends_on:
-    #   - xnat-db
     environment:
       PGPASSWORD: "${XNAT_DATASOURCE_PASSWORD}"
 
