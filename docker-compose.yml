@@ -154,5 +154,6 @@ services:
 
 networks:
   xnat-services:
+    name: xnat-services
     driver: bridge
 

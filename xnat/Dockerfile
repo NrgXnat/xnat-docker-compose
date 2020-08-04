@@ -14,6 +14,9 @@ ARG XNAT_EMAIL=admin@foo.bar
 ARG XNAT_ACTIVEMQ_URL=tcp://xnat-activemq:61616
 ARG XNAT_ACTIVEMQ_USERNAME=write
 ARG XNAT_ACTIVEMQ_PASSWORD=password
+ARG XNAT_PROCESSING_URL=http://xnat-web:8080
+ARG XNAT_PIPELINE_ARCHIVE=xnat-pipeline-${XNAT_VER}.zip
+ARG XNAT_PIPELINE_URL=https://ci.xnat.org/job/pipeline/job/xnat-pipeline-engine/lastSuccessfulReleaseBuild/artifact/build/libs/${XNAT_PIPELINE_ARCHIVE}
 
 ADD make-xnat-config.sh /usr/local/bin/make-xnat-config.sh
 ADD wait-for-postgres.sh /usr/local/bin/wait-for-postgres.sh
@@ -21,9 +24,9 @@ ADD ${XNAT_PATH} /webapps
 
 RUN apk add --no-cache \
         postgresql-client wget && \
-    rm -rf $CATALINA_HOME/webapps/* && \
+    rm -rf ${CATALINA_HOME}/webapps/* && \
     mkdir -p \
-        $CATALINA_HOME/webapps/${TOMCAT_XNAT_FOLDER} \
+        ${CATALINA_HOME}/webapps/${TOMCAT_XNAT_FOLDER} \
         ${XNAT_HOME}/config \
         ${XNAT_HOME}/logs \
         ${XNAT_HOME}/plugins \
