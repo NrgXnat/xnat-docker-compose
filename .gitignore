@@ -1,8 +1,19 @@
 # Created by .ignore support plugin (hsz.mobi)
-*.swp
 *.swo
+*.swp
+
+# Ignore Gradle project-specific cache directory
+.gradle/
+
+# Ignore build manifests
+manifest*.json
+
+# Ignore gradle.properties to allow setting persistent property overrides
+gradle.properties
+
+# Ignore log and env files, as well as mounted data folders and plugin folders.
+*.log
+*.env
 *-data/
 xnat/plugins
-*.log
-.gradle/
-manifest.json
+
