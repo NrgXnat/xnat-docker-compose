@@ -66,7 +66,12 @@ xnat-web_1    | Oct 24, 2017 3:18:27 PM org.apache.catalina.startup.Catalina sta
 xnat-web_1    | INFO: Server startup in 84925 ms
 ```
 
-Your XNAT will soon be available at http://localhost.
+
+4. First XNAT Site Setup
+
+Your XNAT will soon be available at http://localhost. 
+
+After logging in with credentials admin/admin (username/password resp.) the setup page is displayed.
 
 ## Mounted Data
 
