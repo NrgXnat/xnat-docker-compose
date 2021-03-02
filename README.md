@@ -1,4 +1,5 @@
-# Dockerized XNAT
+# XNAT docker-compose
+
 Use this repository to quickly deploy an [XNAT](https://xnat.org/) instance on [docker](https://www.docker.com/).
 
 This `dev-xnat` branch is specifically for deploying in-development (or `SNAPSHOT`) versions of the XNAT war file.

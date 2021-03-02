@@ -4,19 +4,18 @@ import java.util.regex.Matcher
 import javax.inject.Inject
 
 plugins {
-    id "com.avast.gradle.docker-compose" version "0.10.10"
-    id "io.spring.dependency-management" version "1.0.9.RELEASE"
+    id "com.avast.gradle.docker-compose" version "0.14.0"
+    id "io.spring.dependency-management" version "1.0.11.RELEASE"
 }
 
 group "org.nrg.xnat.containers"
-version "1.7.7-ML-SNAPSHOT"
+version "1.8.0"
 
 def manifest = file(hasProperty("manifest") ? property("manifest") : "manifest.json")
 def json = new JsonSlurper().parse(manifest)
 
 repositories {
     mavenLocal()
-    jcenter()
     mavenCentral()
     maven { url "https://nrgxnat.jfrog.io/nrgxnat/libs-release" }
     maven { url "https://nrgxnat.jfrog.io/nrgxnat/libs-snapshot" }
