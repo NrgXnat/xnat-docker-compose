@@ -4,6 +4,18 @@ Use this repository to quickly deploy an [XNAT](https://xnat.org/) instance on [
 branch provides the ability to specify the version of XNAT you want to deploy, along with plugins to extend XNAT's core functionality. It also
 includes definitions for optional components that can be added to your configuration just by referencing the appropriate configuration files.
 
+This document contains the following sections:
+
+* [Introduction](#markdown-header-introduction)
+* [Prerequisites](#markdown-header-prerequisites)
+* [Usage](#markdown-header-usage)
+* [Mounted Data](#markdown-header-mounted-data)
+* [Troubleshooting](#markdown-header-troubleshooting)
+* [Notes on using the Container Service](#markdown-header-notes-on-using-the-container-service)
+* [Environment variables](#markdown-header-environment-variables)
+
+> Please see the [license notice in this repository](LICENSE.txt) for information on using and redistributing this software.
+
 ## Introduction
 
 The dependency management configuration uses [Gradle](https://gradle.org) to manage the configuration for your XNAT application. This includes:
@@ -16,10 +28,23 @@ These are managed using Gradle's dependency management functionality along with 
 
 ## Prerequisites
 
+The only prerequisites for running XNAT using the `xnat-docker-compose` project are:
+
 * [docker](https://www.docker.com/)
-* [docker-compose](http://docs.docker.com/compose) (Which is installed along with docker if you download it from their site)
+* [docker-compose](http://docs.docker.com/compose)
+
+`docker-compose` is installed along with [Docker Desktop](https://www.docker.com/products/docker-desktop), which is the standard installation
+for Windows and OS X, but you may need to install it separately on some platforms, e.g. `docker-ce` on Ubuntu does not include `docker-compose`.
 
 ## Usage
+
+This section describes:
+
+* [Installing](#markdown-header-installing)
+* [Launching](#markdown-header-launching)
+* [Configuring](#markdown-header-configuring)
+
+### Installing
 
 Start by cloning the [xnat-docker-compose](https://github.com/NrgXnat/xnat-docker-compose) repository and checkout the `features/dependency-mgmt`
 branch:
@@ -78,13 +103,20 @@ builds, while `fullStackComposeUp` launches the containers. You can monitor the 
 
 ### Configuring
 
-With both the basic and full-stack configurations, you'll almost certainly want to change how XNAT and/or its services are configured. To support
-differing deployment requirements, `xnat-docker-compose` uses variables for settings that tend to change based on environment. By default, `docker-compose`
-takes the values for variables from the [file `.env`](https://docs.docker.com/compose/environment-variables/). The Gradle build populates this file
-from the file indicated by the `envFile` property on the command line or from the file [default.env](default.env) if you don't specify a value for the
-`envFile` property. You'll notice that the command-line examples above have no references to `envFile`, meaning the variable values used are the
-default values. This may be fine for the basic configuration but for something more complicated, e.g. if you're configuring the SMTP relay container,
-you'll need to provide your own `.env` file.
+With both the basic and full-stack configurations, you'll almost certainly want to change how XNAT and/or its services are configured. There are two
+main configuration mechanisms in this project:
+
+- [Environment variables](#markdown-header-environment-variables)
+- [Manifest files](#markdown-header-manifest-files)
+
+#### Environment variables
+
+To support differing deployment requirements, `xnat-docker-compose` uses variables for settings that tend to change based on environment. By
+default, `docker-compose` takes the values for variables from the [file `.env`](https://docs.docker.com/compose/environment-variables/). The
+Gradle build populates this file from the file indicated by the `envFile` property on the command line or from the file [default.env](default.env)
+if you don't specify a value for the `envFile` property. You'll notice that the command-line examples above have no references to `envFile`,
+meaning the variable values used are the default values. This may be fine for the basic configuration but for something more complicated, e.g.
+if you're configuring the SMTP relay container, you'll need to provide your own `.env` file.
 
 To create your own `.env` file, it's best to just copy `default.env` and modify the values in there.
 
@@ -98,7 +130,85 @@ To use your new `.env` file, add the parameter `-PenvFile=`_file_ to the command
 $ ./gradlew -PenvFile=myProps.env fullStackComposeBuild fullStackComposeUp
 ```
 
+#### Manifest files
 
+Manifest files provide the ability to specify which version of the XNAT application you want to use in your `docker-compose` deployment,
+as well as which plugins–and which versions of those plugins–you want to install. `xnat-docker-compose` uses a simple JSON format for its
+manifest file, with the following properties:
+
+- **version** indicates the version of the deployment. This value is currently ignored by the Gradle build and can be used to represent
+  the version of your own configuration
+- **base** indicates the base folder where the XNAT war file and plugins should be installed. Currently this should _always_ be set to
+  `xnat-data`, as that is the path used to map volumes for XNAT folders (as described in [Mounted Data](#markdown-header-mounted-data)
+  below).
+- **webapps** specifies the Maven coordinates for the XNAT war file. The retrieved file is written to the folder _base_`/webapps`, which
+  is mapped to the Tomcat `webapps` folder in the `docker-compose` configuration. The coordinates for the XNAT war file should be in the
+  form _groupId_:_artifactId_:_version_, e.g. for XNAT 1.8.0, this would be `org.nrg.xnat.web:xnat-web:1.8.0`.
+- **plugins** is an array of Maven coordinates for XNAT plugin jars. These are treated the same way as the **webapps** coordinates, with
+  the exception that the retrieved files are written to the folder _base_`/plugins`, which is mapped to the `plugins` folder in the XNAT
+  user's home folder.
+
+For each coordinates in both **webapps** and **plugins**, you can specify an optional mapping by appending ` -> `_target_, where _target_
+is the file name to use for the downloaded artifact. Artifacts retrieved from Maven have the name _artifactId_-_version_._classifier_
+(_classifier_ is something like _jar_ or _war_). This is especially important to change for the war file, because its name defines the
+context path for the application. For example, XNAT 1.8.0 is named `xnat-web-1.8.0.war`. This would result in XNAT being available at
+the URL http://localhost/xnat-web-1.8.0, which is not exactly concise and would also change if you upgraded to XNAT 1.8.1. Instead you
+can map the name to something like `xnat.war`, which would give you http://localhost/xnat, or `ROOT.war`, which is mounted at the root
+context path, giving you http://localhost.
+
+You can specify a manifest file by adding `-Pmanifest=`_manifest_ to the Gradle command:
+
+```
+$ ./gradlew -PenvFile=xnat.env -Pmanifest=manifest-1.8.0.json fullStackComposeBuild
+```
+
+If you omit the `-Pmanifest=`_manifest_ parameter, the build will first look for a file named `manifest.json` and use that if it exists.
+This means you can just create the manifest you want to use as `manifest.json` and skip specifying the manifest command-line option on
+each build.
+
+If you omit the `-Pmanifest=`_manifest_ parameter and there is no `manifest.json` file, the build uses the file `default-manifest.json`.
+
+`default-manifest.json` contains the following configuration:
+
+```
+{
+    "version": "1.8.0",
+    "base": "xnat-data",
+    "webapps": "org.nrg.xnat.web:xnat-web:1.8.0 -> ROOT.war",
+    "plugins": [
+        "org.nrg.xnatx.plugins:ohif-viewer:3.0.0:fat"
+    ]
+}
+```
+
+This tells the build to get XNAT 1.8.0 and save it as `xnat-data/webapps/ROOT.war`. It also tells the build to download the [OHIF
+viewer plugin](https://bitbucket.org/icrimaginginformatics/ohif-viewer-xnat-plugin) and save it as `xnat-data/plugins/ohif-viewer-3.0.0-fat.jar`.
+
+There are a number of sample manifests included with this project:
+
+- [sample.manifest-XNAT-ML-18.json](sample.manifest-XNAT-ML-18.json)
+- [sample.manifest-mapped.json](sample.manifest-mapped.json)
+- [sample.manifest-unmapped.json](sample.manifest-unmapped.json)
+- [sample.manifest.json](sample.manifest.json)
+
+`sample.manifest-XNAT-ML-18.json` is provided to support the [XNAT ML machine learning workflow](https://wiki.xnat.org/ml). It includes
+XNAT 1.8.0, as well as a number of plugins to support datasets, container management, and machine learning operations including training
+ML models and deploying models for use with XNAT data.
+
+```
+{
+    "version": "1.8.0",
+    "base": "xnat-data",
+    "webapps": "org.nrg.xnat.web:xnat-web:1.8.0 -> ROOT.war",
+    "plugins": [
+        "org.nrg.xnatx.plugins:batch-launch:0.4.0",
+        "org.nrg.xnatx.plugins:container-service:3.0.0:fat",
+        "org.nrg.xnatx.plugins:xnatx-ml:1.8.0",
+        "org.nrg.xnatx.plugins:xnatx-collection:1.8.0",
+        "org.nrg.xnatx.plugins:ohif-viewer:3.0.0:fat"
+    ]
+}
+```
 
 ## Mounted Data
 
@@ -112,6 +222,12 @@ When you bring up XNAT with `docker-compose up`, several directories are created
 
 
 ## Troubleshooting
+
+There are a few ways you can try to find the cause of problems in launching or running your XNAT deployment in `xnat-docker-compose`:
+
+* [Get a shell in a running container](#markdown-header-get-a-shell-in-a-running-container)
+* [Read Tomcat logs]((#markdown-header-read-tomcat-logs)
+* [Controlling instances]((#markdown-header-controlling-instances)
 
 ### Get a shell in a running container
 Say you want to examine some files in the running `xnat-web` container. You can `exec` a command in that container to open a shell.
@@ -181,9 +297,13 @@ $ docker-compose build xnat-web
 
 It is possible that you will need to use the `--no-cache` argument, if you have only changed local files and not the `Dockerfile` itself.
 
-## Notes on using the Container Service
+## Using the Container Service
 
-The Container Service plugin needs some additional configuration to use with the XNAT created by this project.
+If you install the [XNAT Container Service plugin](https://wiki.xnat.org/container-service/container-service-31785304.html), you'll need some additional configuration for it to work
+properly with the XNAT created by this project.
+
+* [Path Translation](#markdown-header-path-translation)
+* [Processing URL](#markdown-header-processing-url)
 
 ### Path Translation
 Short answer: Set up [Path Translation](https://wiki.xnat.org/display/CS/Path+Translation).
@@ -213,6 +333,10 @@ To read essentially all the same information, but perhaps using slightly differe
 This describes the environment variables included in [default.env](default.env) and used in the `docker-compose` configurations, Dockerfiles, and scripts and configuration files. The
 `.env` file is a single file that contains all of the variables, but this section is divided into subsections to better describe groups of variables relevant to a functional area or
 container.
+
+* [XNAT configuration](#markdown-header-xnat-configuration)
+* [Postfix relay configuration](#markdown-header-postfix-relay-configuration)
+* [ActiveMQ configuration](#markdown-header-activemq-configuration)
 
 ### XNAT configuration
 

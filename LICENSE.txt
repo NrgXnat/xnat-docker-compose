@@ -5,7 +5,7 @@ Simplified BSD license:
 
 ==============================================================================
 
-Copyright (c) 2020, Washington University School of Medicine
+Copyright (c) 2021, Washington University School of Medicine
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
