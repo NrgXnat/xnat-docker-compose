@@ -1,16 +1,18 @@
-# XNAT docker-compose
+# XNAT docker-compose with dependency management
 
-Use this repository to quickly deploy an [XNAT](https://xnat.org/) instance on [docker](https://www.docker.com/).
-
-This `dev-xnat` branch is specifically for deploying in-development (or `SNAPSHOT`) versions of the XNAT war file.
+Use this repository to quickly deploy an [XNAT](https://xnat.org/) instance on [docker](https://www.docker.com/). This `features/dependency-mgmt`
+branch provides the ability to specify the version of XNAT you want to deploy, along with plugins to extend XNAT's core functionality. It also
+includes definitions for optional components that can be added to your configuration just by referencing the appropriate configuration files.
 
 ## Introduction
 
-This repository contains files to bootstrap XNAT deployment. The build creates three containers:
+The dependency management configuration uses [Gradle](https://gradle.org) to manage the configuration for your XNAT application. This includes:
 
-- **[Tomcat](http://tomcat.apache.org/) + XNAT**: The XNAT web application
-- [**Postgres**](https://www.postgresql.org/): The XNAT database
-- [**nginx**](https://www.nginx.com/): Web proxy sitting in front of XNAT
+- The XNAT application itself
+- Plugins
+- Configuration and initialization files
+
+These are managed using Gradle's dependency management functionality along with scripts that manage how XNAT is configured on start-up.
 
 ## Prerequisites
 
@@ -19,58 +21,84 @@ This repository contains files to bootstrap XNAT deployment. The build creates t
 
 ## Usage
 
-
-1. Clone the [xnat-docker-compose](https://github.com/NrgXnat/xnat-docker-compose) repository.
+Start by cloning the [xnat-docker-compose](https://github.com/NrgXnat/xnat-docker-compose) repository and checkout the `features/dependency-mgmt`
+branch:
 
 ```
 $ git clone https://github.com/NrgXnat/xnat-docker-compose
 $ cd xnat-docker-compose
+$ git checkout features/dependency-mgmt
 ```
 
-2. Make a directory inside `xnat-docker-compose` called `webapps`. Place into this directory your custom XNAT war. The war file in this directory will *not* be copied into the image, but will be read at runtime. Note that, if you want your XNAT to be found at `http://localhost` you must name your war file `ROOT.war`; otherwise to find your XNAT at `http://localhost/{something}` you must name your war file `something.war`.
+### Launching
 
-3. Configurations: The default configuration is sufficient to run the deployment. The following files can be modified if you want to change the default configuration
-
-    - **docker-compose.yml**: How the different containers are deployed. There is a section of build arguments (under `services → xnat-web → build → args`) to control some aspects of the build.
-        * If you want to download a different version of XNAT, you can change the `XNAT_VER` variable to some other release.
-        * If you need to control some arguments that get sent to tomcat on startup, you can modify the `CATALINA_OPTS` environment variable (under `services → xnat-web → environment`).
-    - **xnat/Dockerfile**: Builds the xnat-web image from a tomcat docker image.
-
-4. Start the system
+At this point, you can start XNAT with a basic configuration just by building and launching the `docker-compose` configuration:
 
 ```
-$ docker-compose up -d
+$ ./gradlew composeBuild composeUp
 ```
 
-Note that at this point, if you go to `localhost` you won't see a working web application. It takes upwards of a minute
-to initialize the database, and you can follow progress by reading the docker compose log of the server:
+The `composeBuild` task builds containers for any services that require special container builds, while `composeUp` actually launches the
+containers. You can monitor the status of the deployment by watching the log generated for the **xnat-web** container:
 
 ```
-docker-compose logs -f --tail=20 xnat-web
-Attaching to xnatdockercompose_xnat-web_1
-xnat-web_1    | INFO: Starting Servlet Engine: Apache Tomcat/7.0.82
-xnat-web_1    | Oct 24, 2017 3:17:02 PM org.apache.catalina.startup.HostConfig deployWAR
-xnat-web_1    | INFO: Deploying web application archive /opt/tomcat/webapps/xnat.war
-xnat-web_1    | Oct 24, 2017 3:17:14 PM org.apache.catalina.startup.TldConfig execute
-xnat-web_1    | INFO: At least one JAR was scanned for TLDs yet contained no TLDs. Enable debug logging for this logger for a complete list of JARs that were scanned but no TLDs were found in them. Skipping unneeded JARs during scanning can improve startup time and JSP compilation time.
-xnat-web_1    | SOURCE: /opt/tomcat/webapps/xnat/
-xnat-web_1    | ===========================
-xnat-web_1    | New Database -- BEGINNING Initialization
-xnat-web_1    | ===========================
-xnat-web_1    | ===========================
-xnat-web_1    | Database initialization complete.
-xnat-web_1    | ===========================
-xnat-web_1    | Oct 24, 2017 3:18:27 PM org.apache.catalina.startup.HostConfig deployWAR
-xnat-web_1    | INFO: Deployment of web application archive /opt/tomcat/webapps/xnat.war has finished in 84,717 ms
-xnat-web_1    | Oct 24, 2017 3:18:27 PM org.apache.coyote.AbstractProtocol start
-xnat-web_1    | INFO: Starting ProtocolHandler ["http-bio-8080"]
-xnat-web_1    | Oct 24, 2017 3:18:27 PM org.apache.coyote.AbstractProtocol start
-xnat-web_1    | INFO: Starting ProtocolHandler ["ajp-bio-8009"]
-xnat-web_1    | Oct 24, 2017 3:18:27 PM org.apache.catalina.startup.Catalina start
-xnat-web_1    | INFO: Server startup in 84925 ms
+$ docker logs --follow xnat-web
 ```
 
-Your XNAT will soon be available at http://localhost.
+You should eventually see a message like this:
+
+```
+Mar 02, 2021 10:35:24 PM org.apache.catalina.startup.Catalina start
+INFO: Server startup in 208163 ms
+```
+
+At that point, open http://localhost in a browser and you should see the XNAT login page.
+
+This basic configuration consists of containers running:
+
+- XNAT itself, running as an application in [Tomcat 7.0](https://tomcat.apache.org)
+- [Traefik](https://traefik.io), a front-end proxy and load balancer that directs HTTP requests to the appropriate service
+- [PostgreSQL](https://www.postgresql.org), for database services
+
+You can also launch XNAT in a full-stack deployment, which includes containers running:
+
+- [Orthanc](https://www.orthanc-server.com), a PACS service
+- [ActiveMQ](https://activemq.apache.org), a messaging broker for distributing processing tasks
+- [Postfix relay service](https://hub.docker.com/r/freinet/postfix-relay), for relaying emails to another SMTP server
+
+To launch the full-stack deployment, start the configuration with the following command:
+
+```
+$ ./gradlew fullStackComposeBuild fullStackComposeUp
+```
+
+Just like with `composeBuild` and `composeUp`, the `fullStackComposeBuild` task builds containers for any services that require special container
+builds, while `fullStackComposeUp` launches the containers. You can monitor the status of the deployment by watching the log generated for the
+**xnat-web** container.
+
+### Configuring
+
+With both the basic and full-stack configurations, you'll almost certainly want to change how XNAT and/or its services are configured. To support
+differing deployment requirements, `xnat-docker-compose` uses variables for settings that tend to change based on environment. By default, `docker-compose`
+takes the values for variables from the [file `.env`](https://docs.docker.com/compose/environment-variables/). The Gradle build populates this file
+from the file indicated by the `envFile` property on the command line or from the file [default.env](default.env) if you don't specify a value for the
+`envFile` property. You'll notice that the command-line examples above have no references to `envFile`, meaning the variable values used are the
+default values. This may be fine for the basic configuration but for something more complicated, e.g. if you're configuring the SMTP relay container,
+you'll need to provide your own `.env` file.
+
+To create your own `.env` file, it's best to just copy `default.env` and modify the values in there.
+
+```
+$ cp default.env myProps.env
+```
+
+To use your new `.env` file, add the parameter `-PenvFile=`_file_ to the command line. For example:
+
+```
+$ ./gradlew -PenvFile=myProps.env fullStackComposeBuild fullStackComposeUp
+```
+
+
 
 ## Mounted Data
 
@@ -179,3 +207,70 @@ If you're using docker for mac or windows, you can use `http://host.docker.inter
 And you can set this value inside XNAT as the Processing URL. This setting is used preferentially over the Site URL to set `XNAT_HOST` in a container. Set this value at Administer > Site Administration > Pipeline Settings > Processing URL.
 
 To read essentially all the same information, but perhaps using slightly different words and with a screenshot, see the wiki page: [Processing URL](https://wiki.xnat.org/display/CS/Processing+URL).
+
+## Environment variables
+
+This describes the environment variables included in [default.env](default.env) and used in the `docker-compose` configurations, Dockerfiles, and scripts and configuration files. The
+`.env` file is a single file that contains all of the variables, but this section is divided into subsections to better describe groups of variables relevant to a functional area or
+container.
+
+### XNAT configuration
+
+These variables directly set options for XNAT itself.
+
+Variable | Description | Default value
+-------- | ----------- | -------------
+XNAT_VERSION | Indicates the version of XNAT to install. | 1.8.0
+XNAT_MIN_HEAP | Indicates the minimum heap size for the Java virtual machine. | 256m
+XNAT_MAX_HEAP | Indicates the minimum heap size for the Java virtual machine. | 4g
+XNAT_DATASOURCE_ADMIN_PASSWORD | Indicates the password to set for the database administrator user (**postgres**) | xnat1234
+XNAT_DATASOURCE_URL | Specifies the URL to use when accessing the database from XNAT. | jdbc:postgresql://xnat-db/xnat
+XNAT_DATASOURCE_DRIVER | Specifies the driver class to set for the database connection. | org.postgresql.Driver
+XNAT_DATASOURCE_USERNAME | Specifies the username for the XNAT database account. | xnat
+XNAT_DATASOURCE_PASSWORD | Specifies the password for the XNAT database account. | xnat
+XNAT_WEBAPP_FOLDER | Indicates the name of the folder for the XNAT application. This affects the context path for accessing XNAT. The value `ROOT` indicates that XNAT is the root application and can be accessed at http://localhost (i.e. no path). Otherwise, you must add this value to the _end_ of the URL so, e.g. if you specify `xnat` for this variable, you'll access XNAT at http://localhost/xnat. | ROOT
+XNAT_ROOT | Indicates the location of the root XNAT folder on the XNAT container. | /data/xnat
+XNAT_HOME | Indicates the location of the XNAT user's home folder on the XNAT container. | /data/xnat/home
+XNAT_EMAIL | Specifies the primary administrator email address. | harmitage@miskatonic.edu
+XNAT_SMTP_ENABLED | Indicates whether SMTP operations are enabled in XNAT. | false
+XNAT_SMTP_HOSTNAME | Sets the address for the server to use for SMTP operations. Has no effect if **XNAT_SMTP_ENABLED** is false. |
+XNAT_SMTP_PORT | Sets the port for the server to use for SMTP operations. Has no effect if **XNAT_SMTP_ENABLED** is false. |
+XNAT_SMTP_AUTH | Indicates whether the configured SMTP server requires authentication. Has no effect if **XNAT_SMTP_ENABLED** is false. |
+XNAT_SMTP_USERNAME | Indicates the username to use to authenticate with the configured SMTP server. Has no effect if **XNAT_SMTP_ENABLED** or **XNAT_SMTP_AUTH** are false. |
+XNAT_SMTP_PASSWORD | Indicates the password to use to authenticate with the configured SMTP server. Has no effect if **XNAT_SMTP_ENABLED** or **XNAT_SMTP_AUTH** are false. |
+XNAT_ACTIVEMQ_URL | Indicates the URL for an external ActiveMQ service to use for messaging. If not specified, XNAT uses its own internal queue. |
+XNAT_ACTIVEMQ_USERNAME | Indicates the username to use to authenticate with the configured ActiveMQ server. Has no effect if **XNAT_ACTIVEMQ_URL** isn't specified. |
+XNAT_ACTIVEMQ_PASSWORD | Indicates the password to use to authenticate with the configured ActiveMQ server. Has no effect if **XNAT_ACTIVEMQ_URL** isn't specified. |
+
+### Postfix relay configuration
+
+These variables are used to configure the [Postfix relay container](https://hub.docker.com/r/freinet/postfix-relay). If you look at the various configuration options available
+for that image, you'll notice that there's not a direct correspondence between those and the variables described here. The relation between the variables in this project and
+those used to configure the container are described in more detail in the [README.md for the **smtp** container](smtp/README.md).
+
+Variable | Description | Default value
+-------- | ----------- | -------------
+REMOTE_SMTP_DOMAIN | Indicates the default mail domain from which mail is sent (this is _not_ the address for the SMTP server!). |
+REMOTE_SMTP_HOST | Indicates the address of the SMTP server to which emails should be relayed. |
+REMOTE_SMTP_PORT | Indicates which port on the SMTP server should be used for relaying emails. This is usually 25 for non-secured SMTP servers and 587 for secured SMTP servers. |
+REMOTE_SMTP_ENABLE_AUTH | Indicates whether authentication is required for the configured SMTP server. | no
+REMOTE_SMTP_USERNAME | Indicates the username to use to authenticate with the configured SMTP server. Has no effect if **REMOTE_SMTP_ENABLE_AUTH** is false. | |
+REMOTE_SMTP_PASSWORD | Indicates the password to use to authenticate with the configured SMTP server. Has no effect if **REMOTE_SMTP_ENABLE_AUTH** is false. | |
+REMOTE_SMTP_LOCAL_TZ | Specifies the timezone from which emails are sent. |
+
+### ActiveMQ configuration
+
+The following variables can be used to configure the external ActiveMQ service.
+
+Variable | Description | Default value
+-------- | ----------- | -------------
+ACTIVEMQ_ADMIN_LOGIN | Indicates the username of the `administrator` account. | admin
+ACTIVEMQ_ADMIN_PASSWORD | Indicates the password for the `administrator` account. | password
+ACTIVEMQ_WRITE_LOGIN | Indicates the username of an account with write access to the messaging queue. | write
+ACTIVEMQ_WRITE_PASSWORD | Indicates the password for the account with write access to the messaging queue. | password
+ACTIVEMQ_READ_LOGIN | Indicates the username of an account with read access to the messaging queue. | write
+ACTIVEMQ_READ_PASSWORD | Indicates the password for the account with read access to the messaging queue. | password
+ACTIVEMQ_JMX_LOGIN | Indicates the username of an account with [JMX access](https://activemq.apache.org/jmx.html) to the messaging queue. | jmx
+ACTIVEMQ_JMX_PASSWORD | Indicates the password for the account with [JMX access](https://en.wikipedia.org/wiki/Java_Management_Extensions) to the messaging queue. | password
+ACTIVEMQ_MIN_MEMORY | Specifies the minimum amount of memory available to the ActiveMQ service. | 512
+ACTIVEMQ_MAX_MEMORY | Specifies the maximum amount of memory available to the ActiveMQ service. | 2048

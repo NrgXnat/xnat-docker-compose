@@ -1,3 +1,4 @@
+import com.avast.gradle.dockercompose.tasks.ComposeBuild
 import groovy.json.JsonSlurper
 import java.nio.file.Paths
 import java.util.regex.Matcher
@@ -11,15 +12,35 @@ plugins {
 group "org.nrg.xnat.containers"
 version "1.8.0"
 
-def manifest = file(hasProperty("manifest") ? property("manifest") : "manifest.json")
-def json = new JsonSlurper().parse(manifest)
-
 repositories {
     mavenLocal()
     mavenCentral()
     maven { url "https://nrgxnat.jfrog.io/nrgxnat/libs-release" }
     maven { url "https://nrgxnat.jfrog.io/nrgxnat/libs-snapshot" }
 }
+
+def static copyEnv(source = "default.env") {
+    def file = new File(source)
+    if (file.exists()) {
+        new File(".env").withWriter { writer ->
+            file.eachLine { line ->
+                if (!(line ==~ /^\s*$/)) {
+                    def (name, value) = line.tokenize("=")
+                    writer.println "${name.trim()}=${value != null ? value.trim() : ""}"
+                }
+            }
+        }
+    }
+}
+
+def static verifyManifest(source) {
+    new File(source).exists() ? source : "default-manifest.json"
+}
+    
+copyEnv(hasProperty("envFile") ? property("envFile") : "default.env")
+
+def manifest = file(verifyManifest(hasProperty("manifest") ? property("manifest") : "manifest.json"))
+def json = new JsonSlurper().parse(manifest)
 
 def baseDestination = "${json.base ? (json.base.startsWith(".") ? json.base : "./" + json.base) : "."}"
 def destination = { path -> Paths.get(baseDestination, path).toString() }
@@ -63,15 +84,21 @@ task copyAll {
     dependsOn tasks.matching { Task task -> task instanceof CopyConfiguration }
 }
 
-composeBuild.dependsOn copyAll
+tasks.withType(ComposeBuild).configureEach { composeBuild ->
+    composeBuild.dependsOn copyAll
+}
 
 dockerCompose {
-    appOnly {
-        startedServices = [ "activemq", "orthanc", "traefik", "xnat-db", "xnat-web" ]
-        removeImages = "All"
-    }
+    useComposeFiles = ["docker-compose.yml"]
+    startedServices = ["xnat-traefik", "xnat-web", "xnat-db"]
+    removeImages = "All"
     tcpPortsToIgnoreWhenWaiting = [8104, 8144]
+
+    // Build full stack with fullStackComposeBuild, launch full stack with fullStackComposeUp.
+    fullStack {
+        useComposeFiles = ["docker-compose.yml", "activemq/docker-compose.yml", "orthanc/docker-compose.yml", "smtp/docker-compose.yml"]
+        startedServices = ["xnat-traefik", "xnat-web", "xnat-db", "xnat-activemq", "xnat-pacs", "xnat-smtp"]
+    }
 }
 
 defaultTasks "composeUp"
-

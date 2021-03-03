@@ -13,3 +13,7 @@ services:
       RELAYHOST_AUTH: ${REMOTE_SMTP_ENABLE_AUTH}
       RELAYHOST_PASSWORDMAP: ${REMOTE_SMTP_HOST}:${REMOTE_SMTP_USERNAME}:${REMOTE_SMTP_PASSWORD}
 
+networks:
+  xnat-services:
+    name: xnat-services
+    driver: bridge

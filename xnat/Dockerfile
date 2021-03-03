@@ -1,21 +1,30 @@
 FROM tomcat:7-jre8-alpine
 MAINTAINER Matt Kelsey <kelseym@wustl.edu>
 
+
+ARG XNAT_VERSION=1.8.0
 ARG XNAT_ROOT=/data/xnat
 ARG XNAT_HOME=/data/xnat/home
 ARG XNAT_DATASOURCE_DRIVER=org.postgresql.Driver
 ARG XNAT_DATASOURCE_URL=jdbc:postgresql://xnat-db/xnat
 ARG XNAT_DATASOURCE_USERNAME=xnat
 ARG XNAT_DATASOURCE_PASSWORD=xnat
-ARG XNAT_HIBERNATE_DIALECT=org.hibernate.dialect.PostgreSQL9Dialect
-ARG TOMCAT_XNAT_FOLDER=ROOT
-ARG XNAT_VER=1.7.6
-ARG XNAT_EMAIL=admin@foo.bar
-ARG XNAT_ACTIVEMQ_URL=tcp://xnat-activemq:61616
-ARG XNAT_ACTIVEMQ_USERNAME=write
-ARG XNAT_ACTIVEMQ_PASSWORD=password
+ARG XNAT_WEBAPP_FOLDER=ROOT
+ARG XNAT_EMAIL=admin@miskatonic.edu
+ARG XNAT_ACTIVEMQ_URL=
+ARG XNAT_ACTIVEMQ_USERNAME=
+ARG XNAT_ACTIVEMQ_PASSWORD=
 ARG XNAT_PROCESSING_URL=http://xnat-web:8080
-ARG XNAT_PIPELINE_ARCHIVE=xnat-pipeline-${XNAT_VER}.zip
+ARG XNAT_SMTP_ENABLED=false
+ARG XNAT_SMTP_HOSTNAME=localhost
+ARG XNAT_SMTP_PORT=25
+ARG XNAT_SMTP_AUTH=
+ARG XNAT_SMTP_USERNAME=
+ARG XNAT_SMTP_PASSWORD=
+
+# The legacy pipeline engine is optional starting with 1.8.0, but these variables 
+# are specified for users who opt to install it.
+ARG XNAT_PIPELINE_ARCHIVE=xnat-pipeline-${XNAT_VERSION}.zip
 ARG XNAT_PIPELINE_URL=https://ci.xnat.org/job/pipeline/job/xnat-pipeline-engine/lastSuccessfulReleaseBuild/artifact/build/libs/${XNAT_PIPELINE_ARCHIVE}
 
 ADD make-xnat-config.sh /usr/local/bin/make-xnat-config.sh
@@ -26,7 +35,7 @@ RUN apk add --no-cache \
         postgresql-client wget && \
     rm -rf ${CATALINA_HOME}/webapps/* && \
     mkdir -p \
-        ${CATALINA_HOME}/webapps/${TOMCAT_XNAT_FOLDER} \
+        ${CATALINA_HOME}/webapps/${XNAT_WEBAPP_FOLDER} \
         ${XNAT_HOME}/config \
         ${XNAT_HOME}/logs \
         ${XNAT_HOME}/plugins \
@@ -46,4 +55,3 @@ EXPOSE 8080
 ENV XNAT_HOME=${XNAT_HOME} XNAT_DATASOURCE_USERNAME=${XNAT_DATASOURCE_USERNAME} PGPASSWORD=${XNAT_DATASOURCE_PASSWORD}
 
 CMD ["wait-for-postgres.sh", "/usr/local/tomcat/bin/catalina.sh", "run"]
-

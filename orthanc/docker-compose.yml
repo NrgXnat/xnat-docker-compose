@@ -1,0 +1,34 @@
+version: "3.7"
+
+services:
+
+  xnat-pacs:
+    container_name: xnat-pacs
+    image: xnat-pacs
+    networks: [xnat-services]
+    build:
+      context: ./orthanc
+      args:
+        XNAT_DATASOURCE_DRIVER: ${XNAT_DATASOURCE_DRIVER}
+        XNAT_DATASOURCE_URL: ${XNAT_DATASOURCE_URL}
+        XNAT_DATASOURCE_USERNAME: ${XNAT_DATASOURCE_USERNAME}
+        XNAT_DATASOURCE_PASSWORD: ${XNAT_DATASOURCE_PASSWORD}
+    expose:
+      - 8042
+    ports:
+      - "4242:4242"
+    labels:
+      - "traefik.http.routers.orthanc.rule=PathPrefix(`/pacs`)"
+      - "traefik.http.routers.orthanc.middlewares=service-redirect@docker,strip-routes@docker"
+      - "traefik.http.services.orthanc.loadbalancer.server.port=8042"
+    volumes:
+      - ./orthanc-data:/var/lib/orthanc/db
+      - ./orthanc/orthanc.json:/etc/orthanc/orthanc.json:ro
+    environment:
+      PGPASSWORD: "${XNAT_DATASOURCE_PASSWORD}"
+
+networks:
+  xnat-services:
+    name: xnat-services
+    driver: bridge
+
