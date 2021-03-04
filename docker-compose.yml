@@ -1,4 +1,4 @@
-version: '2'
+version: '3.7'
 services:
   xnat-web:
     build:
@@ -43,25 +43,3 @@ services:
     links:
       - xnat-web
 
-  # prometheus:
-  #   image: prom/prometheus
-  #   volumes:
-  #     - ./prometheus/prometheus.yaml:/etc/prometheus/prometheus.yaml
-  #   command:
-  #     - '-config.file=/etc/prometheus/prometheus.yaml'
-  #   ports:
-  #     - '9090:9090'
-  #   links:
-  #     - cadvisor
-  #
-  # cadvisor:
-  #   image: google/cadvisor
-  #   volumes:
-  #     - /:/rootfs:ro
-  #     - /var/run:/var/run:rw
-  #     - /sys:/sys:ro
-  #     - /var/lib/docker/:/var/lib/docker:ro
-  #   ports:
-  #     - "8082:8080"
-  #   expose:
-  #     - 8082

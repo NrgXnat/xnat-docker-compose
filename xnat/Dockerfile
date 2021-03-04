@@ -1,14 +1,15 @@
 FROM tomcat:7-jre8-alpine
 MAINTAINER Matt Kelsey <kelseym@wustl.edu>
 
-ARG XNAT_VER=1.7.6
+ARG XNAT_VER=1.8.0
 ARG XNAT_ROOT=/data/xnat
 ARG XNAT_HOME=/data/xnat/home
 ARG XNAT_DATASOURCE_DRIVER=org.postgresql.Driver
 ARG XNAT_DATASOURCE_URL=jdbc:postgresql://xnat-db/xnat
 ARG XNAT_DATASOURCE_USERNAME=xnat
 ARG XNAT_DATASOURCE_PASSWORD=xnat
-ARG XNAT_HIBERNATE_DIALECT=org.hibernate.dialect.PostgreSQL9Dialect
+ARG XNAT_PROCESSING_URL=http://xnat-web:8080
+
 ARG TOMCAT_XNAT_FOLDER=ROOT
 ARG TOMCAT_XNAT_FOLDER_PATH=${CATALINA_HOME}/webapps/${TOMCAT_XNAT_FOLDER}
 
