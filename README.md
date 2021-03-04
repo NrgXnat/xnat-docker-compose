@@ -226,8 +226,8 @@ When you bring up XNAT with `docker-compose up`, several directories are created
 There are a few ways you can try to find the cause of problems in launching or running your XNAT deployment in `xnat-docker-compose`:
 
 * [Get a shell in a running container](#markdown-header-get-a-shell-in-a-running-container)
-* [Read Tomcat logs]((#markdown-header-read-tomcat-logs)
-* [Controlling instances]((#markdown-header-controlling-instances)
+* [Read Tomcat logs](#markdown-header-read-tomcat-logs)
+* [Controlling instances](#markdown-header-controlling-instances)
 
 ### Get a shell in a running container
 Say you want to examine some files in the running `xnat-web` container. You can `exec` a command in that container to open a shell.
