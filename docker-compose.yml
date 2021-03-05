@@ -72,9 +72,9 @@ services:
       - ./xnat-data/tomcat:/usr/local/tomcat/logs
       - /var/run/docker.sock:/var/run/docker.sock
     environment:
-      CATALINA_OPTS: "-Xms${XNAT_MIN_HEAP} -Xmx${XNAT_MAX_HEAP} -Dxnat.home=/data/xnat/home -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=0.0.0.0:8000"
+      CATALINA_OPTS: "-Xms${XNAT_MIN_HEAP} -Xmx${XNAT_MAX_HEAP} -Dxnat.home=${XNAT_HOME} -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=0.0.0.0:8000"
       PGPASSWORD: "${XNAT_DATASOURCE_PASSWORD}"
-      XNAT_HOME: "/data/xnat/home"
+      XNAT_HOME: "${XNAT_HOME}"
 
   xnat-db:
     container_name: xnat-db
