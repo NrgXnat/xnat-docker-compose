@@ -26,17 +26,5 @@ adminEmail=${XNAT_EMAIL}
 EOF
 fi
 
-if [ "${XNAT_SMTP_ENABLED}" == "true" ]; then
-  cat >> ${XNAT_HOME}/config/prefs-init.ini << EOF
-[notifications]
-smtpEnabled=true
-smtpHostname=${XNAT_SMTP_HOSTNAME}
-smtpPort=${XNAT_SMTP_PORT}
-smtpUsername=${XNAT_SMTP_USERNAME}
-smtpPassword=${XNAT_SMTP_PASSWORD}
-smtpAuth=${XNAT_SMTP_AUTH}
-EOF
-fi
-
 
 

@@ -1,6 +1,20 @@
 # Dockerized XNAT
 Use this repository to quickly deploy an [XNAT](https://xnat.org/) instance on [docker](https://www.docker.com/).
 
+
+See the [features/dependency-mgmt](https://github.com/NrgXnat/xnat-docker-compose/tree/features/dependency-mgmt) branch for advanced gradle-based version and plugin management.
+
+
+This document contains the following sections:
+
+* [Introduction](#markdown-header-introduction)
+* [Prerequisites](#markdown-header-prerequisites)
+* [Usage](#markdown-header-usage)
+* [Environment variables](#markdown-header-environment-variables)
+* [Mounted Data](#markdown-header-mounted-data)
+* [Troubleshooting](#markdown-header-troubleshooting)
+* [Notes on using the Container Service](#markdown-header-notes-on-using-the-container-service)
+
 ## Introduction
 
 This repository contains files to bootstrap XNAT deployment. The build creates three containers:
@@ -11,7 +25,7 @@ This repository contains files to bootstrap XNAT deployment. The build creates t
 
 ## Prerequisites
 
-* [docker](https://www.docker.com/)
+* [docker](https://www.docker.com/) including sufficient memory allocation, according to [Max Heap](#mardown-header-xnat-configuration) settings and container usage. (>4GB with default settings) 
 * [docker-compose](http://docs.docker.com/compose) (Which is installed along with docker if you download it from their site)
 
 ## Usage
@@ -82,6 +96,41 @@ When you bring up XNAT with `docker-compose up`, several directories are created
 * **xnat-data/archive** - Contains the XNAT archive
 * **xnat-data/build** - Contains the XNAT build space. This is useful when running the container service plugin.
 * **xnat-data/home/logs** - Contains the XNAT logs.
+
+## Environment variables
+
+To support differing deployment requirements, `xnat-docker-compose` uses variables for settings that tend to change based on environment. By
+default, `docker-compose` takes the values for variables from the [file `.env`](https://docs.docker.com/compose/environment-variables/). Advanced configurations will need to use a customized `.env` file.
+
+To create your own `.env` file, it's best to just copy the existing `.env` and modify the values in there.
+
+### XNAT configuration
+
+These variables directly set options for XNAT itself.
+
+Variable | Description | Default value
+-------- | ----------- | -------------
+XNAT_VERSION | Indicates the version of XNAT to install. | 1.8.0
+XNAT_MIN_HEAP | Indicates the minimum heap size for the Java virtual machine. | 256m
+XNAT_MAX_HEAP | Indicates the minimum heap size for the Java virtual machine. | 4g
+XNAT_SMTP_ENABLED | Indicates whether SMTP operations are enabled in XNAT. | false
+XNAT_SMTP_HOSTNAME | Sets the address for the server to use for SMTP operations. Has no effect if **XNAT_SMTP_ENABLED** is false. |
+XNAT_SMTP_PORT | Sets the port for the server to use for SMTP operations. Has no effect if **XNAT_SMTP_ENABLED** is false. |
+XNAT_SMTP_AUTH | Indicates whether the configured SMTP server requires authentication. Has no effect if **XNAT_SMTP_ENABLED** is false. |
+XNAT_SMTP_USERNAME | Indicates the username to use to authenticate with the configured SMTP server. Has no effect if **XNAT_SMTP_ENABLED** or **XNAT_SMTP_AUTH** are false. |
+XNAT_SMTP_PASSWORD | Indicates the password to use to authenticate with the configured SMTP server. Has no effect if **XNAT_SMTP_ENABLED** or **XNAT_SMTP_AUTH** are false. |
+XNAT_DATASOURCE_ADMIN_PASSWORD | Indicates the password to set for the database administrator user (**postgres**) | xnat1234
+XNAT_DATASOURCE_URL | Specifies the URL to use when accessing the database from XNAT. | jdbc:postgresql://xnat-db/xnat
+XNAT_DATASOURCE_DRIVER | Specifies the driver class to set for the database connection. | org.postgresql.Driver
+XNAT_DATASOURCE_USERNAME | Specifies the username for the XNAT database account. | xnat
+XNAT_DATASOURCE_PASSWORD | Specifies the password for the XNAT database account. | xnat
+XNAT_WEBAPP_FOLDER | Indicates the name of the folder for the XNAT application. This affects the context path for accessing XNAT. The value `ROOT` indicates that XNAT is the root application and can be accessed at http://localhost (i.e. no path). Otherwise, you must add this value to the _end_ of the URL so, e.g. if you specify `xnat` for this variable, you'll access XNAT at http://localhost/xnat. | ROOT
+XNAT_ROOT | Indicates the location of the root XNAT folder on the XNAT container. | /data/xnat
+XNAT_HOME | Indicates the location of the XNAT user's home folder on the XNAT container. | /data/xnat/home
+XNAT_EMAIL | Specifies the primary administrator email address. | harmitage@miskatonic.edu
+XNAT_ACTIVEMQ_URL | Indicates the URL for an external ActiveMQ service to use for messaging. If not specified, XNAT uses its own internal queue. |
+XNAT_ACTIVEMQ_USERNAME | Indicates the username to use to authenticate with the configured ActiveMQ server. Has no effect if **XNAT_ACTIVEMQ_URL** isn't specified. |
+XNAT_ACTIVEMQ_PASSWORD | Indicates the password to use to authenticate with the configured ActiveMQ server. Has no effect if **XNAT_ACTIVEMQ_URL** isn't specified. |
 
 
 ## Troubleshooting
