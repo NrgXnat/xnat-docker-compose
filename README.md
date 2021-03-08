@@ -212,7 +212,7 @@ ML models and deploying models for use with XNAT data.
 
 ## Mounted Data
 
-When you bring up XNAT with `docker-compose up`, several directories are created (if they don't exist already) to store the persistent data.
+When you bring up XNAT with `docker-compose up` or `./gradlew composeUp`, several directories are created (if they don't exist already) to store the persistent data.
 
 * **postgres-data** - Contains the XNAT database
 * **xnat-data/archive** - Contains the XNAT archive
@@ -273,12 +273,29 @@ If you want to bring everything down *and* remove all the images that were built
 $ docker-compose down --rmi all
 ```
 
+Alternatively, use the gradle tasks:
+
+```
+$ ./gradlew composeDown
+```
+or
+```
+$ ./gradlew composeDownForced
+```
+
 #### Bring up instances
 This will bring all instances up again. The `-d` means "detached" so you won't see any output to the terminal.
 
 ```
 $ docker-compose up -d
 ```
+
+Alternatively, use the gradle task:
+
+```
+$ ./gradlew composeUp
+```
+
 
 (If you like seeing the terminal output, you can leave off the `-d` option. The various containers will print output to the terminal as they come up. If you close this connection with `Ctrl+C`, the containers will be stopped or killed.)
 
