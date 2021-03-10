@@ -1,6 +1,5 @@
 # Created by .ignore support plugin (hsz.mobi)
 *.swo
-*.swp
 
 # Ignore Gradle project-specific cache directory
 .gradle/
@@ -20,4 +19,3 @@ xnat/webapps
 
 *.env
 !default.env
-

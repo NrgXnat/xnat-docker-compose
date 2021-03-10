@@ -1,5 +1,5 @@
 # Dockerized XNAT
-Use this repository to quickly deploy an [XNAT](https://xnat.org/) instance on [docker](https://www.docker.com/).
+Use this repository branch to quickly deploy user provided XNAT [XNAT](https://xnat.org/) war on [docker](https://www.docker.com/). This branch is specifically configured to support code debugging and profiling
 
 
 See the [features/dependency-mgmt](https://github.com/NrgXnat/xnat-docker-compose/tree/features/dependency-mgmt) branch for advanced gradle-based version and plugin management.
@@ -32,11 +32,12 @@ This repository contains files to bootstrap XNAT deployment. The build creates t
 
 > Note that the name of the environment variable for the XNAT version has changed from `XNAT_VER` to `XNAT_VERSION`. Please update any `env` files you've created previously.
 
-1. Clone the [xnat-docker-compose](https://github.com/NrgXnat/xnat-docker-compose) repository.)
+1. Clone the [xnat-docker-compose](https://github.com/NrgXnat/xnat-docker-compose) repository and checkout the xnat-dev branch.)
 
 ```
 $ git clone https://github.com/NrgXnat/xnat-docker-compose
 $ cd xnat-docker-compose
+$ git checkout xnat-dev
 ```
 
 2. Set Docker enviroment variables: Default and sample enviroment variables are provided in the `default.env` file. Add these variables to your environment or simply copy `default.env` to `.env` . Values in this file are used to populate dollar-notation variables in the docker-compose.yml file.
@@ -44,7 +45,9 @@ $ cd xnat-docker-compose
 $ cp default.env .env
 ```
 
-3. Configurations: The default configuration is sufficient to run the deployment. The following files can be modified if you want to change the default configuration
+3. Inside of the `xnat` directory is a directory named `webapps`. Place into this directory your custom XNAT war. The war file in this directory will *not* be copied into the image, but will be read at runtime. Note that, if you want your XNAT to be found at `http://localhost` you must name your war file `ROOT.war`; otherwise to find your XNAT at `http://localhost/{something}` you must name your war file `something.war`.
+
+4. Configurations: The default configuration is sufficient to run the deployment. The following files can be modified if you want to change the default configuration
 
     - **docker-compose.yml**: How the different containers are deployed. There is a section of build arguments (under `services → xnat-web → build → args`) to control some aspects of the build.
         * If you want to download a different version of XNAT, you can change the `XNAT_VERSION` variable to some other release.
@@ -52,7 +55,7 @@ $ cp default.env .env
         * If you need to control some arguments that get sent to tomcat on startup, you can modify the `CATALINA_OPTS` environment variable (under `services → xnat-web → environment`).
     - **xnat/Dockerfile**: Builds the xnat-web image from a tomcat docker image.
 
-4. Start the system
+5. Start the system
 
 ```
 $ docker-compose up -d
@@ -87,7 +90,7 @@ xnat-web_1    | INFO: Server startup in 84925 ms
 ```
 
 
-5. First XNAT Site Setup
+6. First XNAT Site Setup
 
 Your XNAT will soon be available at http://localhost. 
 
@@ -98,10 +101,19 @@ After logging in with credentials admin/admin (username/password resp.) the setu
 When you bring up XNAT with `docker-compose up`, several directories are created (if they don't exist already) to store the persistent data.
 
 * **postgres-data** - Contains the XNAT database
+* **xnat/webapps** - 
 * **xnat/plugins** - Initially contains nothing. However, you can customize your XNAT with plugins by placing jars into this directory and restarting XNAT.
 * **xnat-data/archive** - Contains the XNAT archive
 * **xnat-data/build** - Contains the XNAT build space. This is useful when running the container service plugin.
 * **xnat-data/home/logs** - Contains the XNAT logs.
+
+## Debugging and Profiling
+
+Debugging XNAT and plugins is facilitated by exposing port `8000` on the tomcat container. Corresponding Java parameters are included with CATALINA_OPTS : `-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=8000`.
+
+Profiling via YourKit is similarly supported by exposing port `10001` and appending CATALINA_OPTS with `-agentpath:/usr/local/YourKit-JavaProfiler-2020.9/bin/linux-x86-64/libyjpagent.so=port=10001,listen=all`. The [referenced profiler agent](https://www.yourkit.com/download/docker/YourKit-JavaProfiler-2020.9-docker.zip) is downloaded to the xnat-web images upon initial build. Note that a licensed YourKit Java Profiler application is required to use this feature.
+
+Users may remove these options from `docker-compose.yml` if they are unused or to prepare for secure deployment. 
 
 ## Environment variables
 

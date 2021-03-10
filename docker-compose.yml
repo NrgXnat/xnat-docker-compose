@@ -19,9 +19,16 @@ services:
         XNAT_ROOT: ${XNAT_ROOT}
         XNAT_HOME: ${XNAT_HOME}
         XNAT_EMAIL: ${XNAT_EMAIL}
+    expose:
+      - "10001"
+      - "8000"
     ports:
-      - 8104:8104
+      - "10001:10001"
+      - "8080:8080"
+      - "8000:8000"
+      - "8104:8104"
     volumes:
+      - ./xnat/webapps:/usr/local/tomcat/webapps
       - ./xnat/plugins:${XNAT_HOME}/plugins
       - ./xnat-data/home/logs:${XNAT_HOME}/logs
       - ./xnat-data/archive:${XNAT_ROOT}/archive
@@ -31,7 +38,7 @@ services:
     depends_on:
       - xnat-db
     environment:
-      - CATALINA_OPTS=-Xms${XNAT_MIN_HEAP} -Xmx${XNAT_MAX_HEAP} -Dxnat.home=${XNAT_HOME}
+      - CATALINA_OPTS=-Xms${XNAT_MIN_HEAP} -Xmx${XNAT_MAX_HEAP} -Dxnat.home=${XNAT_HOME} -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=8000 -agentpath:/usr/local/YourKit-JavaProfiler-2020.9/bin/linux-x86-64/libyjpagent.so=port=10001,listen=all
       - XNAT_HOME=${XNAT_HOME}
 
   xnat-db:
