@@ -7,7 +7,7 @@ FROM postgres:12.2-alpine
 # $ docker-compose up --detach
 #
 
-RUN if [ ! -z ${POSTGRES_GID} && ${POSTGRES_GID} != 70 ]; then \
+RUN if [[ ! -z ${POSTGRES_GID} && ${POSTGRES_GID} != 70 ]]; then \
         sed -i'' -E 's/postgres:x:70:postgres/postgres:x:'${POSTGRES_GID}':postgres/' /etc/group; \
         sed -i'' -E 's/postgres:x:70:70:/postgres:x:'${POSTGRES_UID}':'${POSTGRES_GID}':/' /etc/passwd; \
     fi;
