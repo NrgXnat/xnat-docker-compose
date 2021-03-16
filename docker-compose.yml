@@ -38,8 +38,9 @@ services:
     depends_on:
       - xnat-db
     environment:
-      - CATALINA_OPTS=-Xms${XNAT_MIN_HEAP} -Xmx${XNAT_MAX_HEAP} -Dxnat.home=${XNAT_HOME} -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=8000 -agentpath:/usr/local/YourKit-JavaProfiler-2020.9/bin/linux-x86-64/libyjpagent.so=port=10001,listen=all
+      - CATALINA_OPTS=-Xms${XNAT_MIN_HEAP} -Xmx${XNAT_MAX_HEAP} -Dxnat.home=${XNAT_HOME} -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=8000
       - XNAT_HOME=${XNAT_HOME}
+      - TZ=${XNAT_SERVER_TIMEZONE}
 
   xnat-db:
     build:
@@ -51,7 +52,8 @@ services:
     volumes:
       - ./postgres-data:/var/lib/postgresql/data
     environment:
-      POSTGRES_PASSWORD: ${XNAT_DATASOURCE_ADMIN_PASSWORD}
+      - POSTGRES_PASSWORD=${XNAT_DATASOURCE_ADMIN_PASSWORD}
+      - TZ=${SERVER_TIMEZONE}
 
   xnat-nginx:
     build: ./nginx
@@ -61,4 +63,6 @@ services:
       - "80"
     links:
       - xnat-web
+    environment:
+      - TZ=${SERVER_TIMEZONE}
 
