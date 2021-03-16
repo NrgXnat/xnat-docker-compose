@@ -25,7 +25,10 @@ services:
       - XNAT_HOME=/data/xnat/home
 
   xnat-db:
-    build: ./postgres
+    build:
+      context: ./postgres
+      args:
+        XNAT_DATASOURCE_PASSWORD: ${XNAT_DATASOURCE_PASSWORD}
     expose:
       - "5432"
     volumes:

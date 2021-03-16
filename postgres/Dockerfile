@@ -1,5 +1,7 @@
 FROM postgres:12.2-alpine
 
+ARG XNAT_DATASOURCE_PASSWORD=${XNAT_DATASOURCE_PASSWORD}
+
 # Default uid and gid for postgres is 70, override by building xnat-db
 # container explicitly with --build-arg options:
 #
@@ -13,4 +15,5 @@ RUN if [[ ! -z "${POSTGRES_GID}" && "${POSTGRES_GID}" != 70 ]]; then \
     fi;
 
 ADD --chown=postgres:postgres XNAT.sql /docker-entrypoint-initdb.d/
+RUN sed -i "s/XNAT_DATASOURCE_PASSWORD/${XNAT_DATASOURCE_PASSWORD}/" /docker-entrypoint-initdb.d/XNAT.sql
 
