@@ -112,7 +112,7 @@ Variable | Description | Default value
 -------- | ----------- | -------------
 XNAT_VERSION | Indicates the version of XNAT to install. | 1.8.0
 XNAT_MIN_HEAP | Indicates the minimum heap size for the Java virtual machine. | 256m
-XNAT_MAX_HEAP | Indicates the minimum heap size for the Java virtual machine. | 4g
+XNAT_MAX_HEAP | Indicates the maximum heap size for the Java virtual machine. | 4g
 XNAT_SMTP_ENABLED | Indicates whether SMTP operations are enabled in XNAT. | false
 XNAT_SMTP_HOSTNAME | Sets the address for the server to use for SMTP operations. Has no effect if **XNAT_SMTP_ENABLED** is false. |
 XNAT_SMTP_PORT | Sets the port for the server to use for SMTP operations. Has no effect if **XNAT_SMTP_ENABLED** is false. |
