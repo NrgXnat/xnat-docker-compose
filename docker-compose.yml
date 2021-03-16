@@ -51,8 +51,8 @@ services:
     volumes:
       - ./xnat/plugins:/plugins
     command: >
-      sh -c "wget -q -P /plugins/ https://api.bitbucket.org/2.0/repositories/icrimaginginformatics/ohif-viewer-xnat-plugin/downloads/ohif-viewer-3.0.0-XNAT-1.8.0.jar &&
-             wget -q -P /plugins/ https://api.bitbucket.org/2.0/repositories/xnatdev/container-service/downloads/container-service-3.0.0-fat.jar && 
-             wget -q -P /plugins/ https://api.bitbucket.org/2.0/repositories/xnatx/xnatx-batch-launch-plugin/downloads/batch-launch-plugin-0.4.0.jar && 
-             wget -q -P /plugins/ https://api.bitbucket.org/2.0/repositories/xnatx/ml-plugin/downloads/ml-plugin-1.0.0.jar && 
-             wget -q -P /plugins/ https://api.bitbucket.org/2.0/repositories/xnatx/datasets-plugin/downloads/datasets-plugin-1.0.0.jar"
+      sh -c "wget -nc -q -P /plugins/ https://api.bitbucket.org/2.0/repositories/icrimaginginformatics/ohif-viewer-xnat-plugin/downloads/ohif-viewer-3.0.0-XNAT-1.8.0.jar &&
+             wget -nc -q -P /plugins/ https://api.bitbucket.org/2.0/repositories/xnatdev/container-service/downloads/container-service-3.0.0-fat.jar && 
+             wget -nc -q -P /plugins/ https://api.bitbucket.org/2.0/repositories/xnatx/xnatx-batch-launch-plugin/downloads/batch-launch-plugin-0.4.0.jar && 
+             wget -nc -q -P /plugins/ https://api.bitbucket.org/2.0/repositories/xnatx/ml-plugin/downloads/ml-plugin-1.0.0.jar && 
+             wget -nc -q -P /plugins/ https://api.bitbucket.org/2.0/repositories/xnatx/datasets-plugin/downloads/datasets-plugin-1.0.0.jar"
