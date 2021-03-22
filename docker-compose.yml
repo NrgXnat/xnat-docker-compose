@@ -12,6 +12,8 @@ services:
         TOMCAT_XNAT_FOLDER: ${TOMCAT_XNAT_FOLDER}
         XNAT_ROOT: ${XNAT_ROOT}
         XNAT_HOME: ${XNAT_HOME}
+    ports:
+      - 8104:8104
     volumes:
       - ./xnat/plugins:/data/xnat/home/plugins
       - ./xnat-data/home/logs:/data/xnat/home/logs
