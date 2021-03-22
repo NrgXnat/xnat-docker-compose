@@ -14,7 +14,7 @@ jobs:
 
       - name: Build images for nginx, web and db
         run: |
-          docker build nginx/ -t docker.io/xnat-dcoker-compose/xnat_docker_compose_xnat-nginx:${{ github.sha }} .
+          docker build -t docker.io/xnat-dcoker-compose/xnat_docker_compose_xnat-nginx:${{ github.sha }} nginx/
 
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@master
