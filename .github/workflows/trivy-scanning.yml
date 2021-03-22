@@ -8,6 +8,7 @@ jobs:
   build:
     name: Build
     runs-on: ubuntu-18.04
+    continue-on-error: true
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
