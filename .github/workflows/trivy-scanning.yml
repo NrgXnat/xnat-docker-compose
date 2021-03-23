@@ -1,0 +1,49 @@
+name: build
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-18.04
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Build images for nginx, web and db
+        run: |
+          docker build -t docker.io/xnat-docker-compose/xnat_docker_compose_xnat-nginx:${{ github.sha }} nginx/
+          docker build -t docker.io/xnat-docker-compose/xnat_docker_compose_xnat-web:${{ github.sha }} tomcat/
+          docker build -t docker.io/xnat-docker-compose/xnat_docker_compose_xnat-db:${{ github.sha }} postgres/
+
+      - name: Run Trivy vulnerability scanner on nginx
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: 'docker.io/xnat-docker-compose/xnat_docker_compose_xnat-nginx:${{ github.sha }}'
+          format: 'table'
+          exit-code: '1'
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+          severity: 'CRITICAL,HIGH'
+        continue-on-error: true
+      - name: Run Trivy vulnerability scanner on web
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: 'docker.io/xnat-docker-compose/xnat_docker_compose_xnat-web:${{ github.sha }}'
+          format: 'table'
+          exit-code: '1'
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+          severity: 'CRITICAL,HIGH'
+        continue-on-error: true
+      - name: Run Trivy vulnerability scanner on postgres
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: 'docker.io/xnat-docker-compose/xnat_docker_compose_xnat-db:${{ github.sha }}'
+          format: 'table'
+          exit-code: '1'
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+          severity: 'CRITICAL,HIGH'
