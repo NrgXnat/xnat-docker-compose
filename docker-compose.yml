@@ -5,6 +5,12 @@ services:
       context: ./xnat
       args:
         XNAT_VER: ${XNAT_VER}
+        XNAT_SMTP_ENABLED: ${XNAT_SMTP_ENABLED}
+        XNAT_SMTP_HOSTNAME: ${XNAT_SMTP_HOSTNAME}
+        XNAT_SMTP_PORT: ${XNAT_SMTP_PORT}
+        XNAT_SMTP_AUTH: ${XNAT_SMTP_AUTH}
+        XNAT_SMTP_USERNAME: ${XNAT_SMTP_USERNAME}
+        XNAT_SMTP_PASSWORD: ${XNAT_SMTP_PASSWORD}
         XNAT_DATASOURCE_DRIVER: ${XNAT_DATASOURCE_DRIVER}
         XNAT_DATASOURCE_URL: ${XNAT_DATASOURCE_URL}
         XNAT_DATASOURCE_USERNAME: ${XNAT_DATASOURCE_USERNAME}
@@ -12,6 +18,7 @@ services:
         TOMCAT_XNAT_FOLDER: ${TOMCAT_XNAT_FOLDER}
         XNAT_ROOT: ${XNAT_ROOT}
         XNAT_HOME: ${XNAT_HOME}
+        XNAT_EMAIL: ${XNAT_EMAIL}
     ports:
       - 8104:8104
     volumes:
@@ -23,8 +30,8 @@ services:
     depends_on:
       - xnat-db
     environment:
-      - CATALINA_OPTS=-Xms${XNAT_MIN_HEAP} -Xmx${XNAT_MAX_HEAP} -Dxnat.home=/data/xnat/home
-      - XNAT_HOME=/data/xnat/home
+      - CATALINA_OPTS=-Xms${XNAT_MIN_HEAP} -Xmx${XNAT_MAX_HEAP} -Dxnat.home=${XNAT_HOME}
+      - XNAT_HOME=${XNAT_HOME}
 
   xnat-db:
     build:

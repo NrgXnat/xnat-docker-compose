@@ -7,6 +7,7 @@ datasource.driver=$XNAT_DATASOURCE_DRIVER
 datasource.url=$XNAT_DATASOURCE_URL
 datasource.username=$XNAT_DATASOURCE_USERNAME
 datasource.password=$XNAT_DATASOURCE_PASSWORD
+
 hibernate.dialect=org.hibernate.dialect.PostgreSQL9Dialect
 hibernate.hbm2ddl.auto=update
 hibernate.show_sql=false
@@ -19,12 +20,26 @@ EOF
 fi
 
 
-if [ ! -z "${XNAT_EMAIL}" ]; then
-  cat > ${XNAT_HOME}/config/prefs-init.ini << EOF
+if [ ! -z "$XNAT_EMAIL" ]; then
+  cat > $XNAT_HOME/config/prefs-init.ini << EOF
 [siteConfig]
-adminEmail=${XNAT_EMAIL}
+adminEmail=$XNAT_EMAIL
 EOF
 fi
 
+if [ "$XNAT_SMTP_ENABLED" = true ]; then
+  cat >> $XNAT_HOME/config/prefs-init.ini << EOF
+[notifications]
+smtpEnabled=true
+smtpHostname=$XNAT_SMTP_HOSTNAME
+smtpPort=$XNAT_SMTP_PORT
+smtpUsername=$XNAT_SMTP_USERNAME
+smtpPassword=$XNAT_SMTP_PASSWORD
+smtpAuth=$XNAT_SMTP_AUTH
+EOF
+fi
+
+mkdir -p /usr/local/share/xnat
+find $XNAT_HOME/config -mindepth 1 -maxdepth 1 -type f -exec cp {} /usr/local/share/xnat \;
 
 
