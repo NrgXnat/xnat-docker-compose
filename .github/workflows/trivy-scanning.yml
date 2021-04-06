@@ -26,16 +26,11 @@ jobs:
           # exit-code: '1'
           format: 'template'
           template: '@/contrib/sarif.tpl'
-          output: 'trivy-results-nginx.sarif'
+          output: '../results/trivy-results-nginx.sarif'
           ignore-unfixed: true
           vuln-type: 'os,library'
           severity: 'CRITICAL,HIGH'
         # continue-on-error: true
-
-      - name: Upload Trivy scan results to GitHub Security tab
-        uses: github/codeql-action/upload-sarif@v1
-        with:
-          sarif_file: 'trivy-results-nginx.sarif'
 
       - name: Run Trivy vulnerability scanner on web
         uses: aquasecurity/trivy-action@master
@@ -45,16 +40,11 @@ jobs:
           # exit-code: '1'
           format: 'template'
           template: '@/contrib/sarif.tpl'
-          output: 'trivy-results-web.sarif'
+          output: '../results/trivy-results-web.sarif'
           ignore-unfixed: true
           vuln-type: 'os,library'
           severity: 'CRITICAL,HIGH'
         # continue-on-error: true
-
-      - name: Upload Trivy scan results to GitHub Security tab
-        uses: github/codeql-action/upload-sarif@v1
-        with:
-          sarif_file: 'trivy-results-web.sarif'
 
       - name: Run Trivy vulnerability scanner on postgres
         uses: aquasecurity/trivy-action@master
@@ -64,12 +54,10 @@ jobs:
           # exit-code: '1'
           format: 'template'
           template: '@/contrib/sarif.tpl'
-          output: 'trivy-results-db.sarif'
+          output: '../results/trivy-results-db.sarif'
           ignore-unfixed: true
           vuln-type: 'os,library'
           severity: 'CRITICAL,HIGH'
 
       - name: Upload Trivy scan results to GitHub Security tab
         uses: github/codeql-action/upload-sarif@v1
-        with:
-          sarif_file: 'trivy-results-db.sarif'
