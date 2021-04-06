@@ -14,9 +14,9 @@ jobs:
 
       - name: Build images for nginx, web and db
         run: |
-          XNAT_NGINX_IMAGE=xnat_docker_compose_xnat-nginx:${{ github.sha }} docker-compose build xnat-nginx
-          XNAT_WEB_IMAGE=xnat_docker_compose_xnat-web:${{ github.sha }} docker-compose build xnat-web
-          XNAT_DB_IMAGE=xnat_docker_compose_xnat-db:${{ github.sha }} docker-compose build xnat-db
+          XNAT_NGINX_IMAGE=docker.io/xnat-docker-compose/xnat_docker_compose_xnat-nginx:${{ github.sha }} docker-compose build xnat-nginx
+          XNAT_WEB_IMAGE=docker.io/xnat-docker-compose/xnat_docker_compose_xnat-web:${{ github.sha }} docker-compose build xnat-web
+          XNAT_DB_IMAGE=docker.io/xnat-docker-compose/xnat_docker_compose_xnat-db:${{ github.sha }} docker-compose build xnat-db
 
       - name: Run Trivy vulnerability scanner on nginx
         uses: aquasecurity/trivy-action@master
