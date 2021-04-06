@@ -1,6 +1,7 @@
 version: '3.7'
 services:
   xnat-web:
+    image: ${XNAT_WEB_IMAGE:-xnat_docker_compose_xnat-web:latest}
     build:
       context: ./xnat
       args:
@@ -35,6 +36,7 @@ services:
       - XNAT_HOME=${XNAT_HOME}
 
   xnat-db:
+    image: ${XNAT_DB_IMAGE:-xnat_docker_compose_xnat-db:latest}
     build:
       context: ./postgres
       args:
@@ -47,6 +49,7 @@ services:
       POSTGRES_PASSWORD: ${XNAT_DATASOURCE_ADMIN_PASSWORD}
 
   xnat-nginx:
+    image: ${XNAT_NGINX_IMAGE:-xnat_docker_compose_xnat-nginx:latest}
     build: ./nginx
     ports:
       - "80:80"
@@ -54,4 +57,3 @@ services:
       - "80"
     links:
       - xnat-web
-
