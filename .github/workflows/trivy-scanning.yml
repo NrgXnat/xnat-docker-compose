@@ -18,6 +18,9 @@ jobs:
           XNAT_WEB_IMAGE=docker.io/xnat-docker-compose/xnat_docker_compose_xnat-web:${{ github.sha }} docker-compose build xnat-web
           XNAT_DB_IMAGE=docker.io/xnat-docker-compose/xnat_docker_compose_xnat-db:${{ github.sha }} docker-compose build xnat-db
 
+      - name: Create folder for the scanner results
+        run: mkdir results
+
       - name: Run Trivy vulnerability scanner on nginx
         uses: aquasecurity/trivy-action@master
         with:
@@ -61,3 +64,5 @@ jobs:
 
       - name: Upload Trivy scan results to GitHub Security tab
         uses: github/codeql-action/upload-sarif@v1
+        with:
+          sarif_file: './results'
