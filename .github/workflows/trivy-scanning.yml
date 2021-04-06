@@ -26,7 +26,7 @@ jobs:
           # exit-code: '1'
           format: 'template'
           template: '@/contrib/sarif.tpl'
-          output: '../results/trivy-results-nginx.sarif'
+          output: './results/trivy-results-nginx.sarif'
           ignore-unfixed: true
           vuln-type: 'os,library'
           severity: 'CRITICAL,HIGH'
@@ -40,7 +40,7 @@ jobs:
           # exit-code: '1'
           format: 'template'
           template: '@/contrib/sarif.tpl'
-          output: '../results/trivy-results-web.sarif'
+          output: './results/trivy-results-web.sarif'
           ignore-unfixed: true
           vuln-type: 'os,library'
           severity: 'CRITICAL,HIGH'
@@ -54,7 +54,7 @@ jobs:
           # exit-code: '1'
           format: 'template'
           template: '@/contrib/sarif.tpl'
-          output: '../results/trivy-results-db.sarif'
+          output: './results/trivy-results-db.sarif'
           ignore-unfixed: true
           vuln-type: 'os,library'
           severity: 'CRITICAL,HIGH'
