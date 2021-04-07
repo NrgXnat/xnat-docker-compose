@@ -110,7 +110,7 @@ These variables directly set options for XNAT itself.
 
 Variable | Description | Default value
 -------- | ----------- | -------------
-XNAT_VERSION | Indicates the version of XNAT to install. | 1.8.0
+XNAT_VERSION | Indicates the version of XNAT to install. | 1.8.1
 XNAT_MIN_HEAP | Indicates the minimum heap size for the Java virtual machine. | 256m
 XNAT_MAX_HEAP | Indicates the maximum heap size for the Java virtual machine. | 4g
 XNAT_SMTP_ENABLED | Indicates whether SMTP operations are enabled in XNAT. | false
