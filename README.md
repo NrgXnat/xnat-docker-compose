@@ -46,7 +46,9 @@ $ cd xnat-docker-compose
         * If you need to control some arguments that get sent to tomcat on startup, you can modify the `CATALINA_OPTS` environment variable (under `services → xnat-web → environment`).
     - **xnat/Dockerfile**: Builds the xnat-web image from a tomcat docker image.
 
-3. Start the system
+3. Copy `.env-dist` to `.env` and edit it for your site.
+
+4. Start the system
 
 ```
 $ docker-compose up -d
@@ -102,7 +104,7 @@ When you bring up XNAT with `docker-compose up`, several directories are created
 To support differing deployment requirements, `xnat-docker-compose` uses variables for settings that tend to change based on environment. By
 default, `docker-compose` takes the values for variables from the [file `.env`](https://docs.docker.com/compose/environment-variables/). Advanced configurations will need to use a customized `.env` file.
 
-To create your own `.env` file, it's best to just copy the existing `.env` and modify the values in there.
+You should copy `.env-dist` to `.env` and modify the values in there.
 
 ### XNAT configuration
 
