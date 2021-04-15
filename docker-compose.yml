@@ -30,6 +30,7 @@ services:
     volumes:
       - ./xnat/webapps:/usr/local/tomcat/webapps
       - ./xnat/plugins:${XNAT_HOME}/plugins
+      - ./xnat-data/home/config:${XNAT_HOME}/config
       - ./xnat-data/home/logs:${XNAT_HOME}/logs
       - ./xnat-data/archive:${XNAT_ROOT}/archive
       - ./xnat-data/build:${XNAT_ROOT}/build
