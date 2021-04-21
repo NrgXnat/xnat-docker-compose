@@ -1,4 +1,4 @@
-FROM tomcat:7-jre8-alpine
+FROM tomcat:9-jdk8-openjdk-slim
 MAINTAINER Matt Kelsey <kelseym@wustl.edu>
 
 ARG XNAT_ROOT=/data/xnat
@@ -9,7 +9,7 @@ ARG XNAT_DATASOURCE_USERNAME=xnat
 ARG XNAT_DATASOURCE_PASSWORD=xnat
 ARG XNAT_HIBERNATE_DIALECT=org.hibernate.dialect.PostgreSQL9Dialect
 ARG TOMCAT_XNAT_FOLDER=ROOT
-ARG XNAT_VER=1.7.6
+ARG XNAT_VER=1.8.3
 ARG XNAT_EMAIL=admin@foo.bar
 ARG XNAT_ACTIVEMQ_URL=tcp://xnat-activemq:61616
 ARG XNAT_ACTIVEMQ_USERNAME=write

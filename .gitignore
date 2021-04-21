@@ -2,6 +2,7 @@
 *.swo
 *.swp
 .gradle/
+xnat/plugins
 *-data/
 
 # Ignore Gradle project-specific cache directory
@@ -15,3 +16,6 @@ manifest*.json
 
 # Ignore gradle.properties to allow setting persistent property overrides
 gradle.properties
+
+*.env
+
