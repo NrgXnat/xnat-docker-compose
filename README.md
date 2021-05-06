@@ -1,4 +1,7 @@
 # Dockerized XNAT
+This branch has been modified to support JupyterHup alongside XNAT. Please see [Notes on using JupyterHub](#markdown-header-notes-on-using-jupyterhub) before running.
+
+
 Use this repository to quickly deploy an [XNAT](https://xnat.org/) instance on [docker](https://www.docker.com/).
 
 
@@ -14,6 +17,7 @@ This document contains the following sections:
 * [Mounted Data](#markdown-header-mounted-data)
 * [Troubleshooting](#markdown-header-troubleshooting)
 * [Notes on using the Container Service](#markdown-header-notes-on-using-the-container-service)
+* [Notes on using JupyterHub](#markdown-header-notes-on-using-jupyterhub)
 
 ## Introduction
 
@@ -25,7 +29,7 @@ This repository contains files to bootstrap XNAT deployment. The build creates t
 
 ## Prerequisites
 
-* [docker](https://www.docker.com/) including sufficient memory allocation, according to [Max Heap](#mardown-header-xnat-configuration) settings and container usage. (>4GB with default settings) 
+* [docker](https://www.docker.com/) including sufficient memory allocation, according to [Max Heap](#mardown-header-xnat-configuration) settings and container usage. (>4GB with default settings)
 * [docker-compose](http://docs.docker.com/compose) (Which is installed along with docker if you download it from their site)
 
 ## Usage
@@ -83,7 +87,7 @@ xnat-web_1    | INFO: Server startup in 84925 ms
 
 4. First XNAT Site Setup
 
-Your XNAT will soon be available at http://localhost. 
+Your XNAT will soon be available at http://localhost.
 
 After logging in with credentials admin/admin (username/password resp.) the setup page is displayed.
 
@@ -229,3 +233,18 @@ If you're using docker for mac or windows, you can use `http://host.docker.inter
 And you can set this value inside XNAT as the Processing URL. This setting is used preferentially over the Site URL to set `XNAT_HOST` in a container. Set this value at Administer > Site Administration > Pipeline Settings > Processing URL.
 
 To read essentially all the same information, but perhaps using slightly different words and with a screenshot, see the wiki page: [Processing URL](https://wiki.xnat.org/display/CS/Processing+URL).
+
+
+## Notes on using JupyterHub
+
+JupyterHub has been added as a service to `docker-compose.yml` along with a handful of environmental variables in `.env`. The `jupyterhub` folder contains the Dockerfile needed to containerize JupyterHub and `jupyterhub_config.py` which configures the JupyterHub deployment. The `jupyterhub-user` folder contains a Dockerfile and `requirements.txt` which needs to be built prior to launching XNAT + JupyterHub. JupyterHub will use this image for all notebook server containers.
+
+This setup of JupyterHub uses the same username and password as an XANT user (and will result in another open session for the user). An XNAT user's projects will be mounted to the spawned notebook server container. User notebooks are stored in docker volumes `jupyterhub-user-username`.
+
+
+### Setup
+
+1. In `.env` set `JHUB_XNAT_ARCHIVE=path/to/xnat-docker-compose/xnat-data/archive`. This is similar to ‘path translation’ in XNAT. To mount XNAT projects to the spawned notebook containers JupyterHub needs to know where xnat-data is on the host.
+2. Run `./build`. This first builds the single user notebook image which JupyerHub will spawn for every user. It then runs `docker-compose build`.
+3. `docker-compose up -d` to start all services.
+4. In the browser XNAT is at `http://localhost` and JupyterHub is at `http://localhost/jupyterhub`. To login to JupyterHub use your XNAT username and password. A users XNAT projects are mounted at `/data/projects`. The XNAT default `admin` user is currently the only JupyterHub admin.
