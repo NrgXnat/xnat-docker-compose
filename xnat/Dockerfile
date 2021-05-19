@@ -1,4 +1,4 @@
-FROM tomcat:8.5.64-jdk8-openjdk-buster
+FROM tomcat:9-jdk8-openjdk-buster
 MAINTAINER Matt Kelsey <kelseym@wustl.edu>
 
 ARG XNAT_VER=${XNAT_VER}
