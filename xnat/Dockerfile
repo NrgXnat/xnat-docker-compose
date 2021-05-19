@@ -1,6 +1,5 @@
-FROM tomcat:7-jre8-alpine
+FROM FROM tomcat:9-jdk8-openjdk-buster
 MAINTAINER Matt Kelsey <kelseym@wustl.edu>
-
 
 ARG XNAT_VERSION=${XNAT_VERSION}
 ARG XNAT_ROOT=${XNAT_ROOT}
