@@ -17,3 +17,7 @@ gradle.properties
 xnat/plugins
 
 xnat/webapps
+
+*.env
+!default.env
+

@@ -22,7 +22,6 @@ services:
     ports:
       - 8104:8104
     volumes:
-      - ./xnat/webapps:/usr/local/tomcat/webapps
       - ./xnat/plugins:/data/xnat/home/plugins
       - ./xnat-data/home/logs:/data/xnat/home/logs
       - ./xnat-data/archive:/data/xnat/archive
