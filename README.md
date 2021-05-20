@@ -38,7 +38,12 @@ $ git clone https://github.com/NrgXnat/xnat-docker-compose
 $ cd xnat-docker-compose
 ```
 
-2. Configurations: The default configuration is sufficient to run the deployment. The following files can be modified if you want to change the default configuration
+2. Set Docker enviroment variables: Default and sample enviroment variables are provided in the default.env file. Add these variables to your environment or simply copy `default.env` to `.env` . Values in this file are used to populate dollar-notation variables in the docker-compose.yml file.
+```
+$ cp default.env .env
+```
+
+3. Configurations: The default configuration is sufficient to run the deployment. The following files can be modified if you want to change the default configuration
 
     - **docker-compose.yml**: How the different containers are deployed. There is a section of build arguments (under `services → xnat-web → build → args`) to control some aspects of the build.
         * If you want to download a different version of XNAT, you can change the `XNAT_VER` variable to some other release.
@@ -46,7 +51,7 @@ $ cd xnat-docker-compose
         * If you need to control some arguments that get sent to tomcat on startup, you can modify the `CATALINA_OPTS` environment variable (under `services → xnat-web → environment`).
     - **xnat/Dockerfile**: Builds the xnat-web image from a tomcat docker image.
 
-3. Start the system
+4. Start the system
 
 ```
 $ docker-compose up -d
@@ -81,7 +86,7 @@ xnat-web_1    | INFO: Server startup in 84925 ms
 ```
 
 
-4. First XNAT Site Setup
+5. First XNAT Site Setup
 
 Your XNAT will soon be available at http://localhost. 
 
@@ -110,7 +115,7 @@ These variables directly set options for XNAT itself.
 
 Variable | Description | Default value
 -------- | ----------- | -------------
-XNAT_VERSION | Indicates the version of XNAT to install. | 1.8.1
+XNAT_VERSION | Indicates the version of XNAT to install. | 1.8.2
 XNAT_MIN_HEAP | Indicates the minimum heap size for the Java virtual machine. | 256m
 XNAT_MAX_HEAP | Indicates the maximum heap size for the Java virtual machine. | 4g
 XNAT_SMTP_ENABLED | Indicates whether SMTP operations are enabled in XNAT. | false
