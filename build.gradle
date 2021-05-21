@@ -10,7 +10,7 @@ plugins {
 }
 
 group "org.nrg.xnat.containers"
-version "1.8.0"
+version "1.8.2"
 
 repositories {
     mavenLocal()
