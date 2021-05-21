@@ -4,7 +4,7 @@ services:
     build:
       context: ./xnat
       args:
-        XNAT_VER: ${XNAT_VER}
+        XNAT_VERSION: ${XNAT_VERSION}
         XNAT_SMTP_ENABLED: ${XNAT_SMTP_ENABLED}
         XNAT_SMTP_HOSTNAME: ${XNAT_SMTP_HOSTNAME}
         XNAT_SMTP_PORT: ${XNAT_SMTP_PORT}
