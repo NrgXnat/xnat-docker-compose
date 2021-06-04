@@ -1,4 +1,4 @@
-FROM FROM tomcat:9-jdk8-openjdk-buster
+FROM tomcat:9-jdk8-openjdk-slim
 MAINTAINER Matt Kelsey <kelseym@wustl.edu>
 
 ARG XNAT_VERSION=${XNAT_VERSION}
@@ -30,8 +30,9 @@ ADD make-xnat-config.sh /usr/local/bin/make-xnat-config.sh
 ADD wait-for-postgres.sh /usr/local/bin/wait-for-postgres.sh
 ADD ${XNAT_PATH} /webapps
 
-RUN apk add --no-cache \
-        postgresql-client wget && \
+RUN apt-get update && \
+    apt-get --yes install postgresql-client wget && \
+    apt-get --yes --auto-remove upgrade && \
     rm -rf ${CATALINA_HOME}/webapps/* && \
     mkdir -p \
         ${CATALINA_HOME}/webapps/${XNAT_WEBAPP_FOLDER} \
@@ -46,7 +47,8 @@ RUN apk add --no-cache \
         ${XNAT_ROOT}/pipeline \
         ${XNAT_ROOT}/prearchive && \
     /usr/local/bin/make-xnat-config.sh && \
-    rm /usr/local/bin/make-xnat-config.sh
+    rm /usr/local/bin/make-xnat-config.sh && \
+    apt-get clean
 
 EXPOSE 8000
 EXPOSE 8080
