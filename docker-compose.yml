@@ -22,11 +22,11 @@ services:
     ports:
       - 8104:8104
     volumes:
-      - ./xnat/plugins:/data/xnat/home/plugins
-      - ./xnat-data/home/logs:/data/xnat/home/logs
-      - ./xnat-data/archive:/data/xnat/archive
-      - ./xnat-data/build:/data/xnat/build
-      - ./xnat-data/cache:/data/xnat/cache
+      - ./xnat/plugins:${XNAT_HOME}/plugins
+      - ./xnat-data/home/logs:${XNAT_HOME}/logs
+      - ./xnat-data/archive:${XNAT_ROOT}/archive
+      - ./xnat-data/build:${XNAT_ROOT}/build
+      - ./xnat-data/cache:${XNAT_ROOT}/cache
       - /var/run/docker.sock:/var/run/docker.sock
     depends_on:
       - xnat-db
