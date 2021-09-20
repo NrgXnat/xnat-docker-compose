@@ -1,0 +1,31 @@
+version: "3.7"
+
+services:
+
+  xnat-activemq:
+    container_name: xnat-activemq
+    image: webcenter/activemq:5.14.3
+    networks: [xnat-services]
+    ports:
+      - "8161:8161"
+      - "61616:61616"
+    environment:
+      ACTIVEMQ_REMOVE_DEFAULT_ACCOUNT: "true"
+      ACTIVEMQ_ADMIN_LOGIN: ${ACTIVEMQ_ADMIN_LOGIN}
+      ACTIVEMQ_ADMIN_PASSWORD: ${ACTIVEMQ_ADMIN_PASSWORD}
+      ACTIVEMQ_WRITE_LOGIN: ${ACTIVEMQ_WRITE_LOGIN}
+      ACTIVEMQ_WRITE_PASSWORD: ${ACTIVEMQ_WRITE_PASSWORD}
+      ACTIVEMQ_READ_LOGIN: ${ACTIVEMQ_READ_LOGIN}
+      ACTIVEMQ_READ_PASSWORD: ${ACTIVEMQ_READ_PASSWORD}
+      ACTIVEMQ_JMX_LOGIN: ${ACTIVEMQ_JMX_LOGIN}
+      ACTIVEMQ_JMX_PASSWORD: ${ACTIVEMQ_JMX_PASSWORD}
+      ACTIVEMQ_STATIC_TOPICS: archive;prearchive;automation
+      ACTIVEMQ_STATIC_QUEUES: defaultRequest;automatedScriptRequest;moveStoredFileRequest;prearchiveOperationRequest;initializeGroupRequest;dicomInboxImportRequest
+      ACTIVEMQ_ENABLED_SCHEDULER: "true"
+      ACTIVEMQ_MIN_MEMORY: ${ACTIVEMQ_MIN_MEMORY}
+      ACTIVEMQ_MAX_MEMORY: ${ACTIVEMQ_MAX_MEMORY}
+
+networks:
+  xnat-services:
+    name: xnat-services
+    driver: bridge

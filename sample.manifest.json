@@ -1,9 +1,9 @@
 {
-    "version": "1.7.7-SNAPSHOT",
+    "version": "1.8.2",
     "base": "xnat-data",
     "webapps": "org.nrg.xnat.web:xnat-web",
     "plugins": [
-        "org.nrg.xnatx:ohif-viewer:2.2.0-SNAPSHOT:fat"
+        "org.nrg.xnatx.plugins:ohif-viewer:3.0.0:fat"
     ],
     "vogons": [
         "org.apache.commons:commons-lang3",

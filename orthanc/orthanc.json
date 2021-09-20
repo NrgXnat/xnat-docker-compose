@@ -39,12 +39,10 @@
   "RemoteAccessAllowed" : true,
   "SslEnabled" : false,
   "SslCertificate" : "certificate.pem",
-  "AuthenticationEnabled" : false,
-
+  "AuthenticationEnabled" : true,
   "RegisteredUsers" : {
     "orthanc" : "orthanc"
   },
-
 
   // Enter any PACS or workstations here
   "DicomModalities" : {
@@ -63,8 +61,6 @@
   "HttpTimeout" : 10,
   "HttpsVerifyPeers" : true,
   "HttpsCACertificates" : "",
-
-
 
   /**
    * Advanced options
