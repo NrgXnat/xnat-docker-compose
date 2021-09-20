@@ -1,0 +1,50 @@
+version: '3.7'
+services:
+  xnat-web:
+    build:
+      context: ./xnat
+      args:
+        XNAT_VERSION: ${XNAT_VERSION}
+        XNAT_SMTP_ENABLED: ${XNAT_SMTP_ENABLED}
+        XNAT_SMTP_HOSTNAME: ${XNAT_SMTP_HOSTNAME}
+        XNAT_SMTP_PORT: ${XNAT_SMTP_PORT}
+        XNAT_SMTP_AUTH: ${XNAT_SMTP_AUTH}
+        XNAT_SMTP_USERNAME: ${XNAT_SMTP_USERNAME}
+        XNAT_SMTP_PASSWORD: ${XNAT_SMTP_PASSWORD}
+        XNAT_DATASOURCE_DRIVER: ${XNAT_DATASOURCE_DRIVER}
+        XNAT_DATASOURCE_URL: ${XNAT_DATASOURCE_URL}
+        XNAT_DATASOURCE_USERNAME: ${XNAT_DATASOURCE_USERNAME}
+        XNAT_DATASOURCE_PASSWORD: ${XNAT_DATASOURCE_PASSWORD}
+        TOMCAT_XNAT_FOLDER: ${TOMCAT_XNAT_FOLDER}
+        TOMCAT_USER_ID: ${TOMCAT_USER_ID}
+        TOMCAT_GROUP_ID: ${TOMCAT_GROUP_ID}
+        XNAT_ROOT: ${XNAT_ROOT}
+        XNAT_HOME: ${XNAT_HOME}
+        XNAT_EMAIL: ${XNAT_EMAIL}
+    ports:
+      - 8104:8104
+      - 8080:8080
+    volumes:
+      - ./xnat/plugins:/data/xnat/home/plugins
+      - ./xnat-data/home/logs:/data/xnat/home/logs
+      - ./xnat-data/archive:/data/xnat/archive
+      - ./xnat-data/build:/data/xnat/build
+      - ./xnat-data/cache:/data/xnat/cache
+      - /var/run/docker.sock:/var/run/docker.sock
+    depends_on:
+      - xnat-db
+    environment:
+      - CATALINA_OPTS=-Xms${XNAT_MIN_HEAP} -Xmx${XNAT_MAX_HEAP} -Dxnat.home=${XNAT_HOME}
+      - XNAT_HOME=${XNAT_HOME}
+
+  xnat-db:
+    build:
+      context: ./postgres
+      args:
+        XNAT_DATASOURCE_PASSWORD: ${XNAT_DATASOURCE_PASSWORD}
+    expose:
+      - "5432"
+    volumes:
+      - ./postgres-data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_PASSWORD: ${XNAT_DATASOURCE_ADMIN_PASSWORD}
