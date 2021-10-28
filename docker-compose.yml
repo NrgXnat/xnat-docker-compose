@@ -25,6 +25,7 @@ services:
       - 8104:8104
     volumes:
       - ./xnat/plugins:/data/xnat/home/plugins
+      - ./xnat/web.xml:/usr/local/tomcat/conf/web.xml
       - ./xnat-data/home/logs:/data/xnat/home/logs
       - ./xnat-data/archive:/data/xnat/archive
       - ./xnat-data/build:/data/xnat/build
