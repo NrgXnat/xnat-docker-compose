@@ -10,6 +10,3 @@ create role :"xnat_user" with login password :'xnat_user_pw';
 -- add missing grants for database
 ALTER DATABASE :"xnat_user" OWNER TO :"xnat_db";
 
--- CREATE USER xnat NOCREATEDB;
--- CREATE DATABASE xnat OWNER xnat;
--- ALTER USER xnat WITH PASSWORD 'XNAT_DATASOURCE_PASSWORD';
