@@ -128,6 +128,7 @@ XNAT_SMTP_PASSWORD | Indicates the password to use to authenticate with the conf
 XNAT_DATASOURCE_ADMIN_PASSWORD | Indicates the password to set for the database administrator user (**postgres**) | xnat1234
 XNAT_DATASOURCE_URL | Specifies the URL to use when accessing the database from XNAT. | jdbc:postgresql://xnat-db/xnat
 XNAT_DATASOURCE_DRIVER | Specifies the driver class to set for the database connection. | org.postgresql.Driver
+XNAT_DATASOURCE_NAME | Specifies the database name for the database connection. | xnat
 XNAT_DATASOURCE_USERNAME | Specifies the username for the XNAT database account. | xnat
 XNAT_DATASOURCE_PASSWORD | Specifies the password for the XNAT database account. | xnat
 XNAT_WEBAPP_FOLDER | Indicates the name of the folder for the XNAT application. This affects the context path for accessing XNAT. The value `ROOT` indicates that XNAT is the root application and can be accessed at http://localhost (i.e. no path). Otherwise, you must add this value to the _end_ of the URL so, e.g. if you specify `xnat` for this variable, you'll access XNAT at http://localhost/xnat. | ROOT
@@ -137,6 +138,8 @@ XNAT_EMAIL | Specifies the primary administrator email address. | harmitage@misk
 XNAT_ACTIVEMQ_URL | Indicates the URL for an external ActiveMQ service to use for messaging. If not specified, XNAT uses its own internal queue. |
 XNAT_ACTIVEMQ_USERNAME | Indicates the username to use to authenticate with the configured ActiveMQ server. Has no effect if **XNAT_ACTIVEMQ_URL** isn't specified. |
 XNAT_ACTIVEMQ_PASSWORD | Indicates the password to use to authenticate with the configured ActiveMQ server. Has no effect if **XNAT_ACTIVEMQ_URL** isn't specified. |
+PG_VERSION | Specifies the [version tag](https://hub.docker.com/_/postgres?tab=tags) of the PostgreSQL docker container used in `docker-compose.yml`. | 12.2-alpine
+NGINX_VERSION | Specifies the [version tag](https://hub.docker.com/_/nginx?tab=tags) of the Nginx docker container used in `docker-compose.yml`. | 1.19-alpine-perl
 
 
 ## Troubleshooting
