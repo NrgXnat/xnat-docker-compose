@@ -27,6 +27,14 @@ adminEmail=$XNAT_EMAIL
 EOF
 fi
 
+if [ ! -z "$XNAT_SITE_URL" ]; then
+  cat > $XNAT_HOME/config/prefs-override.ini << EOF
+[siteConfig]
+siteUrl=$XNAT_SITE_URL
+EOF
+fi
+
+
 if [ "$XNAT_SMTP_ENABLED" = true ]; then
   cat >> $XNAT_HOME/config/prefs-init.ini << EOF
 [notifications]

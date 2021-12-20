@@ -16,6 +16,7 @@ ARG XNAT_SMTP_PORT=${XNAT_SMTP_PORT}
 ARG XNAT_SMTP_AUTH=${XNAT_SMTP_AUTH}
 ARG XNAT_SMTP_USERNAME=${XNAT_SMTP_USERNAME}
 ARG XNAT_SMTP_PASSWORD=${XNAT_SMTP_PASSWORD}
+ARG XNAT_SITE_URL=${XNAT_SITE_URL}
 
 ARG TOMCAT_XNAT_FOLDER=${TOMCAT_XNAT_FOLDER}
 ARG TOMCAT_XNAT_FOLDER_PATH=${CATALINA_HOME}/webapps/${TOMCAT_XNAT_FOLDER}
@@ -39,13 +40,6 @@ RUN mkdir -p \
         ${XNAT_ROOT}/prearchive
 RUN /usr/local/bin/make-xnat-config.sh
 RUN rm /usr/local/bin/make-xnat-config.sh
-RUN wget --no-verbose --output-document=/tmp/xnat-web-${XNAT_VERSION}.war https://api.bitbucket.org/2.0/repositories/xnatdev/xnat-web/downloads/xnat-web-${XNAT_VERSION}.war
-RUN unzip -o -d ${TOMCAT_XNAT_FOLDER_PATH} /tmp/xnat-web-${XNAT_VERSION}.war
-RUN rm -f /tmp/xnat-web-${XNAT_VERSION}.war
-
-RUN wget https://www.yourkit.com/download/docker/YourKit-JavaProfiler-2020.9-docker.zip -P /tmp/ && \
-  unzip /tmp/YourKit-JavaProfiler-2020.9-docker.zip -d /usr/local && \
-  rm /tmp/YourKit-JavaProfiler-2020.9-docker.zip
 
 EXPOSE 8080
 

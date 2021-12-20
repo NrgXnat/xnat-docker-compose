@@ -5,6 +5,7 @@ services:
       context: ./xnat
       args:
         XNAT_VERSION: ${XNAT_VERSION}
+        XNAT_SITE_URL: ${XNAT_SITE_URL}
         XNAT_SMTP_ENABLED: ${XNAT_SMTP_ENABLED}
         XNAT_SMTP_HOSTNAME: ${XNAT_SMTP_HOSTNAME}
         XNAT_SMTP_PORT: ${XNAT_SMTP_PORT}
@@ -30,7 +31,6 @@ services:
     volumes:
       - ./xnat/webapps:/usr/local/tomcat/webapps
       - ./xnat/plugins:${XNAT_HOME}/plugins
-      - ./xnat-data/home/config:${XNAT_HOME}/config
       - ./xnat-data/home/logs:${XNAT_HOME}/logs
       - ./xnat-data/archive:${XNAT_ROOT}/archive
       - ./xnat-data/build:${XNAT_ROOT}/build
@@ -54,7 +54,7 @@ services:
       - ./postgres-data:/var/lib/postgresql/data
     environment:
       - POSTGRES_PASSWORD=${XNAT_DATASOURCE_ADMIN_PASSWORD}
-      - TZ=${SERVER_TIMEZONE}
+      - TZ=${XNAT_SERVER_TIMEZONE}
 
   xnat-nginx:
     build: ./nginx
@@ -65,5 +65,7 @@ services:
     links:
       - xnat-web
     environment:
-      - TZ=${SERVER_TIMEZONE}
+      - TZ=${XNAT_SERVER_TIMEZONE}
+    depends_on:
+      - xnat-web
 
