@@ -35,23 +35,30 @@ services:
       - XNAT_HOME=${XNAT_HOME}
 
   xnat-db:
-    build:
-      context: ./postgres
-      args:
-        XNAT_DATASOURCE_PASSWORD: ${XNAT_DATASOURCE_PASSWORD}
+    image: postgres:${PG_VERSION}
     expose:
       - "5432"
     volumes:
       - ./postgres-data:/var/lib/postgresql/data
+      # 
+      - ./postgres:/docker-entrypoint-initdb.d
     environment:
-      POSTGRES_PASSWORD: ${XNAT_DATASOURCE_ADMIN_PASSWORD}
+      - POSTGRES_PASSWORD=${XNAT_DATASOURCE_ADMIN_PASSWORD}
+      - POSTGRES_DB=${XNAT_DATASOURCE_NAME}
+      # variables for the sql script
+      - XNAT_DATASOURCE_USERNAME=${XNAT_DATASOURCE_USERNAME}
+      - XNAT_DATASOURCE_PASSWORD=${XNAT_DATASOURCE_PASSWORD}
 
   xnat-nginx:
-    build: ./nginx
+    image: nginx:${NGINX_VERSION}
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
     ports:
       - "80:80"
     expose:
       - "80"
+    depends_on:
+      - xnat-web
     links:
       - xnat-web
 
