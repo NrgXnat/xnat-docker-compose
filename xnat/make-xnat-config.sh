@@ -20,9 +20,13 @@ EOF
 fi
 
 
-if [ ! -z "$XNAT_EMAIL" ]; then
-  cat > $XNAT_HOME/config/prefs-init.ini << EOF
+cat > $XNAT_HOME/config/prefs-init.ini << EOF
 [siteConfig]
+siteUrl=$XNAT_SITE_URL
+EOF
+
+if [ ! -z "$XNAT_EMAIL" ]; then
+  cat >> $XNAT_HOME/config/prefs-init.ini << EOF
 adminEmail=$XNAT_EMAIL
 EOF
 fi
@@ -38,6 +42,10 @@ smtpPassword=$XNAT_SMTP_PASSWORD
 smtpAuth=$XNAT_SMTP_AUTH
 EOF
 fi
+
+ls -l $XNAT_HOME/config/prefs-init.ini
+cat   $XNAT_HOME/config/prefs-init.ini
+echo  End of $XNAT_HOME/config/prefs-init.ini `date`
 
 mkdir -p /usr/local/share/xnat
 find $XNAT_HOME/config -mindepth 1 -maxdepth 1 -type f -exec cp {} /usr/local/share/xnat \;
