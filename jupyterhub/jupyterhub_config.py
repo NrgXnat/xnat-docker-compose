@@ -67,8 +67,10 @@ c.DockerSpawner.pre_spawn_hook = xnat_pre_spawn_hook
 # user data persistence
 # jovyan is default user for jupyter docker stack notebooks
 notebook_dir = '/home/jovyan/work'
+env_dir = '/opt/conda'
 c.DockerSpawner.notebook_dir = notebook_dir
-c.DockerSpawner.volumes.update({ 'jupyterhub-user-{username}': notebook_dir})
+c.DockerSpawner.volumes.update({ 'jupyterhub-user-{username}': notebook_dir,
+                                 'jupyterhub-user-{username}-env': env_dir})
 
 # The URL on which the Hub will listen. Private URL for internal communication
 # 0.0.0.0 is for docker containers
