@@ -34,6 +34,7 @@ This repository contains files to bootstrap XNAT deployment. The build creates t
 
 ## Usage
 
+> Note that the name of the environment variable for the XNAT version has changed from `XNAT_VER` to `XNAT_VERSION`. Please update any `env` files you've created previously.
 
 1. Clone the [xnat-docker-compose](https://github.com/NrgXnat/xnat-docker-compose) repository.)
 
@@ -42,15 +43,20 @@ $ git clone https://github.com/NrgXnat/xnat-docker-compose
 $ cd xnat-docker-compose
 ```
 
-2. Configurations: The default configuration is sufficient to run the deployment. The following files can be modified if you want to change the default configuration
+2. Set Docker enviroment variables: Default and sample enviroment variables are provided in the `default.env` file. Add these variables to your environment or simply copy `default.env` to `.env` . Values in this file are used to populate dollar-notation variables in the docker-compose.yml file.
+```
+$ cp default.env .env
+```
+
+3. Configurations: The default configuration is sufficient to run the deployment. The following files can be modified if you want to change the default configuration
 
     - **docker-compose.yml**: How the different containers are deployed. There is a section of build arguments (under `services → xnat-web → build → args`) to control some aspects of the build.
-        * If you want to download a different version of XNAT, you can change the `XNAT_VER` variable to some other release.
+        * If you want to download a different version of XNAT, you can change the `XNAT_VERSION` variable to some other release.
         * The `TOMCAT_XNAT_FOLDER` build argument is set to `ROOT` by default; this means the XNAT will be available at `http://localhost`. If, instead, you wish it to be at `http://localhost/xnat` or, more generally, at `http://localhost/{something}`, you can set `TOMCAT_XNAT_FOLDER` to the value `something`.
         * If you need to control some arguments that get sent to tomcat on startup, you can modify the `CATALINA_OPTS` environment variable (under `services → xnat-web → environment`).
     - **xnat/Dockerfile**: Builds the xnat-web image from a tomcat docker image.
 
-3. Start the system
+4. Start the system
 
 ```
 $ docker-compose up -d
@@ -85,7 +91,7 @@ xnat-web_1    | INFO: Server startup in 84925 ms
 ```
 
 
-4. First XNAT Site Setup
+5. First XNAT Site Setup
 
 Your XNAT will soon be available at http://localhost.
 
@@ -114,7 +120,7 @@ These variables directly set options for XNAT itself.
 
 Variable | Description | Default value
 -------- | ----------- | -------------
-XNAT_VERSION | Indicates the version of XNAT to install. | 1.8.1
+XNAT_VERSION | Indicates the version of XNAT to install. | 1.8.3
 XNAT_MIN_HEAP | Indicates the minimum heap size for the Java virtual machine. | 256m
 XNAT_MAX_HEAP | Indicates the maximum heap size for the Java virtual machine. | 4g
 XNAT_SMTP_ENABLED | Indicates whether SMTP operations are enabled in XNAT. | false
@@ -126,6 +132,7 @@ XNAT_SMTP_PASSWORD | Indicates the password to use to authenticate with the conf
 XNAT_DATASOURCE_ADMIN_PASSWORD | Indicates the password to set for the database administrator user (**postgres**) | xnat1234
 XNAT_DATASOURCE_URL | Specifies the URL to use when accessing the database from XNAT. | jdbc:postgresql://xnat-db/xnat
 XNAT_DATASOURCE_DRIVER | Specifies the driver class to set for the database connection. | org.postgresql.Driver
+XNAT_DATASOURCE_NAME | Specifies the database name for the database connection. | xnat
 XNAT_DATASOURCE_USERNAME | Specifies the username for the XNAT database account. | xnat
 XNAT_DATASOURCE_PASSWORD | Specifies the password for the XNAT database account. | xnat
 XNAT_WEBAPP_FOLDER | Indicates the name of the folder for the XNAT application. This affects the context path for accessing XNAT. The value `ROOT` indicates that XNAT is the root application and can be accessed at http://localhost (i.e. no path). Otherwise, you must add this value to the _end_ of the URL so, e.g. if you specify `xnat` for this variable, you'll access XNAT at http://localhost/xnat. | ROOT
@@ -135,6 +142,8 @@ XNAT_EMAIL | Specifies the primary administrator email address. | harmitage@misk
 XNAT_ACTIVEMQ_URL | Indicates the URL for an external ActiveMQ service to use for messaging. If not specified, XNAT uses its own internal queue. |
 XNAT_ACTIVEMQ_USERNAME | Indicates the username to use to authenticate with the configured ActiveMQ server. Has no effect if **XNAT_ACTIVEMQ_URL** isn't specified. |
 XNAT_ACTIVEMQ_PASSWORD | Indicates the password to use to authenticate with the configured ActiveMQ server. Has no effect if **XNAT_ACTIVEMQ_URL** isn't specified. |
+PG_VERSION | Specifies the [version tag](https://hub.docker.com/_/postgres?tab=tags) of the PostgreSQL docker container used in `docker-compose.yml`. | 12.2-alpine
+NGINX_VERSION | Specifies the [version tag](https://hub.docker.com/_/nginx?tab=tags) of the Nginx docker container used in `docker-compose.yml`. | 1.19-alpine-perl
 
 
 ## Troubleshooting

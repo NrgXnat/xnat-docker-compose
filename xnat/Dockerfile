@@ -1,7 +1,7 @@
-FROM tomcat:7.0.108-jdk8-openjdk-buster
+FROM tomcat:9-jdk8-openjdk-buster
 MAINTAINER Matt Kelsey <kelseym@wustl.edu>
 
-ARG XNAT_VER=${XNAT_VER}
+ARG XNAT_VERSION=${XNAT_VERSION}
 ARG XNAT_ROOT=${XNAT_ROOT}
 ARG XNAT_HOME=${XNAT_HOME}
 ARG XNAT_DATASOURCE_DRIVER=${XNAT_DATASOURCE_DRIVER}
@@ -39,9 +39,9 @@ RUN mkdir -p \
         ${XNAT_ROOT}/prearchive
 RUN /usr/local/bin/make-xnat-config.sh
 RUN rm /usr/local/bin/make-xnat-config.sh
-RUN wget --no-verbose --output-document=/tmp/xnat-web-${XNAT_VER}.war https://api.bitbucket.org/2.0/repositories/xnatdev/xnat-web/downloads/xnat-web-${XNAT_VER}.war
-RUN unzip -o -d ${TOMCAT_XNAT_FOLDER_PATH} /tmp/xnat-web-${XNAT_VER}.war
-RUN rm -f /tmp/xnat-web-${XNAT_VER}.war
+RUN wget --no-verbose --output-document=/tmp/xnat-web-${XNAT_VERSION}.war https://api.bitbucket.org/2.0/repositories/xnatdev/xnat-web/downloads/xnat-web-${XNAT_VERSION}.war
+RUN unzip -o -d ${TOMCAT_XNAT_FOLDER_PATH} /tmp/xnat-web-${XNAT_VERSION}.war
+RUN rm -f /tmp/xnat-web-${XNAT_VERSION}.war
 
 EXPOSE 8080
 
