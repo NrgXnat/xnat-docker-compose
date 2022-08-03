@@ -26,18 +26,20 @@ services:
         XNAT_HOME: ${XNAT_HOME}
         XNAT_EMAIL: ${XNAT_EMAIL}
     ports:
-      - 8104:8104
+      - "8104:8104"
+      - "5005:5005"
     volumes:
       - ./xnat/plugins:${XNAT_HOME}/plugins
       - ./xnat-data/home/logs:${XNAT_HOME}/logs
       - ./xnat-data/archive:${XNAT_ROOT}/archive
       - ./xnat-data/build:${XNAT_ROOT}/build
       - ./xnat-data/cache:${XNAT_ROOT}/cache
+      - ./xnat-data/workspaces:${XNAT_ROOT}/workspaces
       - /var/run/docker.sock:/var/run/docker.sock
     depends_on:
       - xnat-db
     environment:
-      - CATALINA_OPTS=-Xms${XNAT_MIN_HEAP} -Xmx${XNAT_MAX_HEAP} -Dxnat.home=${XNAT_HOME}
+      - CATALINA_OPTS=-Xms${XNAT_MIN_HEAP} -Xmx${XNAT_MAX_HEAP} -Dxnat.home=${XNAT_HOME} -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005
       - XNAT_HOME=${XNAT_HOME}
     networks:
       - xnat-services
@@ -46,6 +48,8 @@ services:
     image: postgres:${PG_VERSION}
     expose:
       - "5432"
+    ports:
+      - "5432:5432"
     volumes:
       - ./postgres-data:/var/lib/postgresql/data
       #
@@ -74,20 +78,17 @@ services:
       - jupyterhub
 
   jupyterhub:
-    build:
-        context: ./jupyterhub
-        args:
-            JHUB_VER: "${JHUB_VER}"
-            JHUB_DOCKER_SPAWNER_VERSION: "${JHUB_DOCKER_SPAWNER_VERSION}"
+    image: xnat/jupyterhub:latest
     volumes:
-        # Bind Docker socket on the host so we can connect to the daemon from
-        # within the container
-        - "/var/run/docker.sock:/var/run/docker.sock:rw"
+      - "/var/run/docker.sock:/var/run/docker.sock:rw"
     networks:
-        - xnat-services
+      - xnat-services
     environment:
-        JHUB_DOCKER_SPAWNER_NETWORK: *networkname
-        JHUB_USER_NB_IMG: "${JHUB_USER_NB_IMG}"
-        JHUB_XNAT_URL: "${JHUB_XNAT_URL}"
-        JHUB_XNAT_ARCHIVE: "${JHUB_XNAT_ARCHIVE}"
-        JUPYTERHUB_CRYPT_KEY: "${JHUB_CRYPT_KEY}"
+      JH_NETWORK: *networkname
+      JH_USER_NB_IMG: "${JH_USER_NB_IMG}"
+      JH_UID: "${JH_UID}"
+      JH_GID: "${JH_GID}"
+      JH_XNAT_URL: "${JH_XNAT_URL}"
+      JH_XNAT_SERVICE_TOKEN: "${JH_XNAT_SERVICE_TOKEN}"
+      JH_XNAT_USERNAME: "${JH_XNAT_USERNAME}"
+      JH_XNAT_PASSWORD: "${JH_XNAT_PASSWORD}"

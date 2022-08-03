@@ -1,9 +1,0 @@
-#!/bin/bash
-export $(cat .env | xargs)
-docker build -f ./jupyterhub-user/Dockerfile \
-             --build-arg JHUB_BASE_NB_IMG="$JHUB_BASE_NB_IMG"\
-             --build-arg JHUB_VER="$JHUB_VER" \
-             -t "$JHUB_USER_NB_IMG" \
-             ./jupyterhub-user
-
-docker-compose build
