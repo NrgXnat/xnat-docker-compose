@@ -13,8 +13,7 @@ gradle.properties
 
 # Ignore log and env files, as well as mounted data folders and plugin folders.
 *.log
-*-data/
-xnat/plugins
+postgres-data/
 
 xnat/webapps
 

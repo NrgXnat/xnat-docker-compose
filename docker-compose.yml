@@ -32,6 +32,7 @@ services:
       - ./xnat/plugins:${XNAT_HOME}/plugins
       - ./xnat-data/home/logs:${XNAT_HOME}/logs
       - ./xnat-data/archive:${XNAT_ROOT}/archive
+      - ./xnat-data/prearchive:${XNAT_ROOT}/prearchive
       - ./xnat-data/build:${XNAT_ROOT}/build
       - ./xnat-data/cache:${XNAT_ROOT}/cache
       - ./xnat-data/workspaces:${XNAT_ROOT}/workspaces
@@ -41,8 +42,12 @@ services:
     environment:
       - CATALINA_OPTS=-Xms${XNAT_MIN_HEAP} -Xmx${XNAT_MAX_HEAP} -Dxnat.home=${XNAT_HOME} -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005
       - XNAT_HOME=${XNAT_HOME}
+      - XNAT_ROOT=${XNAT_ROOT}
+      - TOMCAT_USER_ID=${UID}
+      - TOMCAT_GROUP_ID=${GID}
     networks:
       - xnat-services
+    restart: always
 
   xnat-db:
     image: postgres:${PG_VERSION}
@@ -62,6 +67,7 @@ services:
       - XNAT_DATASOURCE_PASSWORD=${XNAT_DATASOURCE_PASSWORD}
     networks:
       - xnat-services
+    restart: always
 
   xnat-nginx:
     image: nginx:${NGINX_VERSION}
@@ -76,6 +82,7 @@ services:
     depends_on:
       - xnat-web
       - jupyterhub
+    restart: always
 
   jupyterhub:
     image: xnat/jupyterhub:latest
@@ -86,9 +93,10 @@ services:
     environment:
       JH_NETWORK: *networkname
       JH_USER_NB_IMG: "${JH_USER_NB_IMG}"
-      JH_UID: "${JH_UID}"
-      JH_GID: "${JH_GID}"
+      JH_UID: "${UID}"
+      JH_GID: "${GID}"
       JH_XNAT_URL: "${JH_XNAT_URL}"
       JH_XNAT_SERVICE_TOKEN: "${JH_XNAT_SERVICE_TOKEN}"
       JH_XNAT_USERNAME: "${JH_XNAT_USERNAME}"
       JH_XNAT_PASSWORD: "${JH_XNAT_PASSWORD}"
+    restart: always

@@ -22,6 +22,13 @@ ARG TOMCAT_XNAT_FOLDER_PATH=${CATALINA_HOME}/webapps/${TOMCAT_XNAT_FOLDER}
 
 ADD make-xnat-config.sh /usr/local/bin/make-xnat-config.sh
 ADD wait-for-postgres.sh /usr/local/bin/wait-for-postgres.sh
+ADD entrypoint.sh /usr/local/bin/entrypoint.sh
+
+RUN set -eux; \
+	apt-get update; \
+	apt-get install -y gosu; \
+	rm -rf /var/lib/apt/lists/*; \
+	gosu nobody true
 
 RUN apt-get update && apt-get install -y postgresql-client wget 
 RUN rm -rf ${CATALINA_HOME}/webapps/*
@@ -45,7 +52,8 @@ RUN rm -f /tmp/xnat-web-${XNAT_VERSION}.war
 
 EXPOSE 8080
 
-ENV XNAT_HOME=${XNAT_HOME} XNAT_DATASOURCE_USERNAME=${XNAT_DATASOURCE_USERNAME} PGPASSWORD=${XNAT_DATASOURCE_PASSWORD}
+ENV XNAT_HOME=${XNAT_HOME} XNAT_ROOT=${XNAT_ROOT} XNAT_DATASOURCE_USERNAME=${XNAT_DATASOURCE_USERNAME} PGPASSWORD=${XNAT_DATASOURCE_PASSWORD} TOMCAT_USER_ID=${TOMCAT_USER_ID} TOMCAT_GROUP_ID=${TOMCAT_GROUP_ID}
 
+ENTRYPOINT [ "entrypoint.sh" ]
 CMD ["wait-for-postgres.sh", "/usr/local/tomcat/bin/catalina.sh", "run"]
 
