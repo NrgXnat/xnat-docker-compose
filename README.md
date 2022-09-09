@@ -1,5 +1,5 @@
 # Dockerized XNAT
-This branch has been modified to support JupyterHup alongside XNAT. Please see [JupyterHub](#markdown-header-jupyterhub) before running.
+This branch has been modified to support JupyterHup alongside XNAT. Please see [JupyterHub](#markdown-header-jupyterhub) notes before running.
 
 Use this repository to quickly deploy an [XNAT](https://xnat.org/) instance on [docker](https://www.docker.com/).
 
@@ -19,15 +19,16 @@ This document contains the following sections:
 
 ## Introduction
 
-This repository contains files to bootstrap XNAT deployment. The build creates three containers:
+This repository contains files to bootstrap XNAT deployment. The build creates four containers:
 
 - **[Tomcat](http://tomcat.apache.org/) + XNAT**: The XNAT web application
 - [**Postgres**](https://www.postgresql.org/): The XNAT database
 - [**nginx**](https://www.nginx.com/): Web proxy sitting in front of XNAT
+- [**JupyterHub**](https://jupyterhub.readthedocs.io/) for deploy single-user Jupyter notebook server containers
 
 ## Prerequisites
 
-* [docker](https://www.docker.com/) including sufficient memory allocation, according to [Max Heap](#mardown-header-xnat-configuration) settings and container usage. (>4GB with default settings) 
+* [docker](https://www.docker.com/) including sufficient memory allocation, according to [Max Heap](#mardown-header-xnat-configuration) settings and container usage. (>4GB with default settings)
 * [docker-compose](http://docs.docker.com/compose) (Which is installed along with docker if you download it from their site)
 
 ## Usage
@@ -91,7 +92,7 @@ xnat-web_1    | INFO: Server startup in 84925 ms
 
 5. First XNAT Site Setup
 
-Your XNAT will soon be available at http://localhost. 
+Your XNAT will soon be available at http://localhost.
 
 After logging in with credentials admin/admin (username/password resp.) the setup page is displayed.
 
@@ -244,11 +245,18 @@ To read essentially all the same information, but perhaps using slightly differe
 
 ## JupyterHub
 
-The [xnat/jupyterbub](https://hub.docker.com/r/xnat/jupyterhub) image has been added as a service to `docker-compose.yml`. See the [repo](https://bitbucket.org/xnat-containers/xnat-jupyterhub/src/main/) for details and for the argument and environmental variables used. You will also need the latest [XNAT JupyteHub Plugin](https://bitbucket.org/xnatx/xnat-jupyterhub-plugin/src/main/) jar in your `xnat/plugins` directory.
+The [xnat/jupyterbub](https://hub.docker.com/r/xnat/jupyterhub) image has been added as a service to `docker-compose.yml`.
 
 ### Setup
 
-1. `docker-compose up -d` to start all services. XNAT will be running at `http://localhost` and JupyterHub at `http://localhost/jupyterhub`.
-2. Navigate to the plugin preferences and find the JupyterHub tab. You will need to setup Path Translation. There may be other preferences to update as well.
-3. Create a new user for the JupyterHub service account. The default is jupyterhub:jupyterhub.
-4. Add a `JupyterHub` role to the account. 
+1. Download the latest [XNAT JupyterHub Plugin](https://ci.xnat.org/job/Plugins_Develop/job/JupyterHub/) jar into the `./xnat/plugins` directory.
+2. In a Linux environment, specify the UID and GID of the user running this stack in the `.env` file. This user must have permissions to the docker socket `/var/run/docker.sock`. Being a member of the `docker` group should be sufficient. JupyterHub uses the docker socket to deploy the single-user containers. Files are also shared between XNAT and the single-user Jupyter containers. Mismatches in UID/GID between XNAT and JupyterHub will cause problems.
+3. In a Linux environment, in the `.env` file, set `JH_XNAT_URL=http://172.17.0.1`.
+4. In a Mac environment, the UID and GID can be left blank and leave `JH_XNAT_URL=http://host.docker.internal`.
+5. `docker-compose up -d` to start all services. XNAT will be running at `http://localhost` and JupyterHub at `http://localhost/jupyterhub`.
+6. Login to XNAT as the admin user, navigate to the plugin preferences and find the JupyterHub tab. You will need to set up Path Translation in a similar manner to container service. The default for the XNAT prefix is `/data/xnat` unless you have changed it in the `.env` file. For the Docker prefix provide the location of the `../xnat-docker-compose/xnat-data` directory in this repo.
+7. In a Linux environment, still within the JupyterHub plugin preferences, the JupyterHub URL should be changed to `http://172.17.0.1/jupyterhub`.
+8. In a Mac environment, the default JupyterHub URL can remain as `http://host.docker.internal/jupyterhub`
+9. Navigate to the Administer -> User page. You will see a new user, `jupyterhub`. Enable this account. This account is used by JupyterHub to communicate with XNAT.
+
+Everything should now be configured. Navigate to a project, subject or session and from the action panel click Start Jupyter Server.
