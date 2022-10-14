@@ -32,11 +32,14 @@ services:
     volumes:
       - ./xnat/plugins:${XNAT_HOME}/plugins
       - ./xnat-data/home/logs:${XNAT_HOME}/logs
+      - ./xnat-data/home/work:${XNAT_HOME}/work
       - ./xnat-data/archive:${XNAT_ROOT}/archive
       - ./xnat-data/prearchive:${XNAT_ROOT}/prearchive
       - ./xnat-data/build:${XNAT_ROOT}/build
       - ./xnat-data/cache:${XNAT_ROOT}/cache
       - ./xnat-data/workspaces:${XNAT_ROOT}/workspaces
+      - ./xnat-data/ftp:${XNAT_ROOT}/ftp
+      - ./xnat-data/pipeline:${XNAT_ROOT}/pipeline
       - /var/run/docker.sock:/var/run/docker.sock
     depends_on:
       - xnat-db

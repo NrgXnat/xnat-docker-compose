@@ -22,8 +22,8 @@ if [ -n "$TOMCAT_USER_ID" ] && [ -n "$TOMCAT_GROUP_ID" ]; then
     ###
 
     chown -R tomcat:tomcat ${CATALINA_HOME} && chmod 400 ${CATALINA_HOME}/conf/*
-    chown -R tomcat:tomcat ${XNAT_HOME}
-    chown -R tomcat:tomcat ${XNAT_ROOT}
+    #chown -R tomcat:tomcat ${XNAT_HOME}
+    #chown -R tomcat:tomcat ${XNAT_ROOT}
 
     sync
     exec gosu tomcat "$@"
