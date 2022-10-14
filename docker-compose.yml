@@ -88,7 +88,7 @@ services:
     restart: always
 
   jupyterhub:
-    image: xnat/jupyterhub:0.1.1-SNAPSHOT 
+    image: xnat/jupyterhub:0.2.0
     hostname: jupyterhub
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock:rw"
