@@ -48,8 +48,8 @@ services:
       # - CATALINA_OPTS=-Xms${XNAT_MIN_HEAP} -Xmx${XNAT_MAX_HEAP} -Dxnat.home=${XNAT_HOME} -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005
       - XNAT_HOME=${XNAT_HOME}
       - XNAT_ROOT=${XNAT_ROOT}
-      - TOMCAT_USER_ID=${UID}
-      - TOMCAT_GROUP_ID=${GID}
+      - TOMCAT_USER_ID=${TOMCAT_UID}
+      - TOMCAT_GROUP_ID=${TOMCAT_GID}
     networks:
       - xnat-services
     restart: always
@@ -88,7 +88,7 @@ services:
     restart: always
 
   jupyterhub:
-    image: xnat/jupyterhub:0.2.0
+    image: xnat/jupyterhub:0.2.1-SNAPSHOT
     hostname: jupyterhub
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock:rw"
@@ -96,8 +96,10 @@ services:
       - xnat-services
     environment:
       JH_NETWORK: *networkname
-      JH_UID: "${UID}"
-      JH_GID: "${GID}"
+      JH_UID: "${JH_UID}"
+      JH_GID: "${JH_GID}"
+      NB_UID: "${NB_UID}"
+      NB_GID: "${NB_GID}"
       JH_XNAT_URL: "${JH_XNAT_URL}"
       JH_XNAT_SERVICE_TOKEN: "${JH_XNAT_SERVICE_TOKEN}"
       JH_XNAT_USERNAME: "${JH_XNAT_USERNAME}"
