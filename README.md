@@ -34,14 +34,14 @@ This repository contains files to bootstrap XNAT and JupyterHub deployment. The 
 1. Clone the features/jupyterhub branch of the  [xnat-docker-compose](https://github.com/NrgXnat/xnat-docker-compose) repository.
 
 ```
-$ git clone -b features/jupyterhub https://github.com/NrgXnat/xnat-docker-compose
-$ cd xnat-docker-compose
+git clone -b features/jupyterhub https://github.com/NrgXnat/xnat-docker-compose
+cd xnat-docker-compose
 ```
 
 2. Download the latest [XNAT JupyterHub Plugin](https://ci.xnat.org/job/Plugins_Develop/job/JupyterHub/) jar into the `./xnat/plugins` directory.
 
 ```
-$ wget -q -P ./xnat/plugins/xnat-jupyterhub-plugin.jar https://ci.xnat.org/job/Plugins_Develop/job/JupyterHub/lastSuccessfulBuild/artifact/build/libs/xnat-jupyterhub-plugin-0.2.1-SNAPSHOT.jar
+wget -q -P ./xnat/plugins/xnat-jupyterhub-plugin.jar https://ci.xnat.org/job/Plugins_Develop/job/JupyterHub/lastSuccessfulBuild/artifact/build/libs/xnat-jupyterhub-plugin-0.2.1-SNAPSHOT.jar
 ```
 Or
 ```
@@ -52,11 +52,11 @@ curl -s -o ./xnat/plugins/xnat-jupyterhub-plugin.jar https://ci.xnat.org/job/Plu
 
     1. Default and sample enviroment variables are provided in the `linux.env` file and `mac.env` file. Use the env file that's appropriate for your os. Add these variables to your environment or simply copy `linux.env` or `mac.env` to `.env`. Values in this file are used to populate dollar-notation variables in the docker-compose.yml file.
     ```
-    $ cp linux.env .env
+    cp linux.env .env
     ```
     Or
     ```
-    $ cp mac.env .env
+    cp mac.env .env
     ```
 
     2. With Mac the default environmental variables should be sufficient to get started.
@@ -93,7 +93,7 @@ curl -s -o ./xnat/plugins/xnat-jupyterhub-plugin.jar https://ci.xnat.org/job/Plu
 
 4. JupyterHub must be running on the master node of a Docker swarm. To initialize a swarm
 ```
-$ docker swarm init
+docker swarm init
 ```
 
 5. JupyterHub needs an image to spawn single-user Jupyter containers. Let's start with this image and later you can configure other images in the plugin settings page within XNAT. 
@@ -104,8 +104,8 @@ docker pull jupyter/scipy-notebook:hub-3.0.0
 6. Start the system
 
 ```
-$ docker compose build
-$ docker compose up -d
+docker compose build
+docker compose up -d
 ```
 
 Note that at this point, if you go to `localhost` (or the domain name for your server) in your browser you won't see a working web application. It takes a couple minutes to initialize the database, and you can follow progress by reading the docker compose log of the server:
@@ -214,7 +214,7 @@ The UIDs and GIDs are not needed for running on a Mac but are critical for runni
 Say you want to examine some files in the running `xnat-web` container. You can `exec` a command in that container to open a shell.
 
 ```
-$ docker-compose exec xnat-web bash
+docker-compose exec xnat-web bash
 ```
 
 * The `docker-compose exec` part of the command is what tells docker-compose that you want to execute a command inside a container.
@@ -236,7 +236,7 @@ localhost.2018-10-03.log
 View a particular log
 
 ```
-$ docker-compose exec xnat-web cat /usr/local/tomcat/logs/catalina.2018-10-03.log
+docker-compose exec xnat-web cat /usr/local/tomcat/logs/catalina.2018-10-03.log
 ```
 
 ### Read JupyterHub logs
@@ -256,20 +256,20 @@ cat xnat-data/home/logs/xnat-jupyterhub-plugin.log
 Bring all the instances down by running
 
 ```
-$ docker-compose down
+docker-compose down
 ```
 
 If you want to bring everything down *and* remove all the images that were built, you can run
 
 ```
-$ docker-compose down --rmi all
+docker-compose down --rmi all
 ```
 
 #### Bring up instances
 This will bring all instances up again. The `-d` means "detached" so you won't see any output to the terminal.
 
 ```
-$ docker-compose up -d
+docker-compose up -d
 ```
 
 (If you like seeing the terminal output, you can leave off the `-d` option. The various containers will print output to the terminal as they come up. If you close this connection with `Ctrl+C`, the containers will be stopped or killed.)
@@ -277,14 +277,14 @@ $ docker-compose up -d
 #### Restart
 If an instance is having problems, you can restart it.
 ```
-$ docker-compose restart xnat-web
+docker-compose restart xnat-web
 ```
 
 #### Rebuild after making changes
 If you have changed a `Dockerfile`, you will need to rebuild an image before the changes are picked up.
 
 ```
-$ docker-compose build xnat-web
+docker-compose build xnat-web
 ```
 
 It is possible that you will need to use the `--no-cache` argument, if you have only changed local files and not the `Dockerfile` itself.
