@@ -18,5 +18,6 @@ postgres-data/
 xnat/webapps
 
 *.env
-!default.env
+!linux.env
+!mac.env
 
