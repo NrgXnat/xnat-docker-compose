@@ -200,7 +200,7 @@ JH_UID | The UID for running JupterHub. Typically the same as the Tomcat UID. |
 JH_GID | The GID for running JupterHub. This is the group id of the docker group. |
 NB_UID | The UID for running the single-user Jupyter containers. Typicall the same as the Tomcat UID |
 NB_GID | The GID for running the single-user Jupyter containers. Typicall the same as the Tomcat GID |
-JH_XNAT_URL | The domain of this XNAT. Example: https://your.xnat.org  | Linux: http://172.17.0.1 Mac: http://host.docker.internal
+JH_XNAT_URL | The domain name of this XNAT server, if available. For running locally, use the defaults. Example: https://your.xnat.org  | Linux: http://172.17.0.1 Mac: http://host.docker.internal
 JH_XNAT_SERVICE_TOKEN | This is XNAT's password/token for communicating with JupyterHub | secret-token
 JH_XNAT_USERNAME | This is JupyterHub's username on XNAT. Used for getting the single user Jupyter container configuration from XNAT | jupyterhub
 JH_XNAT_PASSWORD | This is JupyterHub's password on XNAT. Used for getting the single user Jupyter container configuration from XNAT. Changes this for added security. | jupyterhub
