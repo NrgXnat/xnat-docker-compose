@@ -41,9 +41,11 @@ $ cd xnat-docker-compose
 2. Download the latest [XNAT JupyterHub Plugin](https://ci.xnat.org/job/Plugins_Develop/job/JupyterHub/) jar into the `./xnat/plugins` directory.
 
 ```
-$ cd ./xnat/plugins
-$ wget https://ci.xnat.org/job/Plugins_Develop/job/JupyterHub/lastSuccessfulBuild/artifact/build/libs/xnat-jupyterhub-plugin-0.2.1-SNAPSHOT.jar
-$ cd ../..
+$ wget -q -P ./xnat/plugins/xnat-jupyterhub-plugin.jar https://ci.xnat.org/job/Plugins_Develop/job/JupyterHub/lastSuccessfulBuild/artifact/build/libs/xnat-jupyterhub-plugin-0.2.1-SNAPSHOT.jar
+```
+Or
+```
+curl -s -o ./xnat/plugins/xnat-jupyterhub-plugin.jar https://ci.xnat.org/job/Plugins_Develop/job/JupyterHub/lastSuccessfulBuild/artifact/build/libs/xnat-jupyterhub-plugin-0.2.1-SNAPSHOT.jar 
 ```
 
 3. Set Docker enviroment variables: 
@@ -89,7 +91,7 @@ $ cd ../..
     This environmental variable is used by JupyterHub to communicate with your XNAT.
 
 
-4. JupyterHub must be running on the master node of a Docker swarm. To initialize a swarm.
+4. JupyterHub must be running on the master node of a Docker swarm. To initialize a swarm
 ```
 $ docker swarm init
 ```
@@ -106,7 +108,7 @@ $ docker compose build
 $ docker compose up -d
 ```
 
-Note that at this point, if you go to `localhost` (or the domain for your server) in your browser you won't see a working web application. It takes a couple minutes to initialize the database, and you can follow progress by reading the docker compose log of the server:
+Note that at this point, if you go to `localhost` (or the domain name for your server) in your browser you won't see a working web application. It takes a couple minutes to initialize the database, and you can follow progress by reading the docker compose log of the server:
 
 ```
 $ docker-compose logs -f --tail=20 xnat-web
@@ -139,7 +141,7 @@ $ docker-compose logs -f jupyterhub
 
 7. First XNAT Site Setup
 
-Your XNAT will soon be available at http://localhost or https://your.xnat.org if your server has a domain.
+Your XNAT will soon be available at http://localhost or https://your.xnat.org if your server has a domain name.
 
 After logging in with credentials admin/admin (username/password resp.) the setup page is displayed. You can usually accept the defaults.
 
@@ -150,7 +152,7 @@ After logging in with credentials admin/admin (username/password resp.) the setu
     3. Set the JupyterHub API url
         1. Linux: `http://172.17.0.1/jupyterhub/hub/api`
         2. Mac: `http://host.docker.internal/jupyterhub/hub/api`
-        3. If you have a domain name: `https://your.xnat.org/jupyterhub/hub/api`
+        3. With a domain name: `https://your.xnat.org/jupyterhub/hub/api`
     4. Setup Path Translation (see master branch readme container service notes for more details). This step is _critical_!
         1. Path Translation XNAT Prefix. This is most likely
         ```
@@ -162,14 +164,12 @@ After logging in with credentials admin/admin (username/password resp.) the setu
         ```
     5. Save these settings and close the JupyterHub Setup dialog. There should be a green check mark under the status column indicating XNAT can reach your JupyterHub.
 
-    6. Enable the JupyterHub user
+    6. Enable the JupyterHub user. This account is used by JupyterHub to get the single-user container configuration options from XNAT.
 
         1. From the top navigation bar, go to `Administer -> Users`. You will see a new user, `jupyterhub`. Enable this account. This account is used by JupyterHub to communicate with XNAT.
-
-   
+        2. If you set the `JH_XNAT_PASSWORD` environmental variable, update that password of the `jupyterhub` user now.
 
 Everything should now be configured. Create a project, add some data, then from the action panel of a Project, Subject, or Experiment page click Start Jupyter.
-
 
 ## Mounted Data
 
