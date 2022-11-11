@@ -41,11 +41,11 @@ cd xnat-docker-compose
 2. Download the latest [XNAT JupyterHub Plugin](https://ci.xnat.org/job/Plugins_Develop/job/JupyterHub/) jar into the `./xnat/plugins` directory.
 
 ```
-wget -q -P ./xnat/plugins/xnat-jupyterhub-plugin.jar https://ci.xnat.org/job/Plugins_Develop/job/JupyterHub/lastSuccessfulBuild/artifact/build/libs/xnat-jupyterhub-plugin-0.2.1-SNAPSHOT.jar
+wget -q -P ./xnat/plugins/ https://ci.xnat.org/job/Plugins_Develop/job/JupyterHub/21/artifact/build/libs/xnat-jupyterhub-plugin-0.3.0-beta1.jar
 ```
 Or
 ```
-curl -s -o ./xnat/plugins/xnat-jupyterhub-plugin.jar https://ci.xnat.org/job/Plugins_Develop/job/JupyterHub/lastSuccessfulBuild/artifact/build/libs/xnat-jupyterhub-plugin-0.2.1-SNAPSHOT.jar 
+curl -s -o ./xnat/plugins/ https://ci.xnat.org/job/Plugins_Develop/job/JupyterHub/21/artifact/build/libs/xnat-jupyterhub-plugin-0.3.0-beta1.jar
 ```
 
 3. Set Docker enviroment variables: 
@@ -175,7 +175,7 @@ Everything should now be configured. Create a project, add some data, then from 
 
 When you checked out this branch, several directories were created to store the persistent data.
 
-* **xnat/plugins** - Initially contains nothing. This is where the [JupterHub](https://ci.xnat.org/job/Plugins_Develop/job/JupyterHub/lastSuccessfulBuild/artifact/build/libs/xnat-jupyterhub-plugin-0.2.1-SNAPSHOT.jar) plugin belongs. You can further customize your XNAT with other plugins by placing jars into this directory and restarting XNAT.
+* **xnat/plugins** - Initially contains nothing. This is where the [JupterHub](https://ci.xnat.org/job/Plugins_Develop/job/JupyterHub/21/artifact/build/libs/xnat-jupyterhub-plugin-0.3.0-beta1.jar) plugin belongs. You can further customize your XNAT with other plugins by placing jars into this directory and restarting XNAT.
 * **xnat-data/archive** - Contains the XNAT archive
 * **xnat-data/workspaces** - User workspaces for storing notebooks
 * **xnat-data/build** - Contains the XNAT build space. This is useful when running the container service plugin.

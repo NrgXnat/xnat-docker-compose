@@ -28,7 +28,7 @@ services:
         XNAT_EMAIL: ${XNAT_EMAIL}
     ports:
       - "8104:8104"
-      # - "5005:5005" # Debugging port
+      - "5005:5005" # Debugging port
     volumes:
       - ./xnat/plugins:${XNAT_HOME}/plugins
       - ./xnat-data/home/logs:${XNAT_HOME}/logs
@@ -88,7 +88,7 @@ services:
     restart: always
 
   jupyterhub:
-    image: xnat/jupyterhub:0.2.1-SNAPSHOT
+    image: xnat/jupyterhub:0.3.0-beta1
     hostname: jupyterhub
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock:rw"
