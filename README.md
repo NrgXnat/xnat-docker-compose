@@ -301,3 +301,6 @@ If you're using docker for mac or linux, you can use `http://host.docker.interna
 And you can set this value inside XNAT as the Processing URL. This setting is used preferentially over the Site URL to set `XNAT_HOST` in a container. Set this value at Administer > Site Administration > Pipeline Settings > Processing URL.
 
 To read essentially all the same information, but perhaps using slightly different words and with a screenshot, see the wiki page: [Processing URL](https://wiki.xnat.org/display/CS/Processing+URL).
+
+## Sample Notebooks
+A [repository of sample notebooks](https://github.com/NrgXnat/xnat-jupyter-notebooks) is availble which demonstrate how to use Jupyter notebooks in this integrated environment.
