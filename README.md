@@ -59,7 +59,7 @@ curl -s -o ./xnat/plugins/ https://ci.xnat.org/job/Plugins_Develop/job/JupyterHu
     cp mac.env .env
     ```
 
-    2. With Mac the default environmental variables should be sufficient to get started.
+    2. With Mac the default environmental variables should be sufficient to get started. The _UID and _GID env variables can be left empty.
 
     3. With Linux it is _critical_ to correctly set the UID/GID envrionmental variables.  The xnat-web tomcat container uid/gid is generally the owner of the directory `xnat-data/archive`. The single user Jupyter notebook containers need read access to `xnat-data/archive` and read/write access to `xnat-data/workspaces`. JupyterHub needs to be a member of the Docker group, it uses the Docker socket to spawn the single-user Jupter containers.
 
@@ -168,6 +168,8 @@ After logging in with credentials admin/admin (username/password resp.) the setu
 
         1. From the top navigation bar, go to `Administer -> Users`. You will see a new user, `jupyterhub`. Enable this account. This account is used by JupyterHub to communicate with XNAT.
         2. If you set the `JH_XNAT_PASSWORD` environmental variable, update that password of the `jupyterhub` user now.
+        
+    7. Set the [Processing URL](https://wiki.xnat.org/display/CS/Processing+URL), a core XNAT preference. Though we are not using the Container Service plugin, we have implemented the same feature in the Jupyter plugin. If you are on a Mac you will need to update this preference.
 
 Everything should now be configured. Create a project, add some data, then from the action panel of a Project, Subject, or Experiment page click Start Jupyter.
 
