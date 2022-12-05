@@ -168,8 +168,8 @@ After logging in with credentials admin/admin (username/password resp.) the setu
 
         1. From the top navigation bar, go to `Administer -> Users`. You will see a new user, `jupyterhub`. Enable this account. This account is used by JupyterHub to communicate with XNAT.
         2. If you set the `JH_XNAT_PASSWORD` environmental variable, update that password of the `jupyterhub` user now.
-        
-    7. Set the [Processing URL](https://wiki.xnat.org/display/CS/Processing+URL), a core XNAT preference. Though we are not using the Container Service plugin, we have implemented the same feature in the Jupyter plugin. If you are on a Mac you will need to update this preference.
+
+9. Set the [Processing URL](https://wiki.xnat.org/display/CS/Processing+URL), a core XNAT preference. Though we are not using the Container Service plugin, we have implemented the same feature in the Jupyter plugin. If you are on a Mac you will need to update this preference.
 
 Everything should now be configured. Create a project, add some data, then from the action panel of a Project, Subject, or Experiment page click Start Jupyter.
 
