@@ -27,8 +27,7 @@ services:
         XNAT_HOME: ${XNAT_HOME}
         XNAT_EMAIL: ${XNAT_EMAIL}
     ports:
-      - "8104:8104"
-      # - "5005:5005" # Debugging port
+      - 8104:8104
     volumes:
       - ./xnat/plugins:${XNAT_HOME}/plugins
       - ./xnat-data/home/logs:${XNAT_HOME}/logs
@@ -45,19 +44,15 @@ services:
       - xnat-db
     environment:
       - CATALINA_OPTS=-Xms${XNAT_MIN_HEAP} -Xmx${XNAT_MAX_HEAP} -Dxnat.home=${XNAT_HOME}
-      # - CATALINA_OPTS=-Xms${XNAT_MIN_HEAP} -Xmx${XNAT_MAX_HEAP} -Dxnat.home=${XNAT_HOME} -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005
       - XNAT_HOME=${XNAT_HOME}
       - XNAT_ROOT=${XNAT_ROOT}
       - TOMCAT_USER_ID=${TOMCAT_UID}
       - TOMCAT_GROUP_ID=${TOMCAT_GID}
     networks:
       - xnat-services
-    restart: always
 
   xnat-db:
     image: postgres:${PG_VERSION}
-    # ports:
-    #   - "5432:5432"
     volumes:
       - ./postgres-data:/var/lib/postgresql/data
       #
@@ -70,7 +65,6 @@ services:
       - XNAT_DATASOURCE_PASSWORD=${XNAT_DATASOURCE_PASSWORD}
     networks:
       - xnat-services
-    restart: always
 
   xnat-nginx:
     image: nginx:${NGINX_VERSION}
@@ -85,7 +79,6 @@ services:
     depends_on:
       - xnat-web
       - jupyterhub
-    restart: always
 
   jupyterhub:
     image: xnat/jupyterhub:0.3.0
@@ -104,4 +97,3 @@ services:
       JH_XNAT_SERVICE_TOKEN: "${JH_XNAT_SERVICE_TOKEN}"
       JH_XNAT_USERNAME: "${JH_XNAT_USERNAME}"
       JH_XNAT_PASSWORD: "${JH_XNAT_PASSWORD}"
-    restart: always
