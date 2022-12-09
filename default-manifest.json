@@ -1,8 +1,8 @@
 {
-    "version": "1.8.2",
+    "version": "1.8.6.1",
     "base": "xnat-data",
-    "webapps": "org.nrg.xnat.web:xnat-web:1.8.2 -> ROOT.war",
+    "webapps": "org.nrg.xnat.web:xnat-web:1.8.6.1 -> ROOT.war",
     "plugins": [
-        "org.nrg.xnatx.plugins:ohif-viewer:3.0.0:fat"
+        "org.nrg.xnatx.plugins:ohif-viewer:3.2.0:fat"
     ]
 }

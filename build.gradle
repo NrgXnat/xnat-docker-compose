@@ -5,12 +5,12 @@ import java.util.regex.Matcher
 import javax.inject.Inject
 
 plugins {
-    id "com.avast.gradle.docker-compose" version "0.14.0"
-    id "io.spring.dependency-management" version "1.0.11.RELEASE"
+    id "com.avast.gradle.docker-compose" version "0.16.11"
+    id "io.spring.dependency-management" version "1.1.0"
 }
 
 group "org.nrg.xnat.containers"
-version "1.8.2"
+version "1.8.6.1"
 
 repositories {
     mavenLocal()
@@ -91,7 +91,7 @@ tasks.withType(ComposeBuild).configureEach { composeBuild ->
 dockerCompose {
     useComposeFiles = ["docker-compose.yml"]
     startedServices = ["xnat-traefik", "xnat-web", "xnat-db"]
-    removeImages = "All"
+    removeImages = com.avast.gradle.dockercompose.RemoveImages.All
     tcpPortsToIgnoreWhenWaiting = [8104, 8144]
 
     // Build full stack with fullStackComposeBuild, launch full stack with fullStackComposeUp.
