@@ -143,7 +143,7 @@ manifest file, with the following properties:
   below).
 - **webapps** specifies the Maven coordinates for the XNAT war file. The retrieved file is written to the folder _base_`/webapps`, which
   is mapped to the Tomcat `webapps` folder in the `docker-compose` configuration. The coordinates for the XNAT war file should be in the
-  form _groupId_:_artifactId_:_version_, e.g. for XNAT 1.8.2, this would be `org.nrg.xnat.web:xnat-web:1.8.2`.
+  form _groupId_:_artifactId_:_version_, e.g. for XNAT 1.8.6.1, this would be `org.nrg.xnat.web:xnat-web:1.8.6.1`.
 - **plugins** is an array of Maven coordinates for XNAT plugin jars. These are treated the same way as the **webapps** coordinates, with
   the exception that the retrieved files are written to the folder _base_`/plugins`, which is mapped to the `plugins` folder in the XNAT
   user's home folder.
@@ -151,15 +151,15 @@ manifest file, with the following properties:
 For each coordinates in both **webapps** and **plugins**, you can specify an optional mapping by appending ` -> `_target_, where _target_
 is the file name to use for the downloaded artifact. Artifacts retrieved from Maven have the name _artifactId_-_version_._classifier_
 (_classifier_ is something like _jar_ or _war_). This is especially important to change for the war file, because its name defines the
-context path for the application. For example, XNAT 1.8.2 is named `xnat-web-1.8.2.war`. This would result in XNAT being available at
-the URL http://localhost/xnat-web-1.8.2, which is not exactly concise and would also change if you upgraded to XNAT 1.8.1. Instead you
+context path for the application. For example, XNAT 1.8.6.1 is named `xnat-web-1.8.6.1.war`. This would result in XNAT being available at
+the URL http://localhost/xnat-web-1.8.6.1, which is not exactly concise and would also change when you upgrade to XNAT 1.8.7. Instead you
 can map the name to something like `xnat.war`, which would give you http://localhost/xnat, or `ROOT.war`, which is mounted at the root
 context path, giving you http://localhost.
 
 You can specify a manifest file by adding `-Pmanifest=`_manifest_ to the Gradle command:
 
 ```
-$ ./gradlew -PenvFile=xnat.env -Pmanifest=manifest-1.8.2.json fullStackComposeBuild
+$ ./gradlew -PenvFile=xnat.env -Pmanifest=manifest-1.8.6.1.json fullStackComposeBuild
 ```
 
 If you omit the `-Pmanifest=`_manifest_ parameter, the build will first look for a file named `manifest.json` and use that if it exists.
@@ -172,43 +172,23 @@ If you omit the `-Pmanifest=`_manifest_ parameter and there is no `manifest.json
 
 ```
 {
-    "version": "1.8.2",
+    "version": "1.8.6.1",
     "base": "xnat-data",
-    "webapps": "org.nrg.xnat.web:xnat-web:1.8.2 -> ROOT.war",
+    "webapps": "org.nrg.xnat.web:xnat-web:1.8.6.1 -> ROOT.war",
     "plugins": [
         "org.nrg.xnatx.plugins:ohif-viewer:3.0.0:fat"
     ]
 }
 ```
 
-This tells the build to get XNAT 1.8.2 and save it as `xnat-data/webapps/ROOT.war`. It also tells the build to download the [OHIF
+This tells the build to get XNAT 1.8.6.1 and save it as `xnat-data/webapps/ROOT.war`. It also tells the build to download the [OHIF
 viewer plugin](https://bitbucket.org/icrimaginginformatics/ohif-viewer-xnat-plugin) and save it as `xnat-data/plugins/ohif-viewer-3.0.0-fat.jar`.
 
 There are a number of sample manifests included with this project:
 
-- [sample.manifest-XNAT-ML-18.json](sample.manifest-XNAT-ML-18.json)
 - [sample.manifest-mapped.json](sample.manifest-mapped.json)
 - [sample.manifest-unmapped.json](sample.manifest-unmapped.json)
 - [sample.manifest.json](sample.manifest.json)
-
-`sample.manifest-XNAT-ML-18.json` is provided to support the [XNAT ML machine learning workflow](https://wiki.xnat.org/ml). It includes
-XNAT 1.8.2, as well as a number of plugins to support datasets, container management, and machine learning operations including training
-ML models and deploying models for use with XNAT data.
-
-```
-{
-    "version": "1.8.2",
-    "base": "xnat-data",
-    "webapps": "org.nrg.xnat.web:xnat-web:1.8.2 -> ROOT.war",
-    "plugins": [
-        "org.nrg.xnatx.plugins:batch-launch:0.4.0",
-        "org.nrg.xnatx.plugins:container-service:3.0.0:fat",
-        "org.nrg.xnatx.plugins:xnatx-ml:1.8.0",
-        "org.nrg.xnatx.plugins:xnatx-collection:1.8.0",
-        "org.nrg.xnatx.plugins:ohif-viewer:3.0.0:fat"
-    ]
-}
-```
 
 ## Mounted Data
 
@@ -361,7 +341,7 @@ These variables directly set options for XNAT itself.
 
 Variable | Description | Default value
 -------- | ----------- | -------------
-XNAT_VERSION | Indicates the version of XNAT to install. | 1.8.2
+XNAT_VERSION | Indicates the version of XNAT to install. | 1.8.6.1
 XNAT_MIN_HEAP | Indicates the minimum heap size for the Java virtual machine. | 256m
 XNAT_MAX_HEAP | Indicates the minimum heap size for the Java virtual machine. | 4g
 XNAT_DATASOURCE_ADMIN_PASSWORD | Indicates the password to set for the database administrator user (**postgres**) | xnat1234
