@@ -77,6 +77,9 @@ sudo chown -R ec2-user:ec2-user xnat-data
 sudo chown -R ec2-user:ec2-user xnat/plugins
 ```
 
+Where `ec2-user` is the system user account that tomcat will use to manage your XNAT data. This user should correspond to `TOMCAT_UID` and `TOMCAT_GID`,
+and likely `NB_UID` and `NB_GID` discussed below.
+
 Next checkout the `features/jupyterhub` branch
 ```
 git checkout -b features/jupyterhub origin/features/jupyterhub
