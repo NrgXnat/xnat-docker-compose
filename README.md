@@ -1,5 +1,5 @@
 # Dockerized XNAT / JupyterHub
-This branch has been modified to support JupyterHup alongside XNAT.
+This branch has been modified to support JupyterHup alongside XNAT. See the [XNAT JupyterHub Plugin Wiki](https://wiki.xnat.org/jupyter-integration) for the latest documentation on this feature.
 
 Use this repository to quickly deploy an [XNAT](https://xnat.org/) and [JupyterHub](https://jupyterhub.readthedocs.io/en/stable/) instance on [docker](https://www.docker.com/).
 
@@ -18,12 +18,7 @@ This document contains the following sections:
 
 ## Introduction
 
-This repository contains files to bootstrap XNAT and JupyterHub deployment. Note that this isn’t in an XNAT release yet but will be coming in the next couple of months. You’re welcome to start previewing the feature in the meantime.
-
-It is not advisable to run this in a production XNAT:
-
- - We do not guarantee forward compatibility.
- - If a user has access to an XNAT project, they will have access to run arbitrary code from Jupyter. We're currently working on improvements to access control whereby site admins can, optionally, restrict Jupyter access to trusted users only. 
+This repository contains files to bootstrap XNAT and JupyterHub deployment.
 
 The build creates four containers:
 
@@ -82,14 +77,14 @@ Next checkout the `features/jupyterhub` branch
 git checkout -b features/jupyterhub origin/features/jupyterhub
 ```
 
-3. Download the latest [XNAT JupyterHub Plugin](https://ci.xnat.org/job/Plugins_Develop/job/JupyterHub/) jar into the `./xnat/plugins` directory.
+3. Download the latest [XNAT JupyterHub Plugin](https://ci.xnat.org/job/Plugins_Release/job/JupyterHub/) jar into the `./xnat/plugins` directory.
 
 ```
-wget -q -P ./xnat/plugins/ https://ci.xnat.org/job/Plugins_Develop/job/JupyterHub/22/artifact/build/libs/xnat-jupyterhub-plugin-0.3.0.jar
+wget -q -P ./xnat/plugins/ https://ci.xnat.org/job/Plugins_Release/job/JupyterHub/lastSuccessfulBuild/artifact/build/libs/xnat-jupyterhub-plugin-1.0.0.jar
 ```
 Or
 ```
-curl -s -o ./xnat/plugins/ https://ci.xnat.org/job/Plugins_Develop/job/JupyterHub/22/artifact/build/libs/xnat-jupyterhub-plugin-0.3.0.jar
+curl -s -o ./xnat/plugins/ https://ci.xnat.org/job/Plugins_Release/job/JupyterHub/lastSuccessfulBuild/artifact/build/libs/xnat-jupyterhub-plugin-1.0.0.jar
 ```
 
 4. Set Docker enviroment variables: 
@@ -144,7 +139,7 @@ docker swarm init
 
 6. JupyterHub needs an image to spawn single-user Jupyter containers. Let's start with this image and later you can configure other images in the plugin settings page within XNAT. 
 ```
-docker pull jupyter/scipy-notebook:hub-3.0.0
+docker pull xnat/datascience-notebook:latest
 ```
 
 7. Start the system

@@ -81,7 +81,7 @@ services:
       - jupyterhub
 
   jupyterhub:
-    image: xnat/jupyterhub:0.3.0
+    image: xnat/jupyterhub:1.0.0
     hostname: jupyterhub
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock:rw"
