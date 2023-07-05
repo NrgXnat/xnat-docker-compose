@@ -1,5 +1,5 @@
 # Dockerized XNAT / JupyterHub
-This branch has been modified to support JupyterHup alongside XNAT. See the [XNAT JupyterHub Plugin Wiki](https://wiki.xnat.org/jupyter-integration) for the latest documentation on this feature.
+This branch has been modified to support JupyterHup alongside XNAT. See the [XNAT Jupyter Integration Wiki](https://wiki.xnat.org/jupyter-integration) for the latest documentation on this feature.
 
 Use this repository to quickly deploy an [XNAT](https://xnat.org/) and [JupyterHub](https://jupyterhub.readthedocs.io/en/stable/) instance on [docker](https://www.docker.com/).
 
@@ -218,7 +218,7 @@ Everything should now be configured. Create a project, add some data, then from 
 
 When you checked out this branch, several directories were created to store the persistent data.
 
-* **xnat/plugins** - Initially contains nothing. This is where the [JupterHub](https://ci.xnat.org/job/Plugins_Develop/job/JupyterHub/22/artifact/build/libs/xnat-jupyterhub-plugin-0.3.0.jar) plugin belongs. You can further customize your XNAT with other plugins by placing jars into this directory and restarting XNAT.
+* **xnat/plugins** - Initially contains nothing. This is where the [xnat-jupyterhub-plugin jar](https://ci.xnat.org/job/Plugins_Release/job/JupyterHub) belongs. You can further customize your XNAT with other plugins by placing jars into this directory and restarting XNAT.
 * **xnat-data/archive** - Contains the XNAT archive
 * **xnat-data/workspaces** - User workspaces for storing notebooks
 * **xnat-data/build** - Contains the XNAT build space. This is useful when running the container service plugin.
