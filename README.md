@@ -18,12 +18,7 @@ This document contains the following sections:
 
 ## Introduction
 
-This repository contains files to bootstrap XNAT and JupyterHub deployment. Note that this isn’t in an XNAT release yet but will be coming in the next couple of months. You’re welcome to start previewing the feature in the meantime.
-
-It is not advisable to run this in a production XNAT:
-
- - We do not guarantee forward compatibility.
- - If a user has access to an XNAT project, they will have access to run arbitrary code from Jupyter. We're currently working on improvements to access control whereby site admins can, optionally, restrict Jupyter access to trusted users only. 
+This repository contains files to bootstrap XNAT and JupyterHub deployment. 
 
 The build creates four containers:
 
@@ -39,12 +34,15 @@ The build creates four containers:
 
 ## Migrating From the Master Branch
 
-Backup your data before continuing!!!
+Backup your data before continuing.
 
-If you are coming from master you'll need to change the ownership of the `xnat-data` and `xnat/plugins` directories.
+If you are coming from master you may need to change the ownership of the `xnat-data` and `xnat/plugins` directories
+if they are owned by root. Jupyter notebooks will be run as a non-root user and we need to ensure that the user has 
+access to the xnat archive directory. 
+
 ```
-sudo chown -R ec2-user:ec2-user xnat-data
-sudo chown -R ec2-user:ec2-user xnat/plugins
+sudo chown -R user:group xnat-data
+sudo chown -R user:group xnat/plugins
 ```
 
 Next checkout the `features/jupyterhub` branch
@@ -62,7 +60,7 @@ No changes are needed to the `postgres-data` directory. Your existing database, 
 
 ## Usage
 
-If your coming from the master branch and would like to try out JupyterHub backup your data before continuing!!!
+If your coming from the master branch and would like to try out JupyterHub backup your data before continuing.
 
 1. Clone the features/jupyterhub branch of the  [xnat-docker-compose](https://github.com/NrgXnat/xnat-docker-compose) repository if your are stating fresh or skip to the next step if your are coming from the master branch.
 
@@ -71,10 +69,10 @@ git clone -b features/jupyterhub https://github.com/NrgXnat/xnat-docker-compose
 cd xnat-docker-compose
 ```
 
-2. If you are coming from master you'll first need to change the ownership of `xnat-data` and `xnat/plugins`
+2. If you are coming from master you'll first need may need to change the ownership of `xnat-data` and `xnat/plugins` if they are owned by root.
 ```
-sudo chown -R ec2-user:ec2-user xnat-data
-sudo chown -R ec2-user:ec2-user xnat/plugins
+sudo chown -R user:group xnat-data
+sudo chown -R user:group xnat/plugins
 ```
 
 Next checkout the `features/jupyterhub` branch
@@ -82,17 +80,22 @@ Next checkout the `features/jupyterhub` branch
 git checkout -b features/jupyterhub origin/features/jupyterhub
 ```
 
-3. Download the latest [XNAT JupyterHub Plugin](https://ci.xnat.org/job/Plugins_Develop/job/JupyterHub/) jar into the `./xnat/plugins` directory.
+3. Make the `xnat-data` and `xnat/plugins` directories if they don't already exist.
+```
+./create-dirs.sh
+```
+
+4. Download the latest [XNAT JupyterHub Plugin](https://ci.xnat.org/job/Plugins_Release/job/JupyterHub/) jar into the `./xnat/plugins` directory.
 
 ```
-wget -q -P ./xnat/plugins/ https://ci.xnat.org/job/Plugins_Develop/job/JupyterHub/22/artifact/build/libs/xnat-jupyterhub-plugin-0.3.0.jar
+wget -q -P ./xnat/plugins/ https://ci.xnat.org/job/Plugins_Release/job/JupyterHub/lastSuccessfulBuild/artifact/build/libs/xnat-jupyterhub-plugin-1.0.1.jar
 ```
 Or
 ```
-curl -s -o ./xnat/plugins/ https://ci.xnat.org/job/Plugins_Develop/job/JupyterHub/22/artifact/build/libs/xnat-jupyterhub-plugin-0.3.0.jar
+curl -s -o ./xnat/plugins/ https://ci.xnat.org/job/Plugins_Release/job/JupyterHub/lastSuccessfulBuild/artifact/build/libs/xnat-jupyterhub-plugin-1.0.1.jar
 ```
 
-4. Set Docker enviroment variables: 
+5. Set Docker enviroment variables:
 
     1. Default and sample enviroment variables are provided in the `linux.env` file and `mac.env` file. Use the env file that's appropriate for your os. Add these variables to your environment or simply copy `linux.env` or `mac.env` to `.env`. Values in this file are used to populate dollar-notation variables in the docker-compose.yml file.
     ```
@@ -137,17 +140,17 @@ curl -s -o ./xnat/plugins/ https://ci.xnat.org/job/Plugins_Develop/job/JupyterHu
     This environmental variable is used by JupyterHub to communicate with your XNAT.
 
 
-5. JupyterHub must be running on the master node of a Docker swarm. To initialize a swarm
+6. JupyterHub must be running on the master node of a Docker swarm. To initialize a swarm
 ```
 docker swarm init
 ```
 
-6. JupyterHub needs an image to spawn single-user Jupyter containers. Let's start with this image and later you can configure other images in the plugin settings page within XNAT. 
+7. JupyterHub needs an image to spawn single-user Jupyter containers. Let's start with this image and later you can configure other images in the plugin settings page within XNAT.
 ```
 docker pull jupyter/scipy-notebook:hub-3.0.0
 ```
 
-7. Start the system
+8. Start the system
 
 ```
 docker compose build
@@ -180,20 +183,20 @@ xnat-web_1    | INFO: Starting ProtocolHandler ["ajp-bio-8009"]
 xnat-web_1    | Oct 24, 2017 3:18:27 PM org.apache.catalina.startup.Catalina start
 xnat-web_1    | INFO: Server startup in 84925 ms
 ...
-$ docker-compose logs -f jupyterhub 
+$ docker-compose logs -f jupyterhub
 ...
 ```
 
 
-8. First XNAT Site Setup
+9. First XNAT Site Setup
 
 Your XNAT will soon be available at http://localhost or https://your.xnat.org if your server has a domain name.
 
 After logging in with credentials admin/admin (username/password resp.) the setup page is displayed. You can usually accept the defaults.
 
-9. Setup the JupyterHub Plugin
+10. Setup the JupyterHub Plugin
 
-    1. From the top navigation bar, go to `Administer -> Plugin Settings` and find the `JupyterHub -> Setup` tab. 
+    1. From the top navigation bar, go to `Administer -> Plugin Settings` and find the `JupyterHub -> Setup` tab.
     2. From the JupyterHub Setup pane, select the Edit action
     3. Set the JupyterHub API url
         1. Linux: `http://172.17.0.1/jupyterhub/hub/api`
@@ -215,7 +218,7 @@ After logging in with credentials admin/admin (username/password resp.) the setu
         1. From the top navigation bar, go to `Administer -> Users`. You will see a new user, `jupyterhub`. Enable this account. This account is used by JupyterHub to communicate with XNAT.
         2. If you set the `JH_XNAT_PASSWORD` environmental variable, update that password of the `jupyterhub` user now.
 
-10. Set the [Processing URL](#setting-the-processing-url), a core XNAT preference. Though we are not using the Container Service plugin, we have implemented the same feature in the Jupyter plugin. If you are on a Mac you will need to update this preference.
+11. Set the [Processing URL](#setting-the-processing-url), a core XNAT preference. Though we are not using the Container Service plugin, we have implemented the same feature in the Jupyter plugin. If you are on a Mac you will need to update this preference.
 
 Everything should now be configured. Create a project, add some data, then from the action panel of a Project, Subject, or Experiment page click Start Jupyter.
 
@@ -238,7 +241,7 @@ To create your own `.env` file, it's best to just copy the existing `linux.env` 
 
 ### XNAT configuration
 
-Description of the core XNAT environmental variables can be found on the master branch readme. This describes the envriomental variables needed for Jupyter integration. 
+Description of the core XNAT environmental variables can be found on the master branch readme. This describes the envriomental variables needed for Jupyter integration.
 
 Variable | Description | Default value
 -------- | ----------- | -------------

@@ -16,8 +16,13 @@ gradle.properties
 postgres-data/
 
 xnat/webapps
+xnat/plugins/
+xnat-data/
 
 *.env
 !linux.env
 !mac.env
+
+# Ignore Mac specific files
+.DS_Store
 
