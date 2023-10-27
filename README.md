@@ -78,6 +78,8 @@ If your coming from the master branch and would like to try out JupyterHub backu
     sudo chown -R user:group xnat/plugins
     ```
 
+    Where `user` and `group` are the system user account Tomcat will use to manage your XNAT data. Jupyter notebooks will be run as a non-root user, and we need to ensure that the user has access to the xnat archive directory. See [Environment variables](#environment-variables) for more details on setting UIDs and GIDs.
+
     Next checkout the `features/jupyterhub` branch.
 
     ```
