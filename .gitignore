@@ -13,15 +13,13 @@ gradle.properties
 
 # Ignore log and env files, as well as mounted data folders and plugin folders.
 *.log
-postgres-data/
+*-data/
+xnat/plugins
 
 xnat/webapps
-xnat/plugins/
-xnat-data/
 
 *.env
-!linux.env
-!mac.env
+!default.env
 
 # Ignore Mac specific files
 .DS_Store

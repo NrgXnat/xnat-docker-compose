@@ -1,4 +1,4 @@
-version: '3.7'
+version: '3.8'
 
 networks:
   xnat-services:
@@ -50,6 +50,8 @@ services:
       - XNAT_ROOT=${XNAT_ROOT}
       - TOMCAT_USER_ID=${TOMCAT_UID}
       - TOMCAT_GROUP_ID=${TOMCAT_GID}
+    env_file:
+      - ./.env
     networks:
       - xnat-services
 
@@ -93,11 +95,5 @@ services:
       - xnat-services
     environment:
       JH_NETWORK: *networkname
-      JH_UID: "${JH_UID}"
-      JH_GID: "${JH_GID}"
-      NB_UID: "${NB_UID}"
-      NB_GID: "${NB_GID}"
-      JH_XNAT_URL: "${JH_XNAT_URL}"
-      JH_XNAT_SERVICE_TOKEN: "${JH_XNAT_SERVICE_TOKEN}"
-      JH_XNAT_USERNAME: "${JH_XNAT_USERNAME}"
-      JH_XNAT_PASSWORD: "${JH_XNAT_PASSWORD}"
+    env_file:
+      - ./.env
