@@ -1,5 +1,5 @@
 # Dockerized XNAT / JupyterHub
-This branch has been modified to support JupyterHup alongside XNAT.
+This branch has been modified to support JupyterHup alongside XNAT. See the [XNAT Jupyter Integration Wiki](https://wiki.xnat.org/jupyter-integration) for the latest documentation on this feature.
 
 Use this repository to quickly deploy an [XNAT](https://xnat.org/) and [JupyterHub](https://jupyterhub.readthedocs.io/en/stable/) instance on [docker](https://www.docker.com/).
 
@@ -71,7 +71,7 @@ If your coming from the master branch and would like to try out JupyterHub backu
     cd xnat-docker-compose
     ```
 
-2. If you are coming from the master branch you'll first need may need to change the ownership of `xnat-data` and `xnat/plugins` if they are owned by root.
+2. If you are coming from the master branch you may need to change the ownership of `xnat-data` and `xnat/plugins` if they are owned by root.
 
     ```
     sudo chown -R user:group xnat-data
@@ -86,7 +86,7 @@ If your coming from the master branch and would like to try out JupyterHub backu
     git checkout -b features/jupyterhub origin/features/jupyterhub
     ```
 
-3. Make the `xnat-data` and `xnat/plugins` directories if they don't already exist.
+3. Create the `xnat-data` and `xnat/plugins` directories if they don't already exist.
 
     ```
     ./create-dirs.sh
@@ -119,7 +119,7 @@ If your coming from the master branch and would like to try out JupyterHub backu
    4. Update the default URLs for Mac by changing http://172.17.0.1 to http://host.docker.internal. This is needed for
       the JupyterHub plugin to communicate with XNAT.
 
-   Review the `.env` file and make any changes needed for your environment.
+   Review the `.env` file and make any changes needed for your environment. Note that xnat-jupyterhub-plugin version 1.1.0 (to be released) is required for the JH_* variables to be used by the XNAT JupyterHub plugin.
 
 6. JupyterHub must be running on the master node of a Docker swarm. To initialize a swarm
     ```
@@ -216,7 +216,7 @@ Everything should now be configured. Create a project, add some data, then from 
 
 The `create-dirs.sh` script creates several directories to store the persistent data.
 
-* **xnat/plugins** - Initially contains nothing. This is where the [JupyterHub](https://ci.xnat.org/job/Plugins_Develop/job/JupyterHub/22/artifact/build/libs/xnat-jupyterhub-plugin-0.3.0.jar) plugin belongs. You can further customize your XNAT with other plugins by placing jars into this directory and restarting XNAT.
+* **xnat/plugins** - Initially contains nothing. This is where the xnat-jupyterhub-plugin jar belongs. You can further customize your XNAT with other plugins by placing jars into this directory and restarting XNAT.
 * **xnat-data/archive** - Contains the XNAT archive
 * **xnat-data/workspaces** - User workspaces for storing notebooks
 * **xnat-data/build** - Contains the XNAT build space. This is useful when running the container service plugin.
@@ -228,7 +228,7 @@ To support differing deployment requirements, `xnat-docker-compose` uses variabl
 default, `docker-compose` takes the values for variables from the [file `.env`](https://docs.docker.com/compose/environment-variables/). Advanced configurations will need to use a customized `.env` file.
 
 The `create-env.sh` script will create a `.env` file from `default.env` if one doesn't already exist. It will also attempt
-to set the path translation variables and the `*_UID` and `*_GID` environmental variables.
+to set the path translation variables and the `*_UID` and `*_GID` environmental variables. Note that xnat-jupyterhub-plugin version 1.1.0 (to be released) is required for the JH_* variables to be used by the XNAT JupyterHub plugin.
 
 ### XNAT configuration
 
