@@ -1,4 +1,4 @@
-# !/bin/bash
+#!/bin/bash
 
 set -e
 
@@ -55,7 +55,7 @@ if [[ "$OS" == *"linux"* ]]; then
     sed -i 's:TOMCAT_UID=:'TOMCAT_UID="$(id -u)"':g' .env
 
     # Replace TOMCAT_GID with id -g
-    sed -i 's:TOMCAT_GID=:'TOMCAT_GID="$(id -g)"':g' .env
+    sed -i 's:TOMCAT_GID=:'TOMCAT_GID="$(getent group docker | cut -d: -f3)"':g' .env
 
     # Replace JH_UID with id -u
     sed -i 's:JH_UID=:'JH_UID="$(id -u)"':g' .env

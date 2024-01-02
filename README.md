@@ -284,6 +284,9 @@ NB_UID=54
 NB_GID=54
 ```
 
+If you are using Container Service, TOMCAT/XNAT may also need to be a member of the docker group. This is because the
+Container Service plugin can use the Docker socket to spawn containers.
+
 ## Troubleshooting
 
 ### Get a shell in a running container
