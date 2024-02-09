@@ -95,11 +95,14 @@ If your coming from the master branch and would like to try out JupyterHub backu
 4. Download the latest [XNAT JupyterHub Plugin](https://ci.xnat.org/job/Plugins_Release/job/JupyterHub/) jar into the `./xnat/plugins` directory.
 
     ```
-    wget -q -P ./xnat/plugins/ https://ci.xnat.org/job/Plugins_Release/job/JupyterHub/lastSuccessfulBuild/artifact/build/libs/xnat-jupyterhub-plugin-1.0.1.jar
+    wget -q -P ./xnat/plugins/ https://github.com/NrgXnat/xnat-jupyterhub-plugin/releases/download/1.0.1/xnat-jupyterhub-plugin-1.0.1.jar
     ```
-    Or
+    
+    Other helpful plugins to download are the OHIF Viewer, Container Service, and Batch Launch plugins. These plugins are not required for JupyterHub to work, but they are useful for working with imaging data.
     ```
-    curl -s -o ./xnat/plugins/ https://ci.xnat.org/job/Plugins_Release/job/JupyterHub/lastSuccessfulBuild/artifact/build/libs/xnat-jupyterhub-plugin-1.0.1.jar
+    wget -q -P ./xnat/plugins/ https://api.bitbucket.org/2.0/repositories/icrimaginginformatics/ohif-viewer-xnat-plugin/downloads/ohif-viewer-3.6.0.jar
+    wget -q -P ./xnat/plugins/ https://api.bitbucket.org/2.0/repositories/xnatdev/container-service/downloads/container-service-3.4.1-fat.jar
+    wget -q -P ./xnat/plugins/ https://api.bitbucket.org/2.0/repositories/xnatx/xnatx-batch-launch-plugin/downloads/batch-launch-0.6.0.jar
     ```
 
 5. Set Docker environment variables: Default and sample environment variables are provided in the `default.env` file.
