@@ -25,24 +25,28 @@ done
 
 # Create xnat directories
 mkdir -pv xnat/plugins \
+          xnat-data/home \
+          xnat-data/home/logs \
+          xnat-data/home/work \
           xnat-data/archive \
           xnat-data/build \
           xnat-data/cache \
           xnat-data/ftp \
           xnat-data/pipeline \
           xnat-data/prearchive \
-          xnat-data/ftp \
           xnat-data/workspaces
 
 # Change ownership of xnat directories
 if [ -n "$USER_ID" ] && [ -n "$GROUP_ID" ]; then
     chown -R "$USER_ID:$GROUP_ID" xnat/plugins \
+                                  xnat-data/home \
+                                  xnat-data/home/logs \
+                                  xnat-data/home/work \
                                   xnat-data/archive \
                                   xnat-data/build \
                                   xnat-data/cache \
                                   xnat-data/ftp \
                                   xnat-data/pipeline \
                                   xnat-data/prearchive \
-                                  xnat-data/ftp \
                                   xnat-data/workspaces
 fi
