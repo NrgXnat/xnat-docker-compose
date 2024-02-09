@@ -92,7 +92,7 @@ If your coming from the master branch and would like to try out JupyterHub backu
     ./create-dirs.sh
     ```
 
-4. Download the latest [XNAT JupyterHub Plugin](https://ci.xnat.org/job/Plugins_Release/job/JupyterHub/) jar into the `./xnat/plugins` directory.
+4. Download the latest [XNAT JupyterHub Plugin](https://github.com/NrgXnat/xnat-jupyterhub-plugin/releases) jar into the `./xnat/plugins` directory.
 
     ```
     wget -q -P ./xnat/plugins/ https://github.com/NrgXnat/xnat-jupyterhub-plugin/releases/download/1.0.1/xnat-jupyterhub-plugin-1.0.1.jar
