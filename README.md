@@ -95,7 +95,7 @@ If your coming from the master branch and would like to try out JupyterHub backu
 4. Download the latest [XNAT JupyterHub Plugin](https://github.com/NrgXnat/xnat-jupyterhub-plugin/releases) jar into the `./xnat/plugins` directory.
 
     ```
-    wget -q -P ./xnat/plugins/ https://github.com/NrgXnat/xnat-jupyterhub-plugin/releases/download/1.0.1/xnat-jupyterhub-plugin-1.0.1.jar
+    wget -q -P ./xnat/plugins/ https://github.com/NrgXnat/xnat-jupyterhub-plugin/releases/download/v1.1.0/xnat-jupyterhub-plugin-1.1.0.jar
     ```
     
     Other helpful plugins to download are the OHIF Viewer, Container Service, and Batch Launch plugins. These plugins are not required for JupyterHub to work, but they are useful for working with imaging data.
@@ -122,7 +122,7 @@ If your coming from the master branch and would like to try out JupyterHub backu
    4. Update the default URLs for Mac by changing http://172.17.0.1 to http://host.docker.internal. This is needed for
       the JupyterHub plugin to communicate with XNAT.
 
-   Review the `.env` file and make any changes needed for your environment. Note that xnat-jupyterhub-plugin version 1.1.0 (to be released) is required for the JH_* variables to be used by the XNAT JupyterHub plugin.
+   Review the `.env` file and make any changes needed for your environment. Note that xnat-jupyterhub-plugin version 1.1.0 is required for the JH_* variables to be used by the XNAT JupyterHub plugin.
 
 6. JupyterHub must be running on the master node of a Docker swarm. To initialize a swarm
     ```
@@ -231,13 +231,12 @@ To support differing deployment requirements, `xnat-docker-compose` uses variabl
 default, `docker-compose` takes the values for variables from the [file `.env`](https://docs.docker.com/compose/environment-variables/). Advanced configurations will need to use a customized `.env` file.
 
 The `create-env.sh` script will create a `.env` file from `default.env` if one doesn't already exist. It will also attempt
-to set the path translation variables and the `*_UID` and `*_GID` environmental variables. Note that xnat-jupyterhub-plugin version 1.1.0 (to be released) is required for the JH_* variables to be used by the XNAT JupyterHub plugin.
+to set the path translation variables and the `*_UID` and `*_GID` environmental variables. Note that xnat-jupyterhub-plugin version 1.1.0 is required for the JH_* variables to be used by the XNAT JupyterHub plugin.
 
 ### XNAT configuration
 
 Description of the core XNAT environmental variables can be found on the master branch readme. This describes the environmental variables needed for Jupyter integration.
 
-<<<<<<< HEAD
 | Variable                            | Description                                                                                                                                         | Default value                                                                                        |
 |-------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------|
 | TOMCAT_UID                          | The UID for running Tomcat                                                                                                                          |                                                                                                      |
@@ -260,34 +259,6 @@ Description of the core XNAT environmental variables can be found on the master 
 | JH_XNAT_PT_WORKSPACE_DOCKER_PREFIX  | The XNAT workspace path translation docker prefix.                                                                                                  | ./xnat-data/workspaces - Updated by create-env.sh with the full path to the xnat-data/workspaces dir |
 | JH_XNAT_WORKSPACE_PATH              | The XNAT workspace path. This directory persists user notebooks across sessions.                                                                    | /data/xnat/workspaces                                                                                |
 | JH_XNAT_ALL_USERS_CAN_START_JUPYTER | Set to true to allow all users to start a Jupyter notebook. Set to false to only allow users with the JupyterHub user role to start a notebook.     | true                                                                                                 |
-=======
-Variable | Description | Default value
--------- | ----------- | -------------
-XNAT_VERSION | Indicates the version of XNAT to install. | 1.8.10
-XNAT_MIN_HEAP | Indicates the minimum heap size for the Java virtual machine. | 256m
-XNAT_MAX_HEAP | Indicates the maximum heap size for the Java virtual machine. | 4g
-XNAT_SMTP_ENABLED | Indicates whether SMTP operations are enabled in XNAT. | false
-XNAT_SMTP_HOSTNAME | Sets the address for the server to use for SMTP operations. Has no effect if **XNAT_SMTP_ENABLED** is false. |
-XNAT_SMTP_PORT | Sets the port for the server to use for SMTP operations. Has no effect if **XNAT_SMTP_ENABLED** is false. |
-XNAT_SMTP_AUTH | Indicates whether the configured SMTP server requires authentication. Has no effect if **XNAT_SMTP_ENABLED** is false. |
-XNAT_SMTP_USERNAME | Indicates the username to use to authenticate with the configured SMTP server. Has no effect if **XNAT_SMTP_ENABLED** or **XNAT_SMTP_AUTH** are false. |
-XNAT_SMTP_PASSWORD | Indicates the password to use to authenticate with the configured SMTP server. Has no effect if **XNAT_SMTP_ENABLED** or **XNAT_SMTP_AUTH** are false. |
-XNAT_DATASOURCE_ADMIN_PASSWORD | Indicates the password to set for the database administrator user (**postgres**) | xnat1234
-XNAT_DATASOURCE_URL | Specifies the URL to use when accessing the database from XNAT. | jdbc:postgresql://xnat-db/xnat
-XNAT_DATASOURCE_DRIVER | Specifies the driver class to set for the database connection. | org.postgresql.Driver
-XNAT_DATASOURCE_NAME | Specifies the database name for the database connection. | xnat
-XNAT_DATASOURCE_USERNAME | Specifies the username for the XNAT database account. | xnat
-XNAT_DATASOURCE_PASSWORD | Specifies the password for the XNAT database account. | xnat
-XNAT_WEBAPP_FOLDER | Indicates the name of the folder for the XNAT application. This affects the context path for accessing XNAT. The value `ROOT` indicates that XNAT is the root application and can be accessed at http://localhost (i.e. no path). Otherwise, you must add this value to the _end_ of the URL so, e.g. if you specify `xnat` for this variable, you'll access XNAT at http://localhost/xnat. | ROOT
-XNAT_ROOT | Indicates the location of the root XNAT folder on the XNAT container. | /data/xnat
-XNAT_HOME | Indicates the location of the XNAT user's home folder on the XNAT container. | /data/xnat/home
-XNAT_EMAIL | Specifies the primary administrator email address. | harmitage@miskatonic.edu
-XNAT_ACTIVEMQ_URL | Indicates the URL for an external ActiveMQ service to use for messaging. If not specified, XNAT uses its own internal queue. |
-XNAT_ACTIVEMQ_USERNAME | Indicates the username to use to authenticate with the configured ActiveMQ server. Has no effect if **XNAT_ACTIVEMQ_URL** isn't specified. |
-XNAT_ACTIVEMQ_PASSWORD | Indicates the password to use to authenticate with the configured ActiveMQ server. Has no effect if **XNAT_ACTIVEMQ_URL** isn't specified. |
-PG_VERSION | Specifies the [version tag](https://hub.docker.com/_/postgres?tab=tags) of the PostgreSQL docker container used in `docker-compose.yml`. | 12.2-alpine
-NGINX_VERSION | Specifies the [version tag](https://hub.docker.com/_/nginx?tab=tags) of the Nginx docker container used in `docker-compose.yml`. | 1.19-alpine-perl
->>>>>>> master
 
 The UIDs and GIDs are not needed for running on a Mac but are critical for running on Linux. The xnat-web tomcat
 container uid/gid is generally the owner of the directory `xnat-data/archive`. The single user Jupyter notebook
