@@ -1,6 +1,7 @@
-version: '3.7'
 services:
-  xnat-web:
+
+  xnat-web-1:
+    container_name: xnat-web-1
     build:
       context: ./xnat
       args:
@@ -19,23 +20,95 @@ services:
         XNAT_ROOT: ${XNAT_ROOT}
         XNAT_HOME: ${XNAT_HOME}
         XNAT_EMAIL: ${XNAT_EMAIL}
+    networks: [xnat-services]
     ports:
+      - 8000:8000
+      - 8080:8080
       - 8104:8104
     volumes:
       - ./xnat/plugins:${XNAT_HOME}/plugins
-      - ./xnat-data/home/logs:${XNAT_HOME}/logs
+      - ./xnat/node-conf-1.properties:${XNAT_HOME}/config/node-conf.properties
+      - ./xnat-data/1/build:${XNAT_ROOT}/build
+      - ./xnat-data/1/cache:${XNAT_ROOT}/cache
+      - ./xnat-data/1/home/logs:${XNAT_HOME}/logs
       - ./xnat-data/archive:${XNAT_ROOT}/archive
-      - ./xnat-data/build:${XNAT_ROOT}/build
-      - ./xnat-data/cache:${XNAT_ROOT}/cache
+      - ./xnat-data/prearchive:${XNAT_ROOT}/prearchive
       - /var/run/docker.sock:/var/run/docker.sock
     depends_on:
       - xnat-db
     environment:
-      - CATALINA_OPTS=-Xms${XNAT_MIN_HEAP} -Xmx${XNAT_MAX_HEAP} -Dxnat.home=${XNAT_HOME}
+      - CATALINA_OPTS=-Xms${XNAT_MIN_HEAP} -Xmx${XNAT_MAX_HEAP} -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=8000 -Dxnat.home=${XNAT_HOME} -Dxnat.is_primary_node=true
       - XNAT_HOME=${XNAT_HOME}
 
+  xnat-web-2:
+    container_name: xnat-web-2
+    build:
+      context: ./xnat
+      args:
+        XNAT_VERSION: ${XNAT_VERSION}
+        XNAT_SMTP_ENABLED: ${XNAT_SMTP_ENABLED}
+        XNAT_SMTP_HOSTNAME: ${XNAT_SMTP_HOSTNAME}
+        XNAT_SMTP_PORT: ${XNAT_SMTP_PORT}
+        XNAT_SMTP_AUTH: ${XNAT_SMTP_AUTH}
+        XNAT_SMTP_USERNAME: ${XNAT_SMTP_USERNAME}
+        XNAT_SMTP_PASSWORD: ${XNAT_SMTP_PASSWORD}
+        XNAT_DATASOURCE_DRIVER: ${XNAT_DATASOURCE_DRIVER}
+        XNAT_DATASOURCE_URL: ${XNAT_DATASOURCE_URL}
+        XNAT_DATASOURCE_USERNAME: ${XNAT_DATASOURCE_USERNAME}
+        XNAT_DATASOURCE_PASSWORD: ${XNAT_DATASOURCE_PASSWORD}
+        TOMCAT_XNAT_FOLDER: ${TOMCAT_XNAT_FOLDER}
+        XNAT_ROOT: ${XNAT_ROOT}
+        XNAT_HOME: ${XNAT_HOME}
+        XNAT_EMAIL: ${XNAT_EMAIL}
+    networks: [xnat-services]
+    ports:
+      - 8001:8000
+      - 8081:8080
+      - 8105:8104
+    volumes:
+      - ./xnat/plugins:${XNAT_HOME}/plugins
+      - ./xnat/node-conf-2.properties:${XNAT_HOME}/config/node-conf.properties
+      - ./xnat-data/2/build:${XNAT_ROOT}/build
+      - ./xnat-data/2/cache:${XNAT_ROOT}/cache
+      - ./xnat-data/2/home/logs:${XNAT_HOME}/logs
+      - ./xnat-data/archive:${XNAT_ROOT}/archive
+      - ./xnat-data/prearchive:${XNAT_ROOT}/prearchive
+      - /var/run/docker.sock:/var/run/docker.sock
+    depends_on:
+      - xnat-db
+    environment:
+      - CATALINA_OPTS=-Xms${XNAT_MIN_HEAP} -Xmx${XNAT_MAX_HEAP} -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=8000 -Dxnat.home=${XNAT_HOME} -Dxnat.is_primary_node=false
+      - XNAT_HOME=${XNAT_HOME}
+
+  xnat-activemq:
+    container_name: xnat-activemq
+    image: islandora/activemq:renovate.all-non-major-dependencies-arm64
+    networks: [xnat-services]
+    expose:
+      - "61616"
+    ports:
+      - "8161:8161"
+    #   - "61616:61616"
+    # environment:
+    #   ACTIVEMQ_REMOVE_DEFAULT_ACCOUNT: "true"
+    #   ACTIVEMQ_ADMIN_LOGIN: ${ACTIVEMQ_ADMIN_LOGIN}
+    #   ACTIVEMQ_ADMIN_PASSWORD: ${ACTIVEMQ_ADMIN_PASSWORD}
+    #   ACTIVEMQ_WRITE_LOGIN: ${ACTIVEMQ_WRITE_LOGIN}
+    #   ACTIVEMQ_WRITE_PASSWORD: ${ACTIVEMQ_WRITE_PASSWORD}
+    #   ACTIVEMQ_READ_LOGIN: ${ACTIVEMQ_READ_LOGIN}
+    #   ACTIVEMQ_READ_PASSWORD: ${ACTIVEMQ_READ_PASSWORD}
+    #   ACTIVEMQ_JMX_LOGIN: ${ACTIVEMQ_JMX_LOGIN}
+    #   ACTIVEMQ_JMX_PASSWORD: ${ACTIVEMQ_JMX_PASSWORD}
+    #   ACTIVEMQ_STATIC_TOPICS: archive;prearchive;automation
+    #   ACTIVEMQ_STATIC_QUEUES: defaultRequest;automatedScriptRequest;moveStoredFileRequest;prearchiveOperationRequest;initializeGroupRequest;dicomInboxImportRequest
+    #   ACTIVEMQ_ENABLED_SCHEDULER: "true"
+    #   ACTIVEMQ_MIN_MEMORY: ${ACTIVEMQ_MIN_MEMORY}
+    #   ACTIVEMQ_MAX_MEMORY: ${ACTIVEMQ_MAX_MEMORY}
+
   xnat-db:
+    container_name: xnat-db
     image: postgres:${PG_VERSION}
+    networks: [xnat-services]
     expose:
       - "5432"
     volumes:
@@ -49,16 +122,22 @@ services:
       - XNAT_DATASOURCE_USERNAME=${XNAT_DATASOURCE_USERNAME}
       - XNAT_DATASOURCE_PASSWORD=${XNAT_DATASOURCE_PASSWORD}
 
-  xnat-nginx:
-    image: nginx:${NGINX_VERSION}
-    volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
-    ports:
-      - "80:80"
-    expose:
-      - "80"
-    depends_on:
-      - xnat-web
-    links:
-      - xnat-web
+networks:
+  xnat-services:
+    name: xnat-services
+    driver: bridge
+
+  # xnat-nginx:
+  #   image: nginx:${NGINX_VERSION}
+  #   volumes:
+  #     - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+  #   networks: [xnat-services]
+  #   ports:
+  #     - "80:80"
+  #   expose:
+  #     - "80"
+  #   depends_on:
+  #     - xnat-web
+  #   links:
+  #     - xnat-web
 
