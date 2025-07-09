@@ -1,6 +1,7 @@
-version: '3.7'
 services:
+
   xnat-web:
+    container_name: xnat-web
     build:
       context: ./xnat
       args:
@@ -11,6 +12,7 @@ services:
         XNAT_SMTP_AUTH: ${XNAT_SMTP_AUTH}
         XNAT_SMTP_USERNAME: ${XNAT_SMTP_USERNAME}
         XNAT_SMTP_PASSWORD: ${XNAT_SMTP_PASSWORD}
+        XNAT_SMTP_START_TLS: ${XNAT_SMTP_START_TLS}
         XNAT_DATASOURCE_DRIVER: ${XNAT_DATASOURCE_DRIVER}
         XNAT_DATASOURCE_URL: ${XNAT_DATASOURCE_URL}
         XNAT_DATASOURCE_USERNAME: ${XNAT_DATASOURCE_USERNAME}
@@ -21,6 +23,8 @@ services:
         XNAT_EMAIL: ${XNAT_EMAIL}
     ports:
       - 8104:8104
+    networks:
+      - xnat-network
     volumes:
       - ./xnat/plugins:${XNAT_HOME}/plugins
       - ./xnat-data/home/logs:${XNAT_HOME}/logs
@@ -35,9 +39,12 @@ services:
       - XNAT_HOME=${XNAT_HOME}
 
   xnat-db:
+    container_name: xnat-db
     image: postgres:${PG_VERSION}
     expose:
-      - "5432"
+      - 5432
+    networks:
+      - xnat-network
     volumes:
       - ./postgres-data:/var/lib/postgresql/data
       # 
@@ -50,15 +57,20 @@ services:
       - XNAT_DATASOURCE_PASSWORD=${XNAT_DATASOURCE_PASSWORD}
 
   xnat-nginx:
+    container_name: xnat-nginx
     image: nginx:${NGINX_VERSION}
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf
     ports:
-      - "80:80"
-    expose:
-      - "80"
+      - 80:80
+    networks:
+      - xnat-network
     depends_on:
       - xnat-web
     links:
       - xnat-web
+
+networks:
+  xnat-network:
+    name: xnat-network
 

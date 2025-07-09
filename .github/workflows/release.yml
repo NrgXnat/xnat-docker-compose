@@ -1,0 +1,41 @@
+name: Create Release Bundle
+
+on:
+  push:
+    tags:
+      - '*' # Only run on tag pushes
+
+jobs:
+  zip-and-release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Get repository name
+        id: repo
+        run: |
+          REPO_NAME=$(basename "$GITHUB_REPOSITORY")
+          echo "repo_name=${REPO_NAME}" >> $GITHUB_OUTPUT
+
+      - name: Get current tag
+        id: tag
+        run: |
+          TAG_NAME="${GITHUB_REF_NAME:-${GITHUB_REF##*/}}"
+          echo "tag_name=${TAG_NAME}"
+          echo "tag_name=${TAG_NAME}" >> $GITHUB_OUTPUT
+
+      - name: Zip all non-dot files and directories
+        run: |
+          ZIP_NAME="${{ steps.repo.outputs.repo_name }}-${{ steps.tag.outputs.tag_name }}.zip"
+          zip -r "$ZIP_NAME" . -x ".*" -x "*/.*"
+        shell: bash
+
+      - name: Create GitHub Release and upload ZIP
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          files: ${{ steps.repo.outputs.repo_name }}-${{ steps.tag.outputs.tag_name }}.zip
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

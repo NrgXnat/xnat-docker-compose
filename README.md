@@ -1,9 +1,7 @@
 # Dockerized XNAT
 Use this repository to quickly deploy an [XNAT](https://xnat.org/) instance on [docker](https://www.docker.com/).
 
-
-See the [features/dependency-mgmt](https://github.com/NrgXnat/xnat-docker-compose/tree/features/dependency-mgmt) branch for advanced gradle-based version and plugin management.
-
+> This documentation has been updated to reflect the newest version of Docker and Docker Compose. Some commands have changed–e.g., you used to use `docker-compose` to launch a deployment, but recent versions of Docker prefer `docker compose`. Also, the default version of PostgreSQL has been updated. If you're upgrading an existing deployment, you can simply specify your PostgreSQL current version in your `.env` file or, if you want to go ahead and upgrade, use one of the procedures in the [PostgreSQL upgrade documentation](https://www.postgresql.org/docs/16/upgrading.html).
 
 This document contains the following sections:
 
@@ -25,8 +23,8 @@ This repository contains files to bootstrap XNAT deployment. The build creates t
 
 ## Prerequisites
 
-* [docker](https://www.docker.com/) including sufficient memory allocation, according to [Max Heap](#mardown-header-xnat-configuration) settings and container usage. (>4GB with default settings) 
-* [docker-compose](http://docs.docker.com/compose) (Which is installed along with docker if you download it from their site)
+* [Docker](https://www.docker.com/) including sufficient memory allocation, according to [Max Heap](#mardown-header-xnat-configuration) settings and container usage. (>4GB with default settings) 
+* [Docker Compose](http://docs.docker.com/compose) (Which is installed along with docker if you download it from their site)
 
 ## Usage
 
@@ -34,12 +32,13 @@ This repository contains files to bootstrap XNAT deployment. The build creates t
 
 1. Clone the [xnat-docker-compose](https://github.com/NrgXnat/xnat-docker-compose) repository.)
 
-```
-$ git clone https://github.com/NrgXnat/xnat-docker-compose
-$ cd xnat-docker-compose
-```
+    ```
+    $ git clone https://github.com/NrgXnat/xnat-docker-compose
+    $ cd xnat-docker-compose
+    ```
 
-2. Set Docker enviroment variables: Default and sample enviroment variables are provided in the `default.env` file. Add these variables to your environment or simply copy `default.env` to `.env` . Values in this file are used to populate dollar-notation variables in the docker-compose.yml file.
+2. Set Docker enviroment variables: Default and sample enviroment variables are provided in the `default.env` file. Add these variables to your environment or simply copy `default.env` to `.env` . Values in this file are used to populate dollar-notation variables in the `docker-compose.yml` file.
+
 ```
 $ cp default.env .env
 ```
@@ -54,48 +53,40 @@ $ cp default.env .env
 
 4. Start the system
 
-```
-$ docker-compose up -d
-```
+    ```
+    $ docker compose up --detach
+    ```
 
-Note that at this point, if you go to `localhost` you won't see a working web application. It takes upwards of a minute
-to initialize the database, and you can follow progress by reading the docker compose log of the server:
+    Note that at this point, if you go to `localhost` you won't see a working web application. It takes upwards of a minute
+    to initialize the database, and you can follow progress by reading the docker compose log of the server:
 
-```
-docker-compose logs -f --tail=20 xnat-web
-Attaching to xnatdockercompose_xnat-web_1
-xnat-web_1    | INFO: Starting Servlet Engine: Apache Tomcat/7.0.82
-xnat-web_1    | Oct 24, 2017 3:17:02 PM org.apache.catalina.startup.HostConfig deployWAR
-xnat-web_1    | INFO: Deploying web application archive /opt/tomcat/webapps/xnat.war
-xnat-web_1    | Oct 24, 2017 3:17:14 PM org.apache.catalina.startup.TldConfig execute
-xnat-web_1    | INFO: At least one JAR was scanned for TLDs yet contained no TLDs. Enable debug logging for this logger for a complete list of JARs that were scanned but no TLDs were found in them. Skipping unneeded JARs during scanning can improve startup time and JSP compilation time.
-xnat-web_1    | SOURCE: /opt/tomcat/webapps/xnat/
-xnat-web_1    | ===========================
-xnat-web_1    | New Database -- BEGINNING Initialization
-xnat-web_1    | ===========================
-xnat-web_1    | ===========================
-xnat-web_1    | Database initialization complete.
-xnat-web_1    | ===========================
-xnat-web_1    | Oct 24, 2017 3:18:27 PM org.apache.catalina.startup.HostConfig deployWAR
-xnat-web_1    | INFO: Deployment of web application archive /opt/tomcat/webapps/xnat.war has finished in 84,717 ms
-xnat-web_1    | Oct 24, 2017 3:18:27 PM org.apache.coyote.AbstractProtocol start
-xnat-web_1    | INFO: Starting ProtocolHandler ["http-bio-8080"]
-xnat-web_1    | Oct 24, 2017 3:18:27 PM org.apache.coyote.AbstractProtocol start
-xnat-web_1    | INFO: Starting ProtocolHandler ["ajp-bio-8009"]
-xnat-web_1    | Oct 24, 2017 3:18:27 PM org.apache.catalina.startup.Catalina start
-xnat-web_1    | INFO: Server startup in 84925 ms
-```
+    ```
+    # docker compose logs --follow --tail=20 xnat-web
+    xnat-web  | 08-Jul-2025 22:21:20.257 INFO [main] org.apache.catalina.core.AprLifecycleListener.lifecycleEvent APR/OpenSSL configuration: useAprConnector [false], useOpenSSL [true]
+    xnat-web  | 08-Jul-2025 22:21:20.258 INFO [main] org.apache.catalina.core.AprLifecycleListener.initializeSSL OpenSSL successfully initialized [OpenSSL 3.0.13 30 Jan 2024]
+    xnat-web  | 08-Jul-2025 22:21:20.389 INFO [main] org.apache.coyote.AbstractProtocol.init Initializing ProtocolHandler ["http-nio-8080"]
+    xnat-web  | 08-Jul-2025 22:21:20.400 INFO [main] org.apache.catalina.startup.Catalina.load Server initialization in [221] milliseconds
+    xnat-web  | 08-Jul-2025 22:21:20.413 INFO [main] org.apache.catalina.core.StandardService.startInternal Starting service [Catalina]
+    xnat-web  | 08-Jul-2025 22:21:20.413 INFO [main] org.apache.catalina.core.StandardEngine.startInternal Starting Servlet engine: [Apache Tomcat/9.0.107]
+    xnat-web  | 08-Jul-2025 22:21:20.418 INFO [main] org.apache.catalina.startup.HostConfig.deployDirectory Deploying web application directory [/usr/local/tomcat/webapps/ROOT]
+    xnat-web  | 08-Jul-2025 22:21:25.728 INFO [main] org.apache.jasper.servlet.TldScanner.scanJars At least one JAR was scanned for TLDs yet contained no TLDs. Enable debug logging for this logger for a complete list of JARs that were scanned but no TLDs were found in them. Skipping unneeded JARs during scanning can improve startup time and JSP compilation time.
+    xnat-web  | SOURCE: /usr/local/tomcat/webapps/ROOT/
+    xnat-web  | ===========================
+    xnat-web  | New Database -- BEGINNING Initialization
+    xnat-web  | ===========================
+    xnat-web  | ===========================
+    xnat-web  | Database initialization complete.
+    xnat-web  | ===========================
+    xnat-web  | 08-Jul-2025 22:22:03.910 INFO [main] org.apache.catalina.startup.HostConfig.deployDirectory Deployment of web application directory [/usr/local/tomcat/webapps/ROOT] has finished in [43,489] ms
+    xnat-web  | 08-Jul-2025 22:22:03.913 INFO [main] org.apache.coyote.AbstractProtocol.start Starting ProtocolHandler ["http-nio-8080"]
+    xnat-web  | 08-Jul-2025 22:22:03.924 INFO [main] org.apache.catalina.startup.Catalina.start Server startup in [43522] milliseconds
+    ```
 
-
-5. First XNAT Site Setup
-
-Your XNAT will soon be available at http://localhost. 
-
-After logging in with credentials admin/admin (username/password resp.) the setup page is displayed.
+5. First XNAT Site Setup! Your XNAT will soon be available at [http://localhost](http://localhost). After logging in with credentials `admin`/`admin` (the default username and password, respectively), the setup page should be displayed.
 
 ## Mounted Data
 
-When you bring up XNAT with `docker-compose up`, several directories are created (if they don't exist already) to store the persistent data.
+When you bring up XNAT with `docker compose up`, several directories are created (if they don't exist already) to store the persistent data.
 
 * **postgres-data** - Contains the XNAT database
 * **xnat/plugins** - Initially contains nothing. However, you can customize your XNAT with plugins by placing jars into this directory and restarting XNAT.
@@ -106,7 +97,7 @@ When you bring up XNAT with `docker-compose up`, several directories are created
 ## Environment variables
 
 To support differing deployment requirements, `xnat-docker-compose` uses variables for settings that tend to change based on environment. By
-default, `docker-compose` takes the values for variables from the [file `.env`](https://docs.docker.com/compose/environment-variables/). Advanced configurations will need to use a customized `.env` file.
+default, `docker compose` takes the values for variables from the [file `.env`](https://docs.docker.com/compose/environment-variables/). Advanced configurations will need to use a customized `.env` file.
 
 To create your own `.env` file, it's best to just copy the existing `.env` and modify the values in there.
 
@@ -116,30 +107,31 @@ These variables directly set options for XNAT itself.
 
 Variable | Description | Default value
 -------- | ----------- | -------------
-XNAT_VERSION | Indicates the version of XNAT to install. | 1.8.10
-XNAT_MIN_HEAP | Indicates the minimum heap size for the Java virtual machine. | 256m
-XNAT_MAX_HEAP | Indicates the maximum heap size for the Java virtual machine. | 4g
-XNAT_SMTP_ENABLED | Indicates whether SMTP operations are enabled in XNAT. | false
-XNAT_SMTP_HOSTNAME | Sets the address for the server to use for SMTP operations. Has no effect if **XNAT_SMTP_ENABLED** is false. |
-XNAT_SMTP_PORT | Sets the port for the server to use for SMTP operations. Has no effect if **XNAT_SMTP_ENABLED** is false. |
-XNAT_SMTP_AUTH | Indicates whether the configured SMTP server requires authentication. Has no effect if **XNAT_SMTP_ENABLED** is false. |
-XNAT_SMTP_USERNAME | Indicates the username to use to authenticate with the configured SMTP server. Has no effect if **XNAT_SMTP_ENABLED** or **XNAT_SMTP_AUTH** are false. |
-XNAT_SMTP_PASSWORD | Indicates the password to use to authenticate with the configured SMTP server. Has no effect if **XNAT_SMTP_ENABLED** or **XNAT_SMTP_AUTH** are false. |
-XNAT_DATASOURCE_ADMIN_PASSWORD | Indicates the password to set for the database administrator user (**postgres**) | xnat1234
-XNAT_DATASOURCE_URL | Specifies the URL to use when accessing the database from XNAT. | jdbc:postgresql://xnat-db/xnat
-XNAT_DATASOURCE_DRIVER | Specifies the driver class to set for the database connection. | org.postgresql.Driver
-XNAT_DATASOURCE_NAME | Specifies the database name for the database connection. | xnat
-XNAT_DATASOURCE_USERNAME | Specifies the username for the XNAT database account. | xnat
-XNAT_DATASOURCE_PASSWORD | Specifies the password for the XNAT database account. | xnat
-XNAT_WEBAPP_FOLDER | Indicates the name of the folder for the XNAT application. This affects the context path for accessing XNAT. The value `ROOT` indicates that XNAT is the root application and can be accessed at http://localhost (i.e. no path). Otherwise, you must add this value to the _end_ of the URL so, e.g. if you specify `xnat` for this variable, you'll access XNAT at http://localhost/xnat. | ROOT
-XNAT_ROOT | Indicates the location of the root XNAT folder on the XNAT container. | /data/xnat
-XNAT_HOME | Indicates the location of the XNAT user's home folder on the XNAT container. | /data/xnat/home
-XNAT_EMAIL | Specifies the primary administrator email address. | harmitage@miskatonic.edu
-XNAT_ACTIVEMQ_URL | Indicates the URL for an external ActiveMQ service to use for messaging. If not specified, XNAT uses its own internal queue. |
-XNAT_ACTIVEMQ_USERNAME | Indicates the username to use to authenticate with the configured ActiveMQ server. Has no effect if **XNAT_ACTIVEMQ_URL** isn't specified. |
-XNAT_ACTIVEMQ_PASSWORD | Indicates the password to use to authenticate with the configured ActiveMQ server. Has no effect if **XNAT_ACTIVEMQ_URL** isn't specified. |
-PG_VERSION | Specifies the [version tag](https://hub.docker.com/_/postgres?tab=tags) of the PostgreSQL docker container used in `docker-compose.yml`. | 12.2-alpine
-NGINX_VERSION | Specifies the [version tag](https://hub.docker.com/_/nginx?tab=tags) of the Nginx docker container used in `docker-compose.yml`. | 1.19-alpine-perl
+XNAT\_VERSION | Indicates the version of XNAT to install. | 1.9.2
+XNAT\_MIN\_HEAP | Indicates the minimum heap size for the Java virtual machine. | `256m`
+XNAT\_MAX\_HEAP | Indicates the maximum heap size for the Java virtual machine. | `4g`
+XNAT\_SMTP\_ENABLED | Indicates whether SMTP operations are enabled in XNAT. | `false`
+XNAT\_SMTP\_HOSTNAME | Sets the address for the server to use for SMTP operations. Has no effect if **XNAT\_SMTP\_ENABLED** is false. |
+XNAT\_SMTP\_PORT | Sets the port for the server to use for SMTP operations. Has no effect if **XNAT\_SMTP\_ENABLED** is false. |
+XNAT\_SMTP\_AUTH | Indicates whether the configured SMTP server requires authentication. Has no effect if **XNAT\_SMTP\_ENABLED** is false. |
+XNAT\_SMTP\_USERNAME | Indicates the username to use to authenticate with the configured SMTP server. Has no effect if **XNAT\_SMTP\_ENABLED** or **XNAT\_SMTP\_AUTH** are false. |
+XNAT\_SMTP\_PASSWORD | Indicates the password to use to authenticate with the configured SMTP server. Has no effect if **XNAT\_SMTP\_ENABLED** or **XNAT\_SMTP\_AUTH** are false. |
+XNAT\_SMTP\_START_TLS | Indicates the connection to the configured SMTP server should be secured with TLS encryption. Has no effect if **XNAT\_SMTP\_ENABLED** or **XNAT\_SMTP\_AUTH** are false. |
+XNAT\_DATASOURCE\_ADMIN\_PASSWORD | Indicates the password to set for the database administrator user (**postgres**) | `xnat1234`
+XNAT\_DATASOURCE\_URL | Specifies the URL to use when accessing the database from XNAT. | `jdbc:postgresql://xnat-db/xnat`
+XNAT\_DATASOURCE\_DRIVER | Specifies the driver class to set for the database connection. | `org.postgresql.Driver`
+XNAT\_DATASOURCE\_NAME | Specifies the database name for the database connection. | `xnat`
+XNAT\_DATASOURCE\_USERNAME | Specifies the username for the XNAT database account. | `xnat`
+XNAT\_DATASOURCE\_PASSWORD | Specifies the password for the XNAT database account. | `xnat`
+XNAT\_WEBAPP\_FOLDER | Indicates the name of the folder for the XNAT application. This affects the context path for accessing XNAT. The value `ROOT` indicates that XNAT is the root application and can be accessed at http://localhost (i.e. no path). Otherwise, you must add this value to the _end_ of the URL so, e.g. if you specify `xnat` for this variable, you'll access XNAT at http://localhost/xnat. | `ROOT`
+XNAT\_ROOT | Indicates the location of the root XNAT folder on the XNAT container. | `/data/xnat`
+XNAT\_HOME | Indicates the location of the XNAT user's home folder on the XNAT container. | `/data/xnat/home`
+XNAT\_EMAIL | Specifies the primary administrator email address. | `harmitage@miskatonic.edu`
+XNAT\_ACTIVEMQ\_URL | Indicates the URL for an external ActiveMQ service to use for messaging. If not specified, XNAT uses its own internal queue. |
+XNAT\_ACTIVEMQ\_USERNAME | Indicates the username to use to authenticate with the configured ActiveMQ server. Has no effect if **XNAT\_ACTIVEMQ\_URL** isn't specified. |
+XNAT\_ACTIVEMQ\_PASSWORD | Indicates the password to use to authenticate with the configured ActiveMQ server. Has no effect if **XNAT\_ACTIVEMQ\_URL** isn't specified. |
+PG\_VERSION | Specifies the [version tag](https://hub.docker.com/_/postgres?tab=tags) of the PostgreSQL docker container used in `docker-compose.yml`. | `16.9-alpine`
+NGINX\_VERSION | Specifies the [version tag](https://hub.docker.com/_/nginx?tab=tags) of the Nginx docker container used in `docker-compose.yml`. | `1.29.0-alpine-perl`
 
 
 ## Troubleshooting
@@ -148,10 +140,10 @@ NGINX_VERSION | Specifies the [version tag](https://hub.docker.com/_/nginx?tab=t
 Say you want to examine some files in the running `xnat-web` container. You can `exec` a command in that container to open a shell.
 
 ```
-$ docker-compose exec xnat-web bash
+$ docker compose exec xnat-web bash
 ```
 
-* The `docker-compose exec` part of the command is what tells docker-compose that you want to execute a command inside a container.
+* The `docker compose exec` part of the command is what tells Docker Compose that you want to execute a command inside a container.
 * The `xnat-web` part says you want to execute the command in whatever container is running for your xnat-web service. If, instead, you want to open a shell on the database container, you would use `xnat-db` instead.
 * The `bash` part is the command that will be executed in the container. It could really be anything, but in this case we want to open a shell. Running `bash` will do just that. You will get a command prompt, and any further commands you issue will be run inside this container.
 
@@ -160,17 +152,17 @@ $ docker-compose exec xnat-web bash
 List available logs
 
 ```
-$ docker-compose exec xnat-web ls /usr/local/tomcat/logs
+$ docker compose exec xnat-web ls /usr/local/tomcat/logs
 
-catalina.2018-10-03.log      localhost_access_log.2018-10-03.txt
-host-manager.2018-10-03.log  manager.2018-10-03.log
-localhost.2018-10-03.log
+catalina.2025-07-08.log      localhost_access_log.2025-07-08.txt
+host-manager.2025-07-08.log  manager.2025-07-08.log
+localhost.2025-07-08.log
 ```
 
 View a particular log
 
 ```
-$ docker-compose exec xnat-web cat /usr/local/tomcat/logs/catalina.2018-10-03.log
+$ docker compose exec xnat-web cat /usr/local/tomcat/logs/catalina.2025-07-08.log
 ```
 
 ### Controlling Instances
@@ -179,35 +171,35 @@ $ docker-compose exec xnat-web cat /usr/local/tomcat/logs/catalina.2018-10-03.lo
 Bring all the instances down by running
 
 ```
-$ docker-compose down
+$ docker compose down
 ```
 
 If you want to bring everything down *and* remove all the images that were built, you can run
 
 ```
-$ docker-compose down --rmi all
+$ docker compose down --rmi all
 ```
 
 #### Bring up instances
-This will bring all instances up again. The `-d` means "detached" so you won't see any output to the terminal.
+This will bring all instances up again. The `--detach` or `-d` means "detached" so you won't see any output to the terminal.
 
 ```
-$ docker-compose up -d
+$ docker compose up --detach
 ```
 
-(If you like seeing the terminal output, you can leave off the `-d` option. The various containers will print output to the terminal as they come up. If you close this connection with `Ctrl+C`, the containers will be stopped or killed.)
+(If you like seeing the terminal output, you can leave off the `--detached`/`-d` option. The various containers will print output to the terminal as they come up. If you close this connection with `Ctrl+C`, the containers will be stopped or killed.)
 
 #### Restart
 If an instance is having problems, you can restart it.
 ```
-$ docker-compose restart xnat-web
+$ docker compose restart xnat-web
 ```
 
 #### Rebuild after making changes
 If you have changed a `Dockerfile`, you will need to rebuild an image before the changes are picked up.
 
 ```
-$ docker-compose build xnat-web
+$ docker compose build xnat-web
 ```
 
 It is possible that you will need to use the `--no-cache` argument, if you have only changed local files and not the `Dockerfile` itself.
@@ -224,7 +216,7 @@ First, a bit of background on the problem that arises. The container service con
 We can solve this problem in two ways:
 
 * In container service versions greater that 1.5.1 you can set *Path Translation* on your docker host. Go to the container service settings `Administer → Plugin Settings → Container Server Setup` and edit the Docker Host settings. There you can set a path prefix on your XNAT server—which, in our example, is `/data/xnat`—and the matching path prefix on your docker server—in the example this is the path on the local host; in my speicifc case this is `/Users/flavin/code/xnat-docker-compose/xnat-data` but you path will likely vary. When the container service finds a path to files in the archive, it substitutes the path prefix before telling docker what to mount. See the wiki page on [Path Translation](https://wiki.xnat.org/display/CS/Path+Translation) for more.
-* For prior container service versions, there is no Path Translation. You will need to create directories on your host machine at `/data/xnat/archive` and `/data/xnat/build`. If you already have data in those directories from running XNAT, you can move them. Then, in the `docker-compose.yaml` file in this project, edit the `services → xnat-web → volumes` for the archive and build spaces to `/data/xnat/archive:/data/xnat/archive` and `/data/xnat/build:/data/xnat/build`. Make sure the permissions are set correctly so that your user account haas full read/write/execute permissions on these directories.
+* For prior container service versions, there is no Path Translation. You will need to create directories on your host machine at `/data/xnat/archive` and `/data/xnat/build`. If you already have data in those directories from running XNAT, you can move them. Then, in the `docker-compose.yml` file in this project, edit the `services → xnat-web → volumes` for the archive and build spaces to `/data/xnat/archive:/data/xnat/archive` and `/data/xnat/build:/data/xnat/build`. Make sure the permissions are set correctly so that your user account haas full read/write/execute permissions on these directories.
 
 ### Processing URL
 Short answer: Set your processing URL to `http://host.docker.internal`. See [Processing URL](https://wiki.xnat.org/display/CS/Processing+URL).
