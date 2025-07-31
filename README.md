@@ -1,6 +1,8 @@
 # Dockerized XNAT
 Use this repository to quickly deploy an [XNAT](https://xnat.org/) instance on [docker](https://www.docker.com/).
 
+> **Note:** This branch of the XNAT Docker Compose project has been modified to run with XNAT 1.10.0-SNAPSHOT on Java 21. Instead of downloading the XNAT war from the [xnat-web bitbucket downloads repository](http://bitbucket.org/xnat-dev/xnat-web/downloads), it uses a war from the `xnat/webapps` subfolder. You can download a recent build of XNAT 1.10.0-SNAPSHOT from [here](https://bitbucket.org/rherrick/xnat-web/downloads/xnat-web-1.10.0-SNAPSHOT.war). Just download it, copy it into the `xnat/webapps` subfolder (you may need to create this folder), then run `docker compose build`.
+
 > This documentation has been updated to reflect the newest version of Docker and Docker Compose. Some commands have changed–e.g., you used to use `docker-compose` to launch a deployment, but recent versions of Docker prefer `docker compose`. Also, the default version of PostgreSQL has been updated. If you're upgrading an existing deployment, you can simply specify your PostgreSQL current version in your `.env` file or, if you want to go ahead and upgrade, use one of the procedures in the [PostgreSQL upgrade documentation](https://www.postgresql.org/docs/16/upgrading.html).
 
 This document contains the following sections:

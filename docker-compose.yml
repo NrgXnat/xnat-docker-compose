@@ -2,6 +2,7 @@ services:
 
   xnat-web:
     container_name: xnat-web
+    image: xnat-web:${XNAT_VERSION}
     build:
       context: ./xnat
       args:
@@ -35,7 +36,7 @@ services:
     depends_on:
       - xnat-db
     environment:
-      - CATALINA_OPTS=-Xms${XNAT_MIN_HEAP} -Xmx${XNAT_MAX_HEAP} -Dxnat.home=${XNAT_HOME}
+      - CATALINA_OPTS=-Dpolyglot.engine.WarnInterpreterOnly=false -XX:+UnlockExperimentalVMOptions -XX:+EnableJVMCI -Xms${XNAT_MIN_HEAP} -Xmx${XNAT_MAX_HEAP} -Dxnat.home=${XNAT_HOME}
       - XNAT_HOME=${XNAT_HOME}
 
   xnat-db:
