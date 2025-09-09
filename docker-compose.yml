@@ -22,11 +22,13 @@ services:
         XNAT_HOME: ${XNAT_HOME}
         XNAT_EMAIL: ${XNAT_EMAIL}
     ports:
+      - 8000:8000
       - 8104:8104
     networks:
       - xnat-network
     volumes:
       - ./xnat/plugins:${XNAT_HOME}/plugins
+      - ./xnat-data/home/config/auth:${XNAT_HOME}/config/auth
       - ./xnat-data/home/logs:${XNAT_HOME}/logs
       - ./xnat-data/archive:${XNAT_ROOT}/archive
       - ./xnat-data/build:${XNAT_ROOT}/build
@@ -35,7 +37,7 @@ services:
     depends_on:
       - xnat-db
     environment:
-      - CATALINA_OPTS=-Xms${XNAT_MIN_HEAP} -Xmx${XNAT_MAX_HEAP} -Dxnat.home=${XNAT_HOME}
+      - CATALINA_OPTS=-Xms${XNAT_MIN_HEAP} -Xmx${XNAT_MAX_HEAP} -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=8000 -Dxnat.home=${XNAT_HOME}
       - XNAT_HOME=${XNAT_HOME}
 
   xnat-db:
@@ -47,7 +49,6 @@ services:
       - xnat-network
     volumes:
       - ./postgres-data:/var/lib/postgresql/data
-      # 
       - ./postgres:/docker-entrypoint-initdb.d
     environment:
       - POSTGRES_PASSWORD=${XNAT_DATASOURCE_ADMIN_PASSWORD}
@@ -69,6 +70,32 @@ services:
       - xnat-web
     links:
       - xnat-web
+
+  xnat-ldap:
+    container_name: xnat-ldap
+    image: osixia/openldap:latest
+    networks:
+      - xnat-network
+    ports:
+      - "389:389"
+      - "636:636"
+    volumes:
+      - ${LDAP_CONFIG}:/container/service/slapd/assets/config/bootstrap/ldif/custom/users.ldif
+    command: ["--copy-service"]
+    environment:
+      LDAP_DOMAIN: ${LDAP_DOMAIN}
+      LDAP_ORGANISATION: ${LDAP_ORGANISATION}
+      LDAP_ADMIN_PASSWORD: ${LDAP_ADMIN_PASSWORD}
+
+  xnat-ldap-admin:
+    container_name: xnat-ldap-admin
+    image: osixia/phpldapadmin:latest
+    networks:
+      - xnat-network
+    ports:
+      - "6443:443"
+    environment:
+      PHPLDAPADMIN_LDAP_HOSTS: xnat-ldap
 
 networks:
   xnat-network:
