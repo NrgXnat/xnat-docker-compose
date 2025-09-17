@@ -2,6 +2,7 @@ services:
 
   xnat-web-1:
     container_name: xnat-web-1
+    restart: on-failure
     build:
       context: ./xnat
       args:
@@ -42,6 +43,7 @@ services:
 
   xnat-web-2:
     container_name: xnat-web-2
+    restart: on-failure
     build:
       context: ./xnat
       args:
@@ -83,6 +85,7 @@ services:
 
   xnat-activemq:
     container_name: xnat-activemq
+    restart: on-failure
     image: islandora/activemq:renovate.all-non-major-dependencies-arm64
     networks: [xnat-services]
     expose:
@@ -92,6 +95,7 @@ services:
 
   xnat-db:
     container_name: xnat-db
+    restart: on-failure
     image: postgres:${PG_VERSION}
     networks: [xnat-services]
     expose:
@@ -107,6 +111,7 @@ services:
 
   xnat-haproxy:
     container_name: xnat-haproxy
+    restart: on-failure
     image:          haproxy:${HAPROXY_VERSION}
     networks:       [xnat-services]
     ports:
