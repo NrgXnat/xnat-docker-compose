@@ -40,6 +40,27 @@ services:
       - CATALINA_OPTS=-Xms${XNAT_MIN_HEAP} -Xmx${XNAT_MAX_HEAP} -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=8000 -Dxnat.home=${XNAT_HOME}
       - XNAT_HOME=${XNAT_HOME}
 
+  xnat-keycloak:
+    container_name: xnat-keycloak
+    image: quay.io/keycloak/keycloak:${KEYCLOAK_VERSION}
+    command: start-dev
+    ports:
+      - "8080:8080"
+    depends_on:
+      - xnat-db
+    networks:
+      - xnat-network
+    environment:
+      KC_DB: postgres
+      KC_DB_URL: ${KEYCLOAK_DATASOURCE_URL}
+      KC_DB_NAME: ${KEYCLOAK_DATASOURCE_NAME}
+      KC_DB_USERNAME: ${KEYCLOAK_DATASOURCE_USERNAME}
+      KC_DB_PASSWORD: ${KEYCLOAK_DATASOURCE_PASSWORD}
+      KC_HOSTNAME: http://localhost
+      KC_HTTP_RELATIVE_PATH: /auth
+      KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN_USERNAME}
+      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
+
   xnat-db:
     container_name: xnat-db
     image: postgres:${PG_VERSION}
@@ -56,6 +77,9 @@ services:
       # variables for the sql script
       - XNAT_DATASOURCE_USERNAME=${XNAT_DATASOURCE_USERNAME}
       - XNAT_DATASOURCE_PASSWORD=${XNAT_DATASOURCE_PASSWORD}
+      - KC_DB_NAME=${KEYCLOAK_DATASOURCE_NAME}
+      - KC_DB_USERNAME=${KEYCLOAK_DATASOURCE_USERNAME}
+      - KC_DB_PASSWORD=${KEYCLOAK_DATASOURCE_PASSWORD}
 
   xnat-nginx:
     container_name: xnat-nginx
@@ -67,35 +91,11 @@ services:
     networks:
       - xnat-network
     depends_on:
+      - xnat-keycloak
       - xnat-web
     links:
+      - xnat-keycloak
       - xnat-web
-
-  xnat-ldap:
-    container_name: xnat-ldap
-    image: osixia/openldap:latest
-    networks:
-      - xnat-network
-    ports:
-      - "389:389"
-      - "636:636"
-    volumes:
-      - ${LDAP_CONFIG}:/container/service/slapd/assets/config/bootstrap/ldif/custom/users.ldif
-    command: ["--copy-service"]
-    environment:
-      LDAP_DOMAIN: ${LDAP_DOMAIN}
-      LDAP_ORGANISATION: ${LDAP_ORGANISATION}
-      LDAP_ADMIN_PASSWORD: ${LDAP_ADMIN_PASSWORD}
-
-  xnat-ldap-admin:
-    container_name: xnat-ldap-admin
-    image: osixia/phpldapadmin:latest
-    networks:
-      - xnat-network
-    ports:
-      - "6443:443"
-    environment:
-      PHPLDAPADMIN_LDAP_HOSTS: xnat-ldap
 
 networks:
   xnat-network:
