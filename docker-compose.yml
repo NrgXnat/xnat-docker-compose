@@ -42,24 +42,27 @@ services:
 
   xnat-keycloak:
     container_name: xnat-keycloak
-    image: quay.io/keycloak/keycloak:${KEYCLOAK_VERSION}
+    image: quay.io/keycloak/keycloak:26.3.2
     command: start-dev
     ports:
-      - "8080:8080"
+      - 8082:8080
     depends_on:
       - xnat-db
     networks:
       - xnat-network
     environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: ${KEYCLOAK_ADMIN_USERNAME}
+      KC_BOOTSTRAP_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
       KC_DB: postgres
       KC_DB_URL: ${KEYCLOAK_DATASOURCE_URL}
       KC_DB_NAME: ${KEYCLOAK_DATASOURCE_NAME}
       KC_DB_USERNAME: ${KEYCLOAK_DATASOURCE_USERNAME}
       KC_DB_PASSWORD: ${KEYCLOAK_DATASOURCE_PASSWORD}
-      KC_HOSTNAME: http://localhost
-      KC_HTTP_RELATIVE_PATH: /auth
-      KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN_USERNAME}
-      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
+      KC_HOSTNAME: ${KEYCLOAK_URL}
+      KC_HTTP_RELATIVE_PATH: ${KEYCLOAK_RELATIVE_PATH}
+    volumes:
+      - keycloak-data:/opt/keycloak/data
+    restart: unless-stopped
 
   xnat-db:
     container_name: xnat-db
@@ -100,4 +103,9 @@ services:
 networks:
   xnat-network:
     name: xnat-network
+
+volumes:
+  keycloak-data:
+    name: keycloak-data
+    driver: local
 
