@@ -23,9 +23,11 @@ services:
         XNAT_EMAIL: ${XNAT_EMAIL}
     networks: [xnat-services]
     ports:
-      - 8000:8000
-      - 8080:8080
+      - 8100:8000
+      - 8180:8080
       - 8104:8104
+      - 8105:8105
+      - 8106:8106
     volumes:
       - ./xnat/plugins:${XNAT_HOME}/plugins
       - ./xnat/node-conf-1.properties:${XNAT_HOME}/config/node-conf.properties
@@ -64,9 +66,11 @@ services:
         XNAT_EMAIL: ${XNAT_EMAIL}
     networks: [xnat-services]
     ports:
-      - 8001:8000
-      - 8081:8080
-      - 8105:8104
+      - 8200:8000
+      - 8280:8080
+      - 8204:8104
+      - 8205:8105
+      - 8206:8106
     volumes:
       - ./xnat/plugins:${XNAT_HOME}/plugins
       - ./xnat/node-conf-2.properties:${XNAT_HOME}/config/node-conf.properties
@@ -119,6 +123,7 @@ services:
     volumes:
       - ./haproxy:/usr/local/etc/haproxy
     depends_on:
+      - xnat-web-1
       - xnat-web-2
 
 networks:
