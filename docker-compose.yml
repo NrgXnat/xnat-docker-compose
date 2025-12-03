@@ -1,13 +1,14 @@
 version: '3.8'
 
 networks:
-  xnat-services:
-    name: &networkname xnat-services
+  xnat-network:
+    name: &networkname xnat-network
     driver: overlay
     attachable: true
 
 services:
   xnat-web:
+    container_name: xnat-web
     build:
       context: ./xnat
       args:
@@ -28,7 +29,7 @@ services:
         XNAT_EMAIL: ${XNAT_EMAIL}
     ports:
       - 8104:8104
-      # - 5005:5005
+      - 5005:5005
     volumes:
       - ./xnat/plugins:${XNAT_HOME}/plugins
       - ./xnat-data/home/logs:${XNAT_HOME}/logs
@@ -44,8 +45,7 @@ services:
     depends_on:
       - xnat-db
     environment:
-      - CATALINA_OPTS=-Xms${XNAT_MIN_HEAP} -Xmx${XNAT_MAX_HEAP} -Dxnat.home=${XNAT_HOME} 
-      # - CATALINA_OPTS=-Xms${XNAT_MIN_HEAP} -Xmx${XNAT_MAX_HEAP} -Dxnat.home=${XNAT_HOME} -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005
+      - CATALINA_OPTS=-Xms${XNAT_MIN_HEAP} -Xmx${XNAT_MAX_HEAP} -Dxnat.home=${XNAT_HOME} -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005
       - XNAT_HOME=${XNAT_HOME}
       - XNAT_ROOT=${XNAT_ROOT}
       - TOMCAT_USER_ID=${TOMCAT_UID}
@@ -53,16 +53,17 @@ services:
     env_file:
       - ./.env
     networks:
-      - xnat-services
+      - xnat-network
 
   xnat-db:
+    container_name: xnat-db
     image: postgres:${PG_VERSION}
     volumes:
       - ./postgres-data:/var/lib/postgresql/data
       #
       - ./postgres:/docker-entrypoint-initdb.d
-    # ports:
-    #   - 5432:5432
+    expose:
+      - 5432
     environment:
       - POSTGRES_PASSWORD=${XNAT_DATASOURCE_ADMIN_PASSWORD}
       - POSTGRES_DB=${XNAT_DATASOURCE_NAME}
@@ -70,29 +71,30 @@ services:
       - XNAT_DATASOURCE_USERNAME=${XNAT_DATASOURCE_USERNAME}
       - XNAT_DATASOURCE_PASSWORD=${XNAT_DATASOURCE_PASSWORD}
     networks:
-      - xnat-services
+      - xnat-network
 
   xnat-nginx:
+    container_name: xnat-nginx
     image: nginx:${NGINX_VERSION}
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf
     ports:
-      - "80:80"
-    expose:
-      - "80"
+      - 80:80
     networks:
-      - xnat-services
+      - xnat-network
     depends_on:
       - xnat-web
       - jupyterhub
+    links:
+      - xnat-web
 
   jupyterhub:
-    image: xnat/jupyterhub:1.3.1
+    image: xnat/jupyterhub:1.3.2
     hostname: jupyterhub
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock:rw"
     networks:
-      - xnat-services
+      - xnat-network
     environment:
       JH_NETWORK: *networkname
     env_file:

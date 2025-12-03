@@ -36,6 +36,7 @@ smtpPort=$XNAT_SMTP_PORT
 smtpUsername=$XNAT_SMTP_USERNAME
 smtpPassword=$XNAT_SMTP_PASSWORD
 smtpAuth=$XNAT_SMTP_AUTH
+smtpStartTls=$XNAT_SMTP_START_TLS
 EOF
 fi
 
