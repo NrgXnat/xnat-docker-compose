@@ -1,0 +1,19 @@
+---
+singleServerConfig:
+  address: "redis://xnat-redis:6379"
+  connectionPoolSize: 64
+  connectionMinimumIdleSize: 10
+  subscriptionConnectionPoolSize: 50
+  subscriptionConnectionMinimumIdleSize: 1
+  dnsMonitoringInterval: 5000
+  timeout: 3000
+  retryAttempts: 3
+  retryInterval: 1500
+  connectTimeout: 10000
+  idleConnectionTimeout: 10000
+
+codec: !<org.redisson.codec.MarshallingCodec> {}
+
+threads: 16
+nettyThreads: 32
+transportMode: "NIO"

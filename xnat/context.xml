@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Context>
+    <Manager className="org.redisson.tomcat.RedissonSessionManager"
+             configPath="${catalina.home}/conf/redisson.yaml"
+             readMode="REDIS"
+             updateMode="DEFAULT" />
+</Context>

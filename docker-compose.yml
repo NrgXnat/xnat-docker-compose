@@ -37,6 +37,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
     depends_on:
       - xnat-db
+      - xnat-redis
     environment:
       - CATALINA_OPTS=-Xms${XNAT_MIN_HEAP} -Xmx${XNAT_MAX_HEAP} -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=8000 -Dxnat.home=${XNAT_HOME} -Dxnat.is_primary_node=true
       - XNAT_HOME=${XNAT_HOME}
@@ -78,6 +79,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
     depends_on:
       - xnat-db
+      - xnat-redis
       - xnat-web-1
     environment:
       - CATALINA_OPTS=-Xms${XNAT_MIN_HEAP} -Xmx${XNAT_MAX_HEAP} -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=8000 -Dxnat.home=${XNAT_HOME} -Dxnat.is_primary_node=false
@@ -86,12 +88,23 @@ services:
   xnat-activemq:
     container_name: xnat-activemq
     restart: on-failure
-    image: islandora/activemq:renovate.all-non-major-dependencies-arm64
+    image: webcenter/activemq:5.14.3
     networks: [xnat-services]
     expose:
       - "61616"
     ports:
       - "8161:8161"
+
+  xnat-redis:
+    container_name: xnat-redis
+    restart: on-failure
+    image: redis:${REDIS_VERSION}
+    networks: [xnat-services]
+    expose:
+      - "6379"
+    command: redis-server --appendonly yes
+    volumes:
+      - ./redis-data:/data
 
   xnat-db:
     container_name: xnat-db
