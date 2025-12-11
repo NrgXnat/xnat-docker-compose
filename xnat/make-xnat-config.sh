@@ -49,7 +49,7 @@ sessionXmlRebuilderRepeat=15000
 siteDescriptionPage=/screens/cthulhu-site.vm
 siteDescriptionType=Page
 siteLogoPath=/images/cthulhu.jpg
-siteUrl=http://localhost:8080
+siteUrl=http://localhost
 triagePath=/data/xnat/triage
 
 [notifications]
