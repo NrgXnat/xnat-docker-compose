@@ -83,6 +83,49 @@ services:
       - CATALINA_OPTS=-Xms${XNAT_MIN_HEAP} -Xmx${XNAT_MAX_HEAP} -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=8000 -Dxnat.home=${XNAT_HOME} -Dxnat.is_primary_node=false
       - XNAT_HOME=${XNAT_HOME}
 
+  xnat-web-3:
+    container_name: xnat-web-3
+    restart: on-failure
+    build:
+      context: ./xnat
+      args:
+        XNAT_VERSION: ${XNAT_VERSION}
+        XNAT_SMTP_ENABLED: ${XNAT_SMTP_ENABLED}
+        XNAT_SMTP_HOSTNAME: ${XNAT_SMTP_HOSTNAME}
+        XNAT_SMTP_PORT: ${XNAT_SMTP_PORT}
+        XNAT_SMTP_AUTH: ${XNAT_SMTP_AUTH}
+        XNAT_SMTP_USERNAME: ${XNAT_SMTP_USERNAME}
+        XNAT_SMTP_PASSWORD: ${XNAT_SMTP_PASSWORD}
+        XNAT_DATASOURCE_DRIVER: ${XNAT_DATASOURCE_DRIVER}
+        XNAT_DATASOURCE_URL: ${XNAT_DATASOURCE_URL}
+        XNAT_DATASOURCE_USERNAME: ${XNAT_DATASOURCE_USERNAME}
+        XNAT_DATASOURCE_PASSWORD: ${XNAT_DATASOURCE_PASSWORD}
+        TOMCAT_XNAT_FOLDER: ${TOMCAT_XNAT_FOLDER}
+        XNAT_ROOT: ${XNAT_ROOT}
+        XNAT_HOME: ${XNAT_HOME}
+        XNAT_EMAIL: ${XNAT_EMAIL}
+    networks: [ xnat-services ]
+    ports:
+      - 8002:8000
+      - 8082:8080
+      - 8106:8104
+    volumes:
+      - ./xnat/plugins:${XNAT_HOME}/plugins
+      - ./xnat/node-conf-3.properties:${XNAT_HOME}/config/node-conf.properties
+      - ./xnat-data/3/build:${XNAT_ROOT}/build
+      - ./xnat-data/3/cache:${XNAT_ROOT}/cache
+      - ./xnat-data/3/home/logs:${XNAT_HOME}/logs
+      - ./xnat-data/archive:${XNAT_ROOT}/archive
+      - ./xnat-data/prearchive:${XNAT_ROOT}/prearchive
+      - /var/run/docker.sock:/var/run/docker.sock
+    depends_on:
+      - xnat-db
+      - xnat-web-1
+      - xnat-web-2
+    environment:
+      - CATALINA_OPTS=-Xms${XNAT_MIN_HEAP} -Xmx${XNAT_MAX_HEAP} -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=8000 -Dxnat.home=${XNAT_HOME} -Dxnat.is_primary_node=false
+      - XNAT_HOME=${XNAT_HOME}
+
   xnat-activemq:
     container_name: xnat-activemq
     restart: on-failure
@@ -119,7 +162,7 @@ services:
     volumes:
       - ./haproxy:/usr/local/etc/haproxy
     depends_on:
-      - xnat-web-2
+      - xnat-web-3
 
 networks:
   xnat-services:
