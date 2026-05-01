@@ -23,7 +23,7 @@ This repository contains files to bootstrap XNAT deployment. The build creates t
 
 ## Prerequisites
 
-* [Docker](https://www.docker.com/) including sufficient memory allocation, according to [Max Heap](#mardown-header-xnat-configuration) settings and container usage. (>4GB with default settings) 
+* [Docker](https://www.docker.com/) including sufficient memory allocation, according to [Max Heap](#mardown-header-xnat-configuration) settings and container usage. (>4GB with default settings)
 * [Docker Compose](http://docs.docker.com/compose) (Which is installed along with docker if you download it from their site)
 
 ## Usage
@@ -99,39 +99,39 @@ When you bring up XNAT with `docker compose up`, several directories are created
 To support differing deployment requirements, `xnat-docker-compose` uses variables for settings that tend to change based on environment. By
 default, `docker compose` takes the values for variables from the [file `.env`](https://docs.docker.com/compose/environment-variables/). Advanced configurations will need to use a customized `.env` file.
 
-To create your own `.env` file, it's best to just copy the existing `.env` and modify the values in there.
+To create your own `.env` file, it's best to just copy the existing `default.env` and modify the values in there.
 
 ### XNAT configuration
 
 These variables directly set options for XNAT itself.
 
-Variable | Description | Default value
--------- | ----------- | -------------
-XNAT\_VERSION | Indicates the version of XNAT to install. | 1.9.2.1
-XNAT\_MIN\_HEAP | Indicates the minimum heap size for the Java virtual machine. | `256m`
-XNAT\_MAX\_HEAP | Indicates the maximum heap size for the Java virtual machine. | `4g`
-XNAT\_SMTP\_ENABLED | Indicates whether SMTP operations are enabled in XNAT. | `false`
-XNAT\_SMTP\_HOSTNAME | Sets the address for the server to use for SMTP operations. Has no effect if **XNAT\_SMTP\_ENABLED** is false. |
-XNAT\_SMTP\_PORT | Sets the port for the server to use for SMTP operations. Has no effect if **XNAT\_SMTP\_ENABLED** is false. |
-XNAT\_SMTP\_AUTH | Indicates whether the configured SMTP server requires authentication. Has no effect if **XNAT\_SMTP\_ENABLED** is false. |
-XNAT\_SMTP\_USERNAME | Indicates the username to use to authenticate with the configured SMTP server. Has no effect if **XNAT\_SMTP\_ENABLED** or **XNAT\_SMTP\_AUTH** are false. |
-XNAT\_SMTP\_PASSWORD | Indicates the password to use to authenticate with the configured SMTP server. Has no effect if **XNAT\_SMTP\_ENABLED** or **XNAT\_SMTP\_AUTH** are false. |
-XNAT\_SMTP\_START_TLS | Indicates the connection to the configured SMTP server should be secured with TLS encryption. Has no effect if **XNAT\_SMTP\_ENABLED** or **XNAT\_SMTP\_AUTH** are false. |
-XNAT\_DATASOURCE\_ADMIN\_PASSWORD | Indicates the password to set for the database administrator user (**postgres**) | `xnat1234`
-XNAT\_DATASOURCE\_URL | Specifies the URL to use when accessing the database from XNAT. | `jdbc:postgresql://xnat-db/xnat`
-XNAT\_DATASOURCE\_DRIVER | Specifies the driver class to set for the database connection. | `org.postgresql.Driver`
-XNAT\_DATASOURCE\_NAME | Specifies the database name for the database connection. | `xnat`
-XNAT\_DATASOURCE\_USERNAME | Specifies the username for the XNAT database account. | `xnat`
-XNAT\_DATASOURCE\_PASSWORD | Specifies the password for the XNAT database account. | `xnat`
-XNAT\_WEBAPP\_FOLDER | Indicates the name of the folder for the XNAT application. This affects the context path for accessing XNAT. The value `ROOT` indicates that XNAT is the root application and can be accessed at http://localhost (i.e. no path). Otherwise, you must add this value to the _end_ of the URL so, e.g. if you specify `xnat` for this variable, you'll access XNAT at http://localhost/xnat. | `ROOT`
-XNAT\_ROOT | Indicates the location of the root XNAT folder on the XNAT container. | `/data/xnat`
-XNAT\_HOME | Indicates the location of the XNAT user's home folder on the XNAT container. | `/data/xnat/home`
-XNAT\_EMAIL | Specifies the primary administrator email address. | `harmitage@miskatonic.edu`
-XNAT\_ACTIVEMQ\_URL | Indicates the URL for an external ActiveMQ service to use for messaging. If not specified, XNAT uses its own internal queue. |
-XNAT\_ACTIVEMQ\_USERNAME | Indicates the username to use to authenticate with the configured ActiveMQ server. Has no effect if **XNAT\_ACTIVEMQ\_URL** isn't specified. |
-XNAT\_ACTIVEMQ\_PASSWORD | Indicates the password to use to authenticate with the configured ActiveMQ server. Has no effect if **XNAT\_ACTIVEMQ\_URL** isn't specified. |
-PG\_VERSION | Specifies the [version tag](https://hub.docker.com/_/postgres?tab=tags) of the PostgreSQL docker container used in `docker-compose.yml`. | `16.9-alpine`
-NGINX\_VERSION | Specifies the [version tag](https://hub.docker.com/_/nginx?tab=tags) of the Nginx docker container used in `docker-compose.yml`. | `1.29.0-alpine-perl`
+Variable | Description                                                                                                                                                                                                                                                                                                                                                                                 | Default value
+-------- |---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------| -------------
+XNAT\_VERSION | Indicates the version of XNAT to install.                                                                                                                                                                                                                                                                                                                                                   | 1.10.0
+XNAT\_MIN\_HEAP | Indicates the minimum heap size for the Java virtual machine.                                                                                                                                                                                                                                                                                                                               | `256m`
+XNAT\_MAX\_HEAP | Indicates the maximum heap size for the Java virtual machine.                                                                                                                                                                                                                                                                                                                               | `4g`
+XNAT\_SMTP\_ENABLED | Indicates whether SMTP operations are enabled in XNAT.                                                                                                                                                                                                                                                                                                                                      | `false`
+XNAT\_SMTP\_HOSTNAME | Sets the address for the server to use for SMTP operations. Has no effect if **XNAT\_SMTP\_ENABLED** is false.                                                                                                                                                                                                                                                                              |
+XNAT\_SMTP\_PORT | Sets the port for the server to use for SMTP operations. Has no effect if **XNAT\_SMTP\_ENABLED** is false.                                                                                                                                                                                                                                                                                 |
+XNAT\_SMTP\_AUTH | Indicates whether the configured SMTP server requires authentication. Has no effect if **XNAT\_SMTP\_ENABLED** is false.                                                                                                                                                                                                                                                                    |
+XNAT\_SMTP\_USERNAME | Indicates the username to use to authenticate with the configured SMTP server. Has no effect if **XNAT\_SMTP\_ENABLED** or **XNAT\_SMTP\_AUTH** are false.                                                                                                                                                                                                                                  |
+XNAT\_SMTP\_PASSWORD | Indicates the password to use to authenticate with the configured SMTP server. Has no effect if **XNAT\_SMTP\_ENABLED** or **XNAT\_SMTP\_AUTH** are false.                                                                                                                                                                                                                                  |
+XNAT\_SMTP\_START_TLS | Indicates the connection to the configured SMTP server should be secured with TLS encryption. Has no effect if **XNAT\_SMTP\_ENABLED** or **XNAT\_SMTP\_AUTH** are false.                                                                                                                                                                                                                   |
+XNAT\_DATASOURCE\_ADMIN\_PASSWORD | Indicates the password to set for the database administrator user (**postgres**)                                                                                                                                                                                                                                                                                                            | `xnat1234`
+XNAT\_DATASOURCE\_URL | Specifies the URL to use when accessing the database from XNAT.                                                                                                                                                                                                                                                                                                                             | `jdbc:postgresql://xnat-db/xnat`
+XNAT\_DATASOURCE\_DRIVER | Specifies the driver class to set for the database connection.                                                                                                                                                                                                                                                                                                                              | `org.postgresql.Driver`
+XNAT\_DATASOURCE\_NAME | Specifies the database name for the database connection.                                                                                                                                                                                                                                                                                                                                    | `xnat`
+XNAT\_DATASOURCE\_USERNAME | Specifies the username for the XNAT database account.                                                                                                                                                                                                                                                                                                                                       | `xnat`
+XNAT\_DATASOURCE\_PASSWORD | Specifies the password for the XNAT database account.                                                                                                                                                                                                                                                                                                                                       | `xnat`
+TOMCAT\_XNAT\_FOLDER | Indicates the name of the folder for the XNAT application. This affects the context path for accessing XNAT. The value `ROOT` indicates that XNAT is the root application and can be accessed at http://localhost (i.e. no path). Otherwise, you must add this value to the _end_ of the URL so, e.g. if you specify `xnat` for this variable, you'll access XNAT at http://localhost/xnat. | `ROOT`
+XNAT\_ROOT | Indicates the location of the root XNAT folder on the XNAT container.                                                                                                                                                                                                                                                                                                                       | `/data/xnat`
+XNAT\_HOME | Indicates the location of the XNAT user's home folder on the XNAT container.                                                                                                                                                                                                                                                                                                                | `/data/xnat/home`
+XNAT\_EMAIL | Specifies the primary administrator email address.                                                                                                                                                                                                                                                                                                                                          | `harmitage@miskatonic.edu`
+XNAT\_ACTIVEMQ\_URL | Indicates the URL for an external ActiveMQ service to use for messaging. If not specified, XNAT uses its own internal queue.                                                                                                                                                                                                                                                                | `tcp://xnat-activemq:61616`
+XNAT\_ACTIVEMQ\_USERNAME | Indicates the username to use to authenticate with the configured ActiveMQ server. Has no effect if **XNAT\_ACTIVEMQ\_URL** isn't specified.                                                                                                                                                                                                                                                | `write`
+XNAT\_ACTIVEMQ\_PASSWORD | Indicates the password to use to authenticate with the configured ActiveMQ server. Has no effect if **XNAT\_ACTIVEMQ\_URL** isn't specified.                                                                                                                                                                                                                                                | `password`
+PG\_VERSION | Specifies the [version tag](https://hub.docker.com/_/postgres?tab=tags) of the PostgreSQL docker container used in `docker-compose.yml`.                                                                                                                                                                                                                                                    | `16.9-alpine`
+NGINX\_VERSION | Specifies the [version tag](https://hub.docker.com/_/nginx?tab=tags) of the Nginx docker container used in `docker-compose.yml`.                                                                                                                                                                                                                                                            | `1.29.0-alpine-perl`
 
 
 ## Troubleshooting
@@ -164,6 +164,27 @@ View a particular log
 ```
 $ docker compose exec xnat-web cat /usr/local/tomcat/logs/catalina.2025-07-08.log
 ```
+
+### Logging into PostgreSQL
+
+Open a connection to the PostgreSQL database
+
+```
+$ docker compose exec xnat-db psql -U xnat
+```
+
+From within the psql console, query the users table (as an example)
+
+```
+xnat=> SELECT * FROM xhbm_xdat_user_auth;
+```
+
+Exit the psql console
+
+```
+xnat=> exit
+```
+
 
 ### Controlling Instances
 
