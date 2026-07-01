@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 # check=skip=SecretsUsedInArgOrEnv
 
-FROM tomcat:9.0-jdk8-temurin-noble
+FROM tomcat:9.0.115-jdk8-temurin-noble
 
 LABEL org.opencontainers.image.authors="Matt Kelsey <kelseym@wustl.edu>"
 
