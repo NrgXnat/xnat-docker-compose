@@ -27,7 +27,6 @@ services:
         XNAT_HOME: ${XNAT_HOME}
         XNAT_EMAIL: ${XNAT_EMAIL}
     ports:
-      - 8080:8080
       - 8104:8104
     networks:
       - xnat-network
@@ -59,8 +58,6 @@ services:
     hostname: xnat-web-2
     image: xnat-web:${XNAT_VERSION}
     profiles: ["multinode"]
-    ports:
-      - 8081:8080
     networks:
       - xnat-network
     volumes:
@@ -104,7 +101,6 @@ services:
       - xnat-network
     volumes:
       - ./postgres-data:/var/lib/postgresql/data
-      # 
       - ./postgres:/docker-entrypoint-initdb.d
     environment:
       - POSTGRES_PASSWORD=${XNAT_DATASOURCE_ADMIN_PASSWORD}
