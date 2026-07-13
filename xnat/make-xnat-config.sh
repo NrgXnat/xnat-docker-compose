@@ -19,6 +19,17 @@ spring.http.multipart.max-request-size=1073741824
 EOF
 fi
 
+# Use an external ActiveMQ broker when a URL is provided (required for multi-node);
+# otherwise XNAT falls back to its in-process vm://localhost queue.
+if [ -n "$XNAT_ACTIVEMQ_URL" ]; then
+  cat >> $XNAT_HOME/config/xnat-conf.properties << EOF
+
+spring.activemq.broker-url=$XNAT_ACTIVEMQ_URL
+spring.activemq.user=$XNAT_ACTIVEMQ_USERNAME
+spring.activemq.password=$XNAT_ACTIVEMQ_PASSWORD
+EOF
+fi
+
 
 if [ ! -z "$XNAT_EMAIL" ]; then
   cat > $XNAT_HOME/config/prefs-init.ini << EOF
