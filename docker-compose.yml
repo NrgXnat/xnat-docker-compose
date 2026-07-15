@@ -2,6 +2,8 @@ services:
 
   xnat-web:
     container_name: xnat-web
+    hostname: xnat-web-1
+    image: xnat-web:${XNAT_VERSION}
     build:
       context: ./xnat
       args:
@@ -17,6 +19,9 @@ services:
         XNAT_DATASOURCE_URL: ${XNAT_DATASOURCE_URL}
         XNAT_DATASOURCE_USERNAME: ${XNAT_DATASOURCE_USERNAME}
         XNAT_DATASOURCE_PASSWORD: ${XNAT_DATASOURCE_PASSWORD}
+        XNAT_ACTIVEMQ_URL: ${XNAT_ACTIVEMQ_URL}
+        XNAT_ACTIVEMQ_USERNAME: ${XNAT_ACTIVEMQ_USERNAME}
+        XNAT_ACTIVEMQ_PASSWORD: ${XNAT_ACTIVEMQ_PASSWORD}
         TOMCAT_XNAT_FOLDER: ${TOMCAT_XNAT_FOLDER}
         XNAT_ROOT: ${XNAT_ROOT}
         XNAT_HOME: ${XNAT_HOME}
@@ -27,16 +32,65 @@ services:
       - xnat-network
     volumes:
       - ./xnat/plugins:${XNAT_HOME}/plugins
+      - ./xnat/node-conf/node1.properties:${XNAT_HOME}/config/node-conf.properties
       - ./xnat-data/home/logs:${XNAT_HOME}/logs
       - ./xnat-data/archive:${XNAT_ROOT}/archive
       - ./xnat-data/build:${XNAT_ROOT}/build
       - ./xnat-data/cache:${XNAT_ROOT}/cache
+      - ./xnat-data/prearchive:${XNAT_ROOT}/prearchive
       - /var/run/docker.sock:/var/run/docker.sock
     depends_on:
       - xnat-db
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/ || exit 1"]
+      interval: 15s
+      timeout: 10s
+      retries: 20
+      start_period: 180s
     environment:
       - CATALINA_OPTS=-Xms${XNAT_MIN_HEAP} -Xmx${XNAT_MAX_HEAP} -Dxnat.home=${XNAT_HOME}
       - XNAT_HOME=${XNAT_HOME}
+
+  # Second XNAT web node — enabled only with the "multinode" profile
+  # (COMPOSE_PROFILES=multinode). Reuses the image built by xnat-web.
+  xnat-web-2:
+    container_name: xnat-web-2
+    hostname: xnat-web-2
+    image: xnat-web:${XNAT_VERSION}
+    profiles: ["multinode"]
+    networks:
+      - xnat-network
+    volumes:
+      - ./xnat/plugins:${XNAT_HOME}/plugins
+      - ./xnat/node-conf/node2.properties:${XNAT_HOME}/config/node-conf.properties
+      - ./xnat-data/home2/logs:${XNAT_HOME}/logs
+      - ./xnat-data/archive:${XNAT_ROOT}/archive
+      - ./xnat-data/build:${XNAT_ROOT}/build
+      - ./xnat-data/cache:${XNAT_ROOT}/cache
+      - ./xnat-data/prearchive:${XNAT_ROOT}/prearchive
+      - /var/run/docker.sock:/var/run/docker.sock
+    depends_on:
+      xnat-db:
+        condition: service_started
+      xnat-activemq:
+        condition: service_started
+      xnat-web:
+        condition: service_healthy
+    environment:
+      - CATALINA_OPTS=-Xms${XNAT_MIN_HEAP} -Xmx${XNAT_MAX_HEAP} -Dxnat.home=${XNAT_HOME}
+      - XNAT_HOME=${XNAT_HOME}
+
+  # External ActiveMQ broker — enabled only with the "multinode" profile.
+  xnat-activemq:
+    container_name: xnat-activemq
+    image: apache/activemq-classic:${ACTIVEMQ_VERSION}
+    profiles: ["multinode"]
+    expose:
+      - 61616
+    ports:
+      - 8161:8161
+    networks:
+      - xnat-network
 
   xnat-db:
     container_name: xnat-db
@@ -47,7 +101,6 @@ services:
       - xnat-network
     volumes:
       - ./postgres-data:/var/lib/postgresql/data
-      # 
       - ./postgres:/docker-entrypoint-initdb.d
     environment:
       - POSTGRES_PASSWORD=${XNAT_DATASOURCE_ADMIN_PASSWORD}
@@ -59,12 +112,19 @@ services:
   xnat-nginx:
     container_name: xnat-nginx
     image: nginx:${NGINX_VERSION}
+    # NGINX_CONF selects the routing config: nginx.conf (single node, default) or
+    # nginx-multinode.conf (load-balances xnat-web + xnat-web-2).
     volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx/${NGINX_CONF:-nginx.conf}:/etc/nginx/nginx.conf
     ports:
       - 80:80
     networks:
       - xnat-network
+    # restart handles the multi-node startup race: the upstream resolves xnat-web-2
+    # at config load, so nginx may exit if it boots first; the restart recovers once
+    # the second node exists. (A non-profiled service can't cleanly depend on a
+    # profile-gated one, so we don't add xnat-web-2 to depends_on.)
+    restart: unless-stopped
     depends_on:
       - xnat-web
     links:

@@ -8,6 +8,7 @@ This document contains the following sections:
 * [Introduction](#markdown-header-introduction)
 * [Prerequisites](#markdown-header-prerequisites)
 * [Usage](#markdown-header-usage)
+* [Multi-node deployment](#markdown-header-multi-node-deployment)
 * [Environment variables](#markdown-header-environment-variables)
 * [Mounted Data](#markdown-header-mounted-data)
 * [Troubleshooting](#markdown-header-troubleshooting)
@@ -15,11 +16,16 @@ This document contains the following sections:
 
 ## Introduction
 
-This repository contains files to bootstrap XNAT deployment. The build creates three containers:
+This repository contains files to bootstrap XNAT deployment. The build creates multiple containers:
 
 - **[Tomcat](http://tomcat.apache.org/) + XNAT**: The XNAT web application
 - [**Postgres**](https://www.postgresql.org/): The XNAT database
 - [**nginx**](https://www.nginx.com/): Web proxy sitting in front of XNAT
+
+The following containers are optional and only run when the [multi-node deployment](#markdown-header-multi-node-deployment) is enabled:
+
+- **[Tomcat](http://tomcat.apache.org/) + XNAT (second node)**: An additional XNAT web application node, load-balanced behind nginx
+- [**ActiveMQ**](https://activemq.apache.org/): A shared message broker used by the XNAT nodes for messaging
 
 ## Prerequisites
 
@@ -84,6 +90,75 @@ $ cp default.env .env
 
 5. First XNAT Site Setup! Your XNAT will soon be available at [http://localhost](http://localhost). After logging in with credentials `admin`/`admin` (the default username and password, respectively), the setup page should be displayed.
 
+## Multi-node deployment
+
+By default this project runs a single XNAT web node. You can optionally run a **two-node,
+load-balanced cluster** backed by an external [ActiveMQ](https://activemq.apache.org/) broker.
+
+> **This is intended for multi-node _testing_ only.** Running both web nodes on a single host
+> provides no performance advantage — the nodes contend for the same CPU, memory, and disk. For a
+> true multi-node production environment (nodes on separate hosts, with proper scaling and
+> orchestration), use the XNAT Helm charts instead:
+> [https://github.com/NrgXnat/helm-charts](https://github.com/NrgXnat/helm-charts).
+
+This provisions two additional containers:
+
+- **xnat-web-2**: A second XNAT web node, running the same image as `xnat-web`. It shares the
+  database, archive, build and cache with the primary node.
+- **xnat-activemq**: An [ActiveMQ Classic](https://hub.docker.com/r/apache/activemq-classic)
+  broker. XNAT normally uses an in-process (`vm://localhost`) message queue that only works within
+  a single JVM; the shared broker lets queued work produced on one node be consumed by any node.
+
+The nginx proxy is switched to a config with an `upstream` block that load-balances across both
+nodes using `ip_hash`, which pins each client to one node (Tomcat HTTP sessions are per-node and
+are not replicated).
+
+### Enabling
+
+Multi-node is controlled from your `.env` file. Set the following three values (a commented
+`# ---- Multi-node cluster (optional) ----` block in `default.env`/`.env` shows exactly where):
+
+```
+COMPOSE_PROFILES=multinode
+NGINX_CONF=nginx-multinode.conf
+XNAT_ACTIVEMQ_URL=tcp://xnat-activemq:61616
+```
+
+Because the ActiveMQ connection is baked into the image at build time, you must **rebuild** when
+switching modes:
+
+```
+$ docker compose build && docker compose up -d
+```
+
+To return to single-node, clear those three values (`COMPOSE_PROFILES=`, `NGINX_CONF=nginx.conf`,
+`XNAT_ACTIVEMQ_URL=`) and rebuild again.
+
+### Entry points
+
+- **http://localhost** — load-balanced across both nodes (via nginx).
+- **http://localhost:8161** — ActiveMQ web console (default login `admin`/`admin`).
+- **http://localhost:8081** — direct access to `xnat-web-2` (optional; bypasses the load balancer).
+
+### How it works
+
+- `xnat-web-2` and `xnat-activemq` are tagged with the Compose profile `multinode`, so they only
+  start when `COMPOSE_PROFILES=multinode`.
+- `xnat-web-2` waits for the primary `xnat-web` to report healthy before starting, so the two nodes
+  don't race on the initial Hibernate schema initialization.
+- Each node gets its per-node settings from `xnat/node-conf/node1.properties` (for `xnat-web`) and
+  `node2.properties` (for `xnat-web-2`), each mounted to `${XNAT_HOME}/config/node-conf.properties`
+  and read by XNAT at startup. These set a unique `node.id` (so XNAT's Node/Task framework runs
+  scheduled/recurring tasks on only one node) and `xnat.is_primary_node` (`true` on `xnat-web`,
+  `false` on `xnat-web-2`). Mounting per-node files avoids baking node-specific values into the
+  shared build-time image.
+- The second node writes its logs to `xnat-data/home2/logs` to avoid clobbering the primary node's
+  logs (`xnat-data/home/logs`).
+
+> **Note:** The ActiveMQ broker as configured here has no persistent volume, so queued messages are
+> lost if the broker restarts. Real-time cross-node cache invalidation additionally requires XNAT's
+> Distributed Events plugin jar in `xnat/plugins/` (not bundled with this project).
+
 ## Mounted Data
 
 When you bring up XNAT with `docker compose up`, several directories are created (if they don't exist already) to store the persistent data.
@@ -93,6 +168,7 @@ When you bring up XNAT with `docker compose up`, several directories are created
 * **xnat-data/archive** - Contains the XNAT archive
 * **xnat-data/build** - Contains the XNAT build space. This is useful when running the container service plugin.
 * **xnat-data/home/logs** - Contains the XNAT logs.
+* **xnat-data/home2/logs** - Contains the logs for the second web node (only used in a [multi-node deployment](#markdown-header-multi-node-deployment)).
 
 ## Environment variables
 
@@ -127,9 +203,12 @@ XNAT\_WEBAPP\_FOLDER | Indicates the name of the folder for the XNAT application
 XNAT\_ROOT | Indicates the location of the root XNAT folder on the XNAT container. | `/data/xnat`
 XNAT\_HOME | Indicates the location of the XNAT user's home folder on the XNAT container. | `/data/xnat/home`
 XNAT\_EMAIL | Specifies the primary administrator email address. | `harmitage@miskatonic.edu`
-XNAT\_ACTIVEMQ\_URL | Indicates the URL for an external ActiveMQ service to use for messaging. If not specified, XNAT uses its own internal queue. |
+XNAT\_ACTIVEMQ\_URL | Indicates the URL for an external ActiveMQ service to use for messaging. If not specified (the default), XNAT uses its own internal queue. Required for multi-node deployment (see below).  |
 XNAT\_ACTIVEMQ\_USERNAME | Indicates the username to use to authenticate with the configured ActiveMQ server. Has no effect if **XNAT\_ACTIVEMQ\_URL** isn't specified. |
 XNAT\_ACTIVEMQ\_PASSWORD | Indicates the password to use to authenticate with the configured ActiveMQ server. Has no effect if **XNAT\_ACTIVEMQ\_URL** isn't specified. |
+ACTIVEMQ\_VERSION | Specifies the [version tag](https://hub.docker.com/r/apache/activemq-classic/tags) of the ActiveMQ container used for multi-node deployment (see below). | `6.1.4`
+COMPOSE\_PROFILES | Docker Compose profiles to activate. Set to `multinode` to enable the multi-node deployment (a second web node and an ActiveMQ broker). Empty (the default) runs the single-node stack. | _(empty)_
+NGINX\_CONF | Selects the nginx routing config mounted into the proxy: `nginx.conf` (single node) or `nginx-multinode.conf` (load-balances both web nodes). | `nginx.conf`
 PG\_VERSION | Specifies the [version tag](https://hub.docker.com/_/postgres?tab=tags) of the PostgreSQL docker container used in `docker-compose.yml`. | `16.9-alpine`
 NGINX\_VERSION | Specifies the [version tag](https://hub.docker.com/_/nginx?tab=tags) of the Nginx docker container used in `docker-compose.yml`. | `1.29.0-alpine-perl`
 
