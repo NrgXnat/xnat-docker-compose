@@ -13,6 +13,8 @@ x-xnat-web: &xnat-web
   environment:
     CATALINA_OPTS: -Xms${XNAT_MIN_HEAP} -Xmx${XNAT_MAX_HEAP} -Dxnat.home=${XNAT_HOME}
     XNAT_HOME: ${XNAT_HOME}
+    # Time zone for XNAT's clock and the times it shows.
+    TZ: ${XNAT_TZ:-Etc/UTC}
     # Send XNAT's logs to the container's stdout (docker compose logs).
     XNAT_LOG_CONSOLE: plain
     XNAT_DATASOURCE_DRIVER: ${XNAT_DATASOURCE_DRIVER}

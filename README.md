@@ -272,6 +272,7 @@ XNAT\_DATASOURCE\_PASSWORD | Specifies the password for the XNAT database accoun
 XNAT\_ROOT | Indicates the location of the root XNAT folder on the XNAT container. | `/data/xnat`
 XNAT\_HOME | Indicates the location of the XNAT user's home folder on the XNAT container. | `/data/xnat/home`
 XNAT\_EMAIL | Specifies the primary administrator email address. | `harmitage@miskatonic.edu`
+XNAT\_TZ | The time zone XNAT uses for its clock and the times it shows, as a tz database name such as `America/Chicago`. Changing it doesn't convert times XNAT has already stored. | `Etc/UTC`
 XNAT\_ACTIVEMQ\_URL | Indicates the URL for an external ActiveMQ service to use for messaging. If not specified (the default), XNAT uses its own internal queue. Required for multi-node deployment (see below).  |
 XNAT\_ACTIVEMQ\_USERNAME | Indicates the username to use to authenticate with the configured ActiveMQ server. Has no effect if **XNAT\_ACTIVEMQ\_URL** isn't specified. |
 XNAT\_ACTIVEMQ\_PASSWORD | Indicates the password to use to authenticate with the configured ActiveMQ server. Has no effect if **XNAT\_ACTIVEMQ\_URL** isn't specified. |
