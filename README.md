@@ -242,7 +242,7 @@ When you bring up XNAT with `docker compose up`, several directories are created
 To support differing deployment requirements, `xnat-docker-compose` uses variables for settings that tend to change based on environment. By
 default, `docker compose` takes the values for variables from the [file `.env`](https://docs.docker.com/compose/environment-variables/). Advanced configurations will need to use a customized `.env` file.
 
-To create your own `.env` file, it's best to just copy the existing `.env` and modify the values in there.
+To create your own `.env` file, it's best to just copy the existing `default.env` and modify the values in there.
 
 ### XNAT configuration
 
@@ -300,6 +300,26 @@ Tomcat and XNAT write their logs to the container's output:
 
 ```
 $ docker compose logs --follow xnat-web
+```
+
+### Logging into PostgreSQL
+
+Open a connection to the PostgreSQL database
+
+```
+$ docker compose exec xnat-db psql -U xnat
+```
+
+From within the psql console, query the users table (as an example)
+
+```
+xnat=> SELECT * FROM xhbm_xdat_user_auth;
+```
+
+Exit the psql console
+
+```
+xnat=> exit
 ```
 
 ### Controlling Instances
