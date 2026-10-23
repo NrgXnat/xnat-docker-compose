@@ -151,10 +151,16 @@ services:
       - ./xnat/webapps/ROOT:/usr/local/tomcat/webapps/ROOT
 ```
 
-Start XNAT with `docker compose up -d`. After you unpack a new build, recreate the container so it starts clean:
+Start XNAT with `docker compose up -d`. After you unpack a new build, recreate the container so it starts clean and mounts the new directory:
 
 ```
 $ docker compose up -d --force-recreate xnat-web
+```
+
+For the multi-node deployment, recreate both nodes. A node that keeps running still has the deleted directory mounted.
+
+```
+$ docker compose up -d --force-recreate xnat-web xnat-web-2
 ```
 
 The WAR must match the image's XNAT line: XNAT 1.10 or later on `ghcr.io/nrgxnat/xnat` (Java 21), and XNAT 1.9 on `ghcr.io/nrgxnat/xnat-web` (Java 8). To go back to the image's XNAT, delete `docker-compose.override.yml` and run `docker compose up -d`.
@@ -246,7 +252,7 @@ To create your own `.env` file, it's best to just copy the existing `default.env
 
 ### XNAT configuration
 
-These variables directly set options for XNAT itself.
+These variables directly set options for XNAT itself. `XNAT_EMAIL` and the `XNAT_SMTP_*` variables apply on XNAT's first start only; see [Apply changes](#markdown-header-apply-changes).
 
 Variable | Description | Default value
 -------- | ----------- | -------------
@@ -361,6 +367,8 @@ $ docker compose up --detach
 ```
 
 Changes to `xnat/xnat-start.sh` alone need only a restart (`docker compose restart xnat-web`).
+
+`xnat-start.sh` writes `xnat-conf.properties` and `prefs-init.ini` on every start, so edits made to them inside the container are lost. `XNAT_EMAIL` and the `XNAT_SMTP_*` settings go to `prefs-init.ini`, which XNAT reads only for settings it doesn't have yet. They take effect on XNAT's first start. After that, change them under Administer > Site Administration.
 
 ## Notes on using the Container Service
 

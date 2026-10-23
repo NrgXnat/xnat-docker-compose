@@ -31,6 +31,7 @@ spring.activemq.password=$XNAT_ACTIVEMQ_PASSWORD
 EOF
 fi
 
+# prefs-init.ini only sets preferences XNAT doesn't have yet, so these apply on the first start.
 if [ -n "$XNAT_EMAIL" ]; then
   cat > "$conf/prefs-init.ini" << EOF
 [siteConfig]
