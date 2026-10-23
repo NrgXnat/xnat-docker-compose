@@ -51,4 +51,8 @@ smtpStartTls=$XNAT_SMTP_START_TLS
 EOF
 fi
 
+# Warn about missed Linux setup steps. XNAT still starts and passes its health check without them.
+[ -w "$XNAT_ROOT/archive" ] || echo "WARNING: XNAT can't write $XNAT_ROOT/archive. On Linux, set XNAT_UID in .env to the owner of xnat-data (id -u)." >&2
+[ ! -S /var/run/docker.sock ] || [ -w /var/run/docker.sock ] || echo "WARNING: XNAT can't use /var/run/docker.sock. Set DOCKER_GID in .env to its group (stat -c %g /var/run/docker.sock)." >&2
+
 exec /usr/local/bin/entrypoint.sh /usr/local/tomcat/bin/catalina.sh run

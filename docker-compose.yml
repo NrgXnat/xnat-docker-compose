@@ -13,12 +13,19 @@ x-xnat-web: &xnat-web
     - "${DOCKER_GID:-0}"
   networks:
     - xnat-network
+  healthcheck:
+    test: ["CMD-SHELL", "curl -f http://localhost:8080/ || exit 1"]
+    interval: 15s
+    timeout: 10s
+    retries: 20
+    start_period: 180s
   environment:
     CATALINA_OPTS: -Xms${XNAT_MIN_HEAP} -Xmx${XNAT_MAX_HEAP} -Dxnat.home=/data/xnat/home
     # Time zone for XNAT's clock and the times it shows.
     TZ: ${XNAT_TZ:-Etc/UTC}
     # Send XNAT's logs to the container's stdout (docker compose logs).
     XNAT_LOG_CONSOLE: plain
+    XNAT_ROOT: ${XNAT_ROOT}
     XNAT_DATASOURCE_DRIVER: ${XNAT_DATASOURCE_DRIVER}
     XNAT_DATASOURCE_URL: ${XNAT_DATASOURCE_URL}
     XNAT_DATASOURCE_USERNAME: ${XNAT_DATASOURCE_USERNAME}
@@ -56,12 +63,6 @@ services:
     depends_on:
       xnat-db:
         condition: service_healthy
-    healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:8080/ || exit 1"]
-      interval: 15s
-      timeout: 10s
-      retries: 20
-      start_period: 180s
 
   # Second XNAT web node — enabled only with the "multinode" profile
   # (COMPOSE_PROFILES=multinode). Runs the same image as xnat-web.
