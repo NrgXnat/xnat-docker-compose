@@ -274,11 +274,11 @@ XNAT\_EMAIL | Specifies the primary administrator email address. | `harmitage@mi
 XNAT\_ACTIVEMQ\_URL | Indicates the URL for an external ActiveMQ service to use for messaging. If not specified (the default), XNAT uses its own internal queue. Required for multi-node deployment (see below).  |
 XNAT\_ACTIVEMQ\_USERNAME | Indicates the username to use to authenticate with the configured ActiveMQ server. Has no effect if **XNAT\_ACTIVEMQ\_URL** isn't specified. |
 XNAT\_ACTIVEMQ\_PASSWORD | Indicates the password to use to authenticate with the configured ActiveMQ server. Has no effect if **XNAT\_ACTIVEMQ\_URL** isn't specified. |
-ACTIVEMQ\_VERSION | Specifies the [version tag](https://hub.docker.com/r/apache/activemq-classic/tags) of the ActiveMQ container used for multi-node deployment (see below). | `6.1.4`
+ACTIVEMQ\_VERSION | Specifies the [version tag](https://hub.docker.com/r/apache/activemq-classic/tags) of the ActiveMQ container used for multi-node deployment (see below). | `6.2.0`
 COMPOSE\_PROFILES | Docker Compose profiles to activate. Set to `multinode` to enable the multi-node deployment (a second web node and an ActiveMQ broker). Empty (the default) runs the single-node stack. | _(empty)_
 NGINX\_CONF | Selects the nginx routing config mounted into the proxy: `nginx.conf` (single node) or `nginx-multinode.conf` (load-balances both web nodes). | `nginx.conf`
-PG\_VERSION | Specifies the [version tag](https://hub.docker.com/_/postgres?tab=tags) of the PostgreSQL docker container used in `docker-compose.yml`. | `16.9-alpine`
-NGINX\_VERSION | Specifies the [version tag](https://hub.docker.com/_/nginx?tab=tags) of the Nginx docker container used in `docker-compose.yml`. | `1.29.0-alpine-perl`
+PG\_VERSION | Specifies the [version tag](https://hub.docker.com/_/postgres?tab=tags) of the PostgreSQL docker container used in `docker-compose.yml`. | `16.15-alpine`
+NGINX\_VERSION | Specifies the [version tag](https://hub.docker.com/_/nginx?tab=tags) of the Nginx docker container used in `docker-compose.yml`. | `1.30.6-alpine-perl`
 
 
 ## Troubleshooting
