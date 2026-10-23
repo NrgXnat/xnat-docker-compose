@@ -53,7 +53,7 @@ $ cp default.env .env
 3. Configurations: The default configuration is sufficient to run the deployment. To change it:
 
     - **.env**: `XNAT_IMAGE` and `XNAT_VERSION` choose the published XNAT image. To run XNAT 1.9, set `XNAT_IMAGE=ghcr.io/nrgxnat/xnat-web` and `XNAT_VERSION=1.9.3.9`. See [Environment variables](#markdown-header-environment-variables) for the rest.
-    - **docker-compose.yml**: How the different containers are deployed. To change the arguments sent to Tomcat on startup, edit the `CATALINA_OPTS` environment variable (under `x-xnat-web → environment`).
+    - **docker-compose.yml**: How the different containers are deployed. To change the arguments sent to Tomcat on startup, edit the `CATALINA_OPTS` environment variable (under `x-xnat-node → environment`).
     - **xnat/xnat-start.sh**: Writes XNAT's configuration files from the environment each time the XNAT container starts, then starts XNAT.
 
     XNAT is served at the root of the site (`http://localhost`).

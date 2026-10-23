@@ -1,7 +1,7 @@
 # Settings shared by the XNAT web nodes. They run the published XNAT image, with XNAT's
 # home at the image's /data/xnat/home. xnat-start.sh writes XNAT's configuration from
 # these variables on every start, then runs the image's own entrypoint.
-x-xnat-web: &xnat-web
+x-xnat-node: &xnat-node
   image: ${XNAT_IMAGE}:${XNAT_VERSION}
   entrypoint: ["/bin/sh", "/usr/local/bin/xnat-start.sh"]
   # Runs as XNAT_UID in the image's group (1000), which can write the image's paths.
@@ -45,7 +45,7 @@ x-xnat-web: &xnat-web
 services:
 
   xnat-web:
-    <<: *xnat-web
+    <<: *xnat-node
     container_name: xnat-web
     hostname: xnat-web-1
     ports:
@@ -67,7 +67,7 @@ services:
   # Second XNAT web node — enabled only with the "multinode" profile
   # (COMPOSE_PROFILES=multinode). Runs the same image as xnat-web.
   xnat-web-2:
-    <<: *xnat-web
+    <<: *xnat-node
     container_name: xnat-web-2
     hostname: xnat-web-2
     profiles: ["multinode"]
