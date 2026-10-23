@@ -109,6 +109,7 @@ $ cp default.env .env
 Earlier versions of this project built an XNAT image from a WAR and ran it as `root`. Check these changes before you switch an existing deployment to the published images:
 
 - The default XNAT version is now 1.10.2.1. Upgrading from XNAT 1.9 changes the database and can't be undone. Back up the database first (`docker compose exec -T xnat-db pg_dump -U xnat xnat > xnat-backup.sql`) and check that each plugin has a build for XNAT 1.10. To stay on XNAT 1.9, set `XNAT_IMAGE=ghcr.io/nrgxnat/xnat-web` and `XNAT_VERSION=1.9.3.9`.
+- XNAT 1.8 and earlier aren't supported. There are no published images for them.
 - XNAT is served at `http://localhost`. If you set `TOMCAT_XNAT_FOLDER` to serve it under a path such as `/xnat`, update the Site URL (Administer > Site Administration) and any links or scripts that use the old path.
 - `xnat/Dockerfile` and `xnat/make-xnat-config.sh` are gone. Move any changes you made to them into `xnat/xnat-start.sh` or `docker-compose.yml`, or run your own WAR as described in [Use your own XNAT build or plugins](#markdown-header-use-your-own-xnat-build-or-plugins).
 - XNAT's logs go to `docker compose logs` instead of files in `xnat-data/home/logs`.
