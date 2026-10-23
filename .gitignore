@@ -17,6 +17,7 @@ gradle.properties
 xnat/plugins
 
 xnat/webapps
+docker-compose.override.yml
 
 *.env
 !default.env
