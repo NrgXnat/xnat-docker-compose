@@ -113,6 +113,7 @@ Earlier versions of this project built an XNAT image from a WAR and ran it as `r
 - XNAT is served at `http://localhost`. If you set `TOMCAT_XNAT_FOLDER` to serve it under a path such as `/xnat`, update the Site URL (Administer > Site Administration) and any links or scripts that use the old path.
 - `xnat/Dockerfile` and `xnat/make-xnat-config.sh` are gone. Move any changes you made to them into `xnat/xnat-start.sh` or `docker-compose.yml`, or run your own WAR as described in [Use your own XNAT build or plugins](#markdown-header-use-your-own-xnat-build-or-plugins).
 - XNAT's logs go to `docker compose logs` instead of files in `xnat-data/home/logs`.
+- `XNAT_HOME` is no longer a setting. XNAT's home in the container is always `/data/xnat/home`, the image's own. The directories on the host don't change.
 
 To switch:
 
@@ -215,7 +216,7 @@ To return to single-node, run `docker compose down`, clear those three values (`
 - `xnat-web-2` waits for the primary `xnat-web` to report healthy before starting, so the two nodes
   don't race on the initial Hibernate schema initialization.
 - Each node gets its per-node settings from `xnat/node-conf/node1.properties` (for `xnat-web`) and
-  `node2.properties` (for `xnat-web-2`), each mounted to `${XNAT_HOME}/config/node-conf.properties`
+  `node2.properties` (for `xnat-web-2`), each mounted to `/data/xnat/home/config/node-conf.properties`
   and read by XNAT at startup. These set a unique `node.id` (so XNAT's Node/Task framework runs
   scheduled/recurring tasks on only one node) and `xnat.is_primary_node` (`true` on `xnat-web`,
   `false` on `xnat-web-2`). Mounting per-node files keeps node-specific values out of the shared
@@ -270,7 +271,6 @@ XNAT\_DATASOURCE\_NAME | Specifies the database name for the database connection
 XNAT\_DATASOURCE\_USERNAME | Specifies the username for the XNAT database account. | `xnat`
 XNAT\_DATASOURCE\_PASSWORD | Specifies the password for the XNAT database account. | `xnat`
 XNAT\_ROOT | Indicates the location of the root XNAT folder on the XNAT container. | `/data/xnat`
-XNAT\_HOME | Indicates the location of the XNAT user's home folder on the XNAT container. | `/data/xnat/home`
 XNAT\_EMAIL | Specifies the primary administrator email address. | `harmitage@miskatonic.edu`
 XNAT\_TZ | The time zone XNAT uses for its clock and the times it shows, as a tz database name such as `America/Chicago`. Changing it doesn't convert times XNAT has already stored. | `Etc/UTC`
 XNAT\_ACTIVEMQ\_URL | Indicates the URL for an external ActiveMQ service to use for messaging. If not specified (the default), XNAT uses its own internal queue. Required for multi-node deployment (see below).  |
