@@ -8,6 +8,7 @@ This document contains the following sections:
 * [Introduction](#markdown-header-introduction)
 * [Prerequisites](#markdown-header-prerequisites)
 * [Usage](#markdown-header-usage)
+* [Use your own XNAT build or plugins](#markdown-header-use-your-own-xnat-build-or-plugins)
 * [Multi-node deployment](#markdown-header-multi-node-deployment)
 * [Environment variables](#markdown-header-environment-variables)
 * [Mounted Data](#markdown-header-mounted-data)
@@ -55,7 +56,7 @@ $ cp default.env .env
     - **docker-compose.yml**: How the different containers are deployed. To change the arguments sent to Tomcat on startup, edit the `CATALINA_OPTS` environment variable (under `x-xnat-web → environment`).
     - **xnat/xnat-start.sh**: Writes XNAT's configuration files from the environment each time the XNAT container starts, then starts XNAT.
 
-    XNAT is served at the root of the site (`http://localhost`). The published images don't support serving it under a path such as `/xnat`.
+    XNAT is served at the root of the site (`http://localhost`).
 
 4. On Linux only, create the data directories and give them to the XNAT user (uid 1000) before the first start. The XNAT container runs as that user, and Docker would otherwise create the directories as `root`. Docker Desktop on macOS and Windows doesn't need this.
 
@@ -105,7 +106,14 @@ $ cp default.env .env
 
 ### Upgrading from a version of this project that built its own image
 
-Earlier versions of this project built an XNAT image and ran it as `root`. To switch an existing deployment to the published images:
+Earlier versions of this project built an XNAT image from a WAR and ran it as `root`. Check these changes before you switch an existing deployment to the published images:
+
+- The default XNAT version is now 1.10.2.1. Upgrading from XNAT 1.9 changes the database and can't be undone. Back up the database first (`docker compose exec -T xnat-db pg_dump -U xnat xnat > xnat-backup.sql`) and check that each plugin has a build for XNAT 1.10. To stay on XNAT 1.9, set `XNAT_IMAGE=ghcr.io/nrgxnat/xnat-web` and `XNAT_VERSION=1.9.3.9`.
+- XNAT is served at `http://localhost`. If you set `TOMCAT_XNAT_FOLDER` to serve it under a path such as `/xnat`, update the Site URL (Administer > Site Administration) and any links or scripts that use the old path.
+- `xnat/Dockerfile` and `xnat/make-xnat-config.sh` are gone. Move any changes you made to them into `xnat/xnat-start.sh` or `docker-compose.yml`, or run your own WAR as described in [Use your own XNAT build or plugins](#markdown-header-use-your-own-xnat-build-or-plugins).
+- XNAT's logs go to `docker compose logs` instead of files in `xnat-data/home/logs`.
+
+To switch:
 
 1. Bring it down with `docker compose down`.
 2. Copy the new variables from `default.env` into your `.env`: `XNAT_IMAGE`, `XNAT_VERSION` and `DOCKER_GID`. `TOMCAT_XNAT_FOLDER` is no longer used.
@@ -116,6 +124,40 @@ Earlier versions of this project built an XNAT image and ran it as `root`. To sw
     ```
 
 4. Start it with `docker compose up -d`.
+
+## Use your own XNAT build or plugins
+
+**Plugins:** copy plugin jars into `xnat/plugins` and restart XNAT. When you replace a plugin with a new version, delete the old jar.
+
+```
+$ cp path/to/my-plugin-xpl.jar xnat/plugins/
+$ docker compose restart xnat-web
+```
+
+**XNAT WAR:** unpack your WAR into `xnat/webapps/ROOT`:
+
+```
+$ rm -rf xnat/webapps/ROOT
+$ mkdir -p xnat/webapps/ROOT
+$ unzip -q path/to/xnat-web.war -d xnat/webapps/ROOT
+```
+
+Then mount it over the image's copy of XNAT with a `docker-compose.override.yml` file next to `docker-compose.yml`. Docker Compose reads that file automatically. For the multi-node deployment, add the same volume to `xnat-web-2`.
+
+```yaml
+services:
+  xnat-web:
+    volumes:
+      - ./xnat/webapps/ROOT:/usr/local/tomcat/webapps/ROOT
+```
+
+Start XNAT with `docker compose up -d`. After you unpack a new build, recreate the container so it starts clean:
+
+```
+$ docker compose up -d --force-recreate xnat-web
+```
+
+The WAR must match the image's XNAT line: XNAT 1.10 or later on `ghcr.io/nrgxnat/xnat` (Java 21), and XNAT 1.9 on `ghcr.io/nrgxnat/xnat-web` (Java 8). To go back to the image's XNAT, delete `docker-compose.override.yml` and run `docker compose up -d`.
 
 ## Multi-node deployment
 
@@ -164,7 +206,6 @@ To return to single-node, run `docker compose down`, clear those three values (`
 
 - **http://localhost** — load-balanced across both nodes (via nginx).
 - **http://localhost:8161** — ActiveMQ web console (default login `admin`/`admin`).
-- **http://localhost:8081** — direct access to `xnat-web-2` (optional; bypasses the load balancer).
 
 ### How it works
 
