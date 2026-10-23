@@ -1,6 +1,6 @@
 #!/bin/sh
 # Write XNAT's configuration from the environment, then start the image's own entrypoint.
-# Runs on every start as the image's user (uid 1000), which owns $XNAT_HOME/config.
+# Runs on every start in the image's group (1000), which can write $XNAT_HOME/config.
 set -e
 conf="$XNAT_HOME/config"
 

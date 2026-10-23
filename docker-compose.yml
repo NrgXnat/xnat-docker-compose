@@ -1,11 +1,13 @@
-# Settings shared by the XNAT web nodes. They run the published XNAT image as its
-# non-root user (uid 1000), with XNAT's home at the image's /data/xnat/home, which that
-# user owns. xnat-start.sh writes XNAT's configuration from these variables on every
-# start, then runs the image's own entrypoint.
+# Settings shared by the XNAT web nodes. They run the published XNAT image, with XNAT's
+# home at the image's /data/xnat/home. xnat-start.sh writes XNAT's configuration from
+# these variables on every start, then runs the image's own entrypoint.
 x-xnat-web: &xnat-web
   image: ${XNAT_IMAGE}:${XNAT_VERSION}
   entrypoint: ["/bin/sh", "/usr/local/bin/xnat-start.sh"]
-  # Lets uid 1000 use the Docker socket for the container service. The socket's group
+  # Runs as XNAT_UID in the image's group (1000), which can write the image's paths.
+  # On Linux, XNAT_UID is your own uid, so XNAT can write the directories mounted here.
+  user: "${XNAT_UID:-1000}:1000"
+  # Lets XNAT use the Docker socket for the container service. The socket's group
   # is 0 on Docker Desktop; on Linux, set DOCKER_GID to `stat -c %g /var/run/docker.sock`.
   group_add:
     - "${DOCKER_GID:-0}"

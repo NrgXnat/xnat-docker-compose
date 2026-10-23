@@ -58,17 +58,15 @@ $ cp default.env .env
 
     XNAT is served at the root of the site (`http://localhost`).
 
-4. On Linux only, create the data directories and give them to the XNAT user (uid 1000) before the first start. The XNAT container runs as that user, and Docker would otherwise create the directories as `root`. Docker Desktop on macOS and Windows doesn't need this.
+4. On Linux only, set two values in `.env` and create the data directories before the first start. Docker Desktop on macOS and Windows doesn't need this.
+
+    - `XNAT_UID`: your uid, from `id -u`. XNAT runs as this user, so it can write the directories you create here, and you can edit what XNAT writes.
+    - `DOCKER_GID`: the group that owns the Docker socket, from `stat -c %g /var/run/docker.sock`, so the container service can use it.
+
+    Create the directories yourself, because Docker creates missing ones as `root`:
 
     ```
     $ mkdir -p xnat-data/archive xnat-data/build xnat-data/cache xnat-data/prearchive xnat-data/home/logs xnat-data/home2/logs xnat/plugins
-    $ sudo chown -R 1000:1000 xnat-data xnat/plugins
-    ```
-
-    Also set `DOCKER_GID` in `.env` to the group that owns the Docker socket, so the container service can use it:
-
-    ```
-    $ stat -c %g /var/run/docker.sock
     ```
 
 5. Start the system
@@ -118,11 +116,11 @@ Earlier versions of this project built an XNAT image from a WAR and ran it as `r
 To switch:
 
 1. Bring it down with `docker compose down`.
-2. Copy the new variables from `default.env` into your `.env`: `XNAT_IMAGE`, `XNAT_VERSION` and `DOCKER_GID`. `TOMCAT_XNAT_FOLDER` is no longer used.
-3. On Linux, give the existing data to the XNAT user, and set `DOCKER_GID` as described in step 4 above:
+2. Copy the new variables from `default.env` into your `.env`: `XNAT_IMAGE`, `XNAT_VERSION`, `XNAT_UID` and `DOCKER_GID`. `TOMCAT_XNAT_FOLDER` is no longer used.
+3. On Linux, set `XNAT_UID` and `DOCKER_GID` as described in step 4 above. The old image wrote the data as `root`, so give it to your user once:
 
     ```
-    $ sudo chown -R 1000:1000 xnat-data xnat/plugins
+    $ sudo chown -R $(id -u):$(id -g) xnat-data xnat/plugins
     ```
 
 4. Start it with `docker compose up -d`.
@@ -254,6 +252,7 @@ Variable | Description | Default value
 -------- | ----------- | -------------
 XNAT\_IMAGE | The published XNAT image to run. Use `ghcr.io/nrgxnat/xnat-web` for XNAT 1.9. | `ghcr.io/nrgxnat/xnat`
 XNAT\_VERSION | The tag of the XNAT image, which is the XNAT version. | `1.10.2.1`
+XNAT\_UID | The uid XNAT runs as, in the image's group (1000). On Linux, set it to your own uid (`id -u`) so XNAT can write the directories mounted from this folder. | `1000`
 DOCKER\_GID | The group that owns the Docker socket on the host, added to the XNAT user so the container service can use the socket. `0` on Docker Desktop; on Linux, the output of `stat -c %g /var/run/docker.sock`. | `0`
 XNAT\_MIN\_HEAP | Indicates the minimum heap size for the Java virtual machine. | `256m`
 XNAT\_MAX\_HEAP | Indicates the maximum heap size for the Java virtual machine. | `4g`
