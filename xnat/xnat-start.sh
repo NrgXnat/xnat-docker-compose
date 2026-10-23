@@ -1,45 +1,44 @@
 #!/bin/sh
+# Write XNAT's configuration from the environment, then start the image's own entrypoint.
+# Runs on every start as the image's user (uid 1000), which owns $XNAT_HOME/config.
+set -e
+conf="$XNAT_HOME/config"
 
-# generate xnat config
-if [ ! -f $XNAT_HOME/config/xnat-conf.properties ]; then
-  cat > $XNAT_HOME/config/xnat-conf.properties << EOF
+# Replace any configuration the image was built with.
+rm -f "$conf/xnat-conf.properties" "$conf/prefs-init.ini"
+
+cat > "$conf/xnat-conf.properties" << EOF
 datasource.driver=$XNAT_DATASOURCE_DRIVER
 datasource.url=$XNAT_DATASOURCE_URL
 datasource.username=$XNAT_DATASOURCE_USERNAME
 datasource.password=$XNAT_DATASOURCE_PASSWORD
-
 hibernate.dialect=org.hibernate.dialect.PostgreSQL9Dialect
 hibernate.hbm2ddl.auto=update
 hibernate.show_sql=false
 hibernate.cache.use_second_level_cache=true
 hibernate.cache.use_query_cache=true
-
 spring.http.multipart.max-file-size=1073741824
 spring.http.multipart.max-request-size=1073741824
 EOF
-fi
 
 # Use an external ActiveMQ broker when a URL is provided (required for multi-node);
 # otherwise XNAT falls back to its in-process vm://localhost queue.
 if [ -n "$XNAT_ACTIVEMQ_URL" ]; then
-  cat >> $XNAT_HOME/config/xnat-conf.properties << EOF
-
+  cat >> "$conf/xnat-conf.properties" << EOF
 spring.activemq.broker-url=$XNAT_ACTIVEMQ_URL
 spring.activemq.user=$XNAT_ACTIVEMQ_USERNAME
 spring.activemq.password=$XNAT_ACTIVEMQ_PASSWORD
 EOF
 fi
 
-
-if [ ! -z "$XNAT_EMAIL" ]; then
-  cat > $XNAT_HOME/config/prefs-init.ini << EOF
+if [ -n "$XNAT_EMAIL" ]; then
+  cat > "$conf/prefs-init.ini" << EOF
 [siteConfig]
 adminEmail=$XNAT_EMAIL
 EOF
 fi
-
 if [ "$XNAT_SMTP_ENABLED" = true ]; then
-  cat >> $XNAT_HOME/config/prefs-init.ini << EOF
+  cat >> "$conf/prefs-init.ini" << EOF
 [notifications]
 smtpEnabled=true
 smtpHostname=$XNAT_SMTP_HOSTNAME
@@ -51,7 +50,4 @@ smtpStartTls=$XNAT_SMTP_START_TLS
 EOF
 fi
 
-mkdir -p /usr/local/share/xnat
-find $XNAT_HOME/config -mindepth 1 -maxdepth 1 -type f -exec cp {} /usr/local/share/xnat \;
-
-
+exec /usr/local/bin/entrypoint.sh /usr/local/tomcat/bin/catalina.sh run

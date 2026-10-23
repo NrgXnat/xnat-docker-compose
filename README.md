@@ -16,9 +16,9 @@ This document contains the following sections:
 
 ## Introduction
 
-This repository contains files to bootstrap XNAT deployment. The build creates multiple containers:
+This repository contains files to bootstrap XNAT deployment. It runs multiple containers:
 
-- **[Tomcat](http://tomcat.apache.org/) + XNAT**: The XNAT web application
+- **[Tomcat](http://tomcat.apache.org/) + XNAT**: The XNAT web application, from the published XNAT image (`ghcr.io/nrgxnat/xnat`, or `ghcr.io/nrgxnat/xnat-web` for XNAT 1.9)
 - [**Postgres**](https://www.postgresql.org/): The XNAT database
 - [**nginx**](https://www.nginx.com/): Web proxy sitting in front of XNAT
 
@@ -49,15 +49,28 @@ The following containers are optional and only run when the [multi-node deployme
 $ cp default.env .env
 ```
 
-3. Configurations: The default configuration is sufficient to run the deployment. The following files can be modified if you want to change the default configuration
+3. Configurations: The default configuration is sufficient to run the deployment. To change it:
 
-    - **docker-compose.yml**: How the different containers are deployed. There is a section of build arguments (under `services → xnat-web → build → args`) to control some aspects of the build.
-        * If you want to download a different version of XNAT, you can change the `XNAT_VERSION` variable to some other release.
-        * The `TOMCAT_XNAT_FOLDER` build argument is set to `ROOT` by default; this means the XNAT will be available at `http://localhost`. If, instead, you wish it to be at `http://localhost/xnat` or, more generally, at `http://localhost/{something}`, you can set `TOMCAT_XNAT_FOLDER` to the value `something`.
-        * If you need to control some arguments that get sent to tomcat on startup, you can modify the `CATALINA_OPTS` environment variable (under `services → xnat-web → environment`).
-    - **xnat/Dockerfile**: Builds the xnat-web image from a tomcat docker image.
+    - **.env**: `XNAT_IMAGE` and `XNAT_VERSION` choose the published XNAT image. To run XNAT 1.9, set `XNAT_IMAGE=ghcr.io/nrgxnat/xnat-web` and `XNAT_VERSION=1.9.3.9`. See [Environment variables](#markdown-header-environment-variables) for the rest.
+    - **docker-compose.yml**: How the different containers are deployed. To change the arguments sent to Tomcat on startup, edit the `CATALINA_OPTS` environment variable (under `x-xnat-web → environment`).
+    - **xnat/xnat-start.sh**: Writes XNAT's configuration files from the environment each time the XNAT container starts, then starts XNAT.
 
-4. Start the system
+    XNAT is served at the root of the site (`http://localhost`). The published images don't support serving it under a path such as `/xnat`.
+
+4. On Linux only, create the data directories and give them to the XNAT user (uid 1000) before the first start. The XNAT container runs as that user, and Docker would otherwise create the directories as `root`. Docker Desktop on macOS and Windows doesn't need this.
+
+    ```
+    $ mkdir -p xnat-data/archive xnat-data/build xnat-data/cache xnat-data/prearchive xnat-data/home/logs xnat-data/home2/logs xnat/plugins
+    $ sudo chown -R 1000:1000 xnat-data xnat/plugins
+    ```
+
+    Also set `DOCKER_GID` in `.env` to the group that owns the Docker socket, so the container service can use it:
+
+    ```
+    $ stat -c %g /var/run/docker.sock
+    ```
+
+5. Start the system
 
     ```
     $ docker compose up --detach
@@ -88,7 +101,21 @@ $ cp default.env .env
     xnat-web  | 08-Jul-2025 22:22:03.924 INFO [main] org.apache.catalina.startup.Catalina.start Server startup in [43522] milliseconds
     ```
 
-5. First XNAT Site Setup! Your XNAT will soon be available at [http://localhost](http://localhost). After logging in with credentials `admin`/`admin` (the default username and password, respectively), the setup page should be displayed.
+6. First XNAT Site Setup! Your XNAT will soon be available at [http://localhost](http://localhost). After logging in with credentials `admin`/`admin` (the default username and password, respectively), the setup page should be displayed.
+
+### Upgrading from a version of this project that built its own image
+
+Earlier versions of this project built an XNAT image and ran it as `root`. To switch an existing deployment to the published images:
+
+1. Bring it down with `docker compose down`.
+2. Copy the new variables from `default.env` into your `.env`: `XNAT_IMAGE`, `XNAT_VERSION` and `DOCKER_GID`. `TOMCAT_XNAT_FOLDER` is no longer used.
+3. On Linux, give the existing data to the XNAT user, and set `DOCKER_GID` as described in step 4 above:
+
+    ```
+    $ sudo chown -R 1000:1000 xnat-data xnat/plugins
+    ```
+
+4. Start it with `docker compose up -d`.
 
 ## Multi-node deployment
 
@@ -124,15 +151,14 @@ NGINX_CONF=nginx-multinode.conf
 XNAT_ACTIVEMQ_URL=tcp://xnat-activemq:61616
 ```
 
-Because the ActiveMQ connection is baked into the image at build time, you must **rebuild** when
-switching modes:
+Then start the stack:
 
 ```
-$ docker compose build && docker compose up -d
+$ docker compose up -d
 ```
 
-To return to single-node, clear those three values (`COMPOSE_PROFILES=`, `NGINX_CONF=nginx.conf`,
-`XNAT_ACTIVEMQ_URL=`) and rebuild again.
+To return to single-node, run `docker compose down`, clear those three values (`COMPOSE_PROFILES=`,
+`NGINX_CONF=nginx.conf`, `XNAT_ACTIVEMQ_URL=`), and run `docker compose up -d` again.
 
 ### Entry points
 
@@ -150,8 +176,8 @@ To return to single-node, clear those three values (`COMPOSE_PROFILES=`, `NGINX_
   `node2.properties` (for `xnat-web-2`), each mounted to `${XNAT_HOME}/config/node-conf.properties`
   and read by XNAT at startup. These set a unique `node.id` (so XNAT's Node/Task framework runs
   scheduled/recurring tasks on only one node) and `xnat.is_primary_node` (`true` on `xnat-web`,
-  `false` on `xnat-web-2`). Mounting per-node files avoids baking node-specific values into the
-  shared build-time image.
+  `false` on `xnat-web-2`). Mounting per-node files keeps node-specific values out of the shared
+  configuration.
 - The second node writes its logs to `xnat-data/home2/logs` to avoid clobbering the primary node's
   logs (`xnat-data/home/logs`).
 
@@ -167,8 +193,8 @@ When you bring up XNAT with `docker compose up`, several directories are created
 * **xnat/plugins** - Initially contains nothing. However, you can customize your XNAT with plugins by placing jars into this directory and restarting XNAT.
 * **xnat-data/archive** - Contains the XNAT archive
 * **xnat-data/build** - Contains the XNAT build space. This is useful when running the container service plugin.
-* **xnat-data/home/logs** - Contains the XNAT logs.
-* **xnat-data/home2/logs** - Contains the logs for the second web node (only used in a [multi-node deployment](#markdown-header-multi-node-deployment)).
+* **xnat-data/home/logs** - XNAT's log directory. XNAT writes its logs to the container's output instead (`XNAT_LOG_CONSOLE` in `docker-compose.yml`), so read them with `docker compose logs`.
+* **xnat-data/home2/logs** - The log directory for the second web node (only used in a [multi-node deployment](#markdown-header-multi-node-deployment)).
 
 ## Environment variables
 
@@ -183,7 +209,9 @@ These variables directly set options for XNAT itself.
 
 Variable | Description | Default value
 -------- | ----------- | -------------
-XNAT\_VERSION | Indicates the version of XNAT to install. | 1.9.3.6
+XNAT\_IMAGE | The published XNAT image to run. Use `ghcr.io/nrgxnat/xnat-web` for XNAT 1.9. | `ghcr.io/nrgxnat/xnat`
+XNAT\_VERSION | The tag of the XNAT image, which is the XNAT version. | `1.10.2.1`
+DOCKER\_GID | The group that owns the Docker socket on the host, added to the XNAT user so the container service can use the socket. `0` on Docker Desktop; on Linux, the output of `stat -c %g /var/run/docker.sock`. | `0`
 XNAT\_MIN\_HEAP | Indicates the minimum heap size for the Java virtual machine. | `256m`
 XNAT\_MAX\_HEAP | Indicates the maximum heap size for the Java virtual machine. | `4g`
 XNAT\_SMTP\_ENABLED | Indicates whether SMTP operations are enabled in XNAT. | `false`
@@ -199,7 +227,6 @@ XNAT\_DATASOURCE\_DRIVER | Specifies the driver class to set for the database co
 XNAT\_DATASOURCE\_NAME | Specifies the database name for the database connection. | `xnat`
 XNAT\_DATASOURCE\_USERNAME | Specifies the username for the XNAT database account. | `xnat`
 XNAT\_DATASOURCE\_PASSWORD | Specifies the password for the XNAT database account. | `xnat`
-XNAT\_WEBAPP\_FOLDER | Indicates the name of the folder for the XNAT application. This affects the context path for accessing XNAT. The value `ROOT` indicates that XNAT is the root application and can be accessed at http://localhost (i.e. no path). Otherwise, you must add this value to the _end_ of the URL so, e.g. if you specify `xnat` for this variable, you'll access XNAT at http://localhost/xnat. | `ROOT`
 XNAT\_ROOT | Indicates the location of the root XNAT folder on the XNAT container. | `/data/xnat`
 XNAT\_HOME | Indicates the location of the XNAT user's home folder on the XNAT container. | `/data/xnat/home`
 XNAT\_EMAIL | Specifies the primary administrator email address. | `harmitage@miskatonic.edu`
@@ -226,22 +253,12 @@ $ docker compose exec xnat-web bash
 * The `xnat-web` part says you want to execute the command in whatever container is running for your xnat-web service. If, instead, you want to open a shell on the database container, you would use `xnat-db` instead.
 * The `bash` part is the command that will be executed in the container. It could really be anything, but in this case we want to open a shell. Running `bash` will do just that. You will get a command prompt, and any further commands you issue will be run inside this container.
 
-### Read Tomcat logs
+### Read logs
 
-List available logs
-
-```
-$ docker compose exec xnat-web ls /usr/local/tomcat/logs
-
-catalina.2025-07-08.log      localhost_access_log.2025-07-08.txt
-host-manager.2025-07-08.log  manager.2025-07-08.log
-localhost.2025-07-08.log
-```
-
-View a particular log
+Tomcat and XNAT write their logs to the container's output:
 
 ```
-$ docker compose exec xnat-web cat /usr/local/tomcat/logs/catalina.2025-07-08.log
+$ docker compose logs --follow xnat-web
 ```
 
 ### Controlling Instances
@@ -253,7 +270,7 @@ Bring all the instances down by running
 $ docker compose down
 ```
 
-If you want to bring everything down *and* remove all the images that were built, you can run
+If you want to bring everything down *and* remove the images it uses, you can run
 
 ```
 $ docker compose down --rmi all
@@ -274,14 +291,14 @@ If an instance is having problems, you can restart it.
 $ docker compose restart xnat-web
 ```
 
-#### Rebuild after making changes
-If you have changed a `Dockerfile`, you will need to rebuild an image before the changes are picked up.
+#### Apply changes
+After changing `.env`, `docker-compose.yml` or `xnat/xnat-start.sh`, recreate the containers. To upgrade XNAT, change `XNAT_VERSION` in `.env` first.
 
 ```
-$ docker compose build xnat-web
+$ docker compose up --detach
 ```
 
-It is possible that you will need to use the `--no-cache` argument, if you have only changed local files and not the `Dockerfile` itself.
+Changes to `xnat/xnat-start.sh` alone need only a restart (`docker compose restart xnat-web`).
 
 ## Notes on using the Container Service
 

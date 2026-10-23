@@ -1,36 +1,46 @@
+# Settings shared by the XNAT web nodes. They run the published XNAT image as its
+# non-root user (uid 1000). xnat-start.sh writes XNAT's configuration from these
+# variables on every start, then runs the image's own entrypoint.
+x-xnat-web: &xnat-web
+  image: ${XNAT_IMAGE}:${XNAT_VERSION}
+  entrypoint: ["/bin/sh", "/usr/local/bin/xnat-start.sh"]
+  # Lets uid 1000 use the Docker socket for the container service. The socket's group
+  # is 0 on Docker Desktop; on Linux, set DOCKER_GID to `stat -c %g /var/run/docker.sock`.
+  group_add:
+    - "${DOCKER_GID:-0}"
+  networks:
+    - xnat-network
+  environment:
+    CATALINA_OPTS: -Xms${XNAT_MIN_HEAP} -Xmx${XNAT_MAX_HEAP} -Dxnat.home=${XNAT_HOME}
+    XNAT_HOME: ${XNAT_HOME}
+    # Send XNAT's logs to the container's stdout (docker compose logs).
+    XNAT_LOG_CONSOLE: plain
+    XNAT_DATASOURCE_DRIVER: ${XNAT_DATASOURCE_DRIVER}
+    XNAT_DATASOURCE_URL: ${XNAT_DATASOURCE_URL}
+    XNAT_DATASOURCE_USERNAME: ${XNAT_DATASOURCE_USERNAME}
+    XNAT_DATASOURCE_PASSWORD: ${XNAT_DATASOURCE_PASSWORD}
+    XNAT_ACTIVEMQ_URL: ${XNAT_ACTIVEMQ_URL}
+    XNAT_ACTIVEMQ_USERNAME: ${XNAT_ACTIVEMQ_USERNAME}
+    XNAT_ACTIVEMQ_PASSWORD: ${XNAT_ACTIVEMQ_PASSWORD}
+    XNAT_EMAIL: ${XNAT_EMAIL}
+    XNAT_SMTP_ENABLED: ${XNAT_SMTP_ENABLED}
+    XNAT_SMTP_HOSTNAME: ${XNAT_SMTP_HOSTNAME}
+    XNAT_SMTP_PORT: ${XNAT_SMTP_PORT}
+    XNAT_SMTP_AUTH: ${XNAT_SMTP_AUTH}
+    XNAT_SMTP_USERNAME: ${XNAT_SMTP_USERNAME}
+    XNAT_SMTP_PASSWORD: ${XNAT_SMTP_PASSWORD}
+    XNAT_SMTP_START_TLS: ${XNAT_SMTP_START_TLS}
+
 services:
 
   xnat-web:
+    <<: *xnat-web
     container_name: xnat-web
     hostname: xnat-web-1
-    image: xnat-web:${XNAT_VERSION}
-    build:
-      context: ./xnat
-      args:
-        XNAT_VERSION: ${XNAT_VERSION}
-        XNAT_SMTP_ENABLED: ${XNAT_SMTP_ENABLED}
-        XNAT_SMTP_HOSTNAME: ${XNAT_SMTP_HOSTNAME}
-        XNAT_SMTP_PORT: ${XNAT_SMTP_PORT}
-        XNAT_SMTP_AUTH: ${XNAT_SMTP_AUTH}
-        XNAT_SMTP_USERNAME: ${XNAT_SMTP_USERNAME}
-        XNAT_SMTP_PASSWORD: ${XNAT_SMTP_PASSWORD}
-        XNAT_SMTP_START_TLS: ${XNAT_SMTP_START_TLS}
-        XNAT_DATASOURCE_DRIVER: ${XNAT_DATASOURCE_DRIVER}
-        XNAT_DATASOURCE_URL: ${XNAT_DATASOURCE_URL}
-        XNAT_DATASOURCE_USERNAME: ${XNAT_DATASOURCE_USERNAME}
-        XNAT_DATASOURCE_PASSWORD: ${XNAT_DATASOURCE_PASSWORD}
-        XNAT_ACTIVEMQ_URL: ${XNAT_ACTIVEMQ_URL}
-        XNAT_ACTIVEMQ_USERNAME: ${XNAT_ACTIVEMQ_USERNAME}
-        XNAT_ACTIVEMQ_PASSWORD: ${XNAT_ACTIVEMQ_PASSWORD}
-        TOMCAT_XNAT_FOLDER: ${TOMCAT_XNAT_FOLDER}
-        XNAT_ROOT: ${XNAT_ROOT}
-        XNAT_HOME: ${XNAT_HOME}
-        XNAT_EMAIL: ${XNAT_EMAIL}
     ports:
       - 8104:8104
-    networks:
-      - xnat-network
     volumes:
+      - ./xnat/xnat-start.sh:/usr/local/bin/xnat-start.sh:ro
       - ./xnat/plugins:${XNAT_HOME}/plugins
       - ./xnat/node-conf/node1.properties:${XNAT_HOME}/config/node-conf.properties
       - ./xnat-data/home/logs:${XNAT_HOME}/logs
@@ -40,27 +50,24 @@ services:
       - ./xnat-data/prearchive:${XNAT_ROOT}/prearchive
       - /var/run/docker.sock:/var/run/docker.sock
     depends_on:
-      - xnat-db
+      xnat-db:
+        condition: service_healthy
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost:8080/ || exit 1"]
       interval: 15s
       timeout: 10s
       retries: 20
       start_period: 180s
-    environment:
-      - CATALINA_OPTS=-Xms${XNAT_MIN_HEAP} -Xmx${XNAT_MAX_HEAP} -Dxnat.home=${XNAT_HOME}
-      - XNAT_HOME=${XNAT_HOME}
 
   # Second XNAT web node — enabled only with the "multinode" profile
-  # (COMPOSE_PROFILES=multinode). Reuses the image built by xnat-web.
+  # (COMPOSE_PROFILES=multinode). Runs the same image as xnat-web.
   xnat-web-2:
+    <<: *xnat-web
     container_name: xnat-web-2
     hostname: xnat-web-2
-    image: xnat-web:${XNAT_VERSION}
     profiles: ["multinode"]
-    networks:
-      - xnat-network
     volumes:
+      - ./xnat/xnat-start.sh:/usr/local/bin/xnat-start.sh:ro
       - ./xnat/plugins:${XNAT_HOME}/plugins
       - ./xnat/node-conf/node2.properties:${XNAT_HOME}/config/node-conf.properties
       - ./xnat-data/home2/logs:${XNAT_HOME}/logs
@@ -71,14 +78,11 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
     depends_on:
       xnat-db:
-        condition: service_started
+        condition: service_healthy
       xnat-activemq:
         condition: service_started
       xnat-web:
         condition: service_healthy
-    environment:
-      - CATALINA_OPTS=-Xms${XNAT_MIN_HEAP} -Xmx${XNAT_MAX_HEAP} -Dxnat.home=${XNAT_HOME}
-      - XNAT_HOME=${XNAT_HOME}
 
   # External ActiveMQ broker — enabled only with the "multinode" profile.
   xnat-activemq:
@@ -108,6 +112,13 @@ services:
       # variables for the sql script
       - XNAT_DATASOURCE_USERNAME=${XNAT_DATASOURCE_USERNAME}
       - XNAT_DATASOURCE_PASSWORD=${XNAT_DATASOURCE_PASSWORD}
+    # Checks over TCP, so it passes only after the init scripts in ./postgres have run:
+    # the image's temporary server during initialization doesn't listen on TCP.
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -U ${XNAT_DATASOURCE_USERNAME} -d ${XNAT_DATASOURCE_NAME}"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
 
   xnat-nginx:
     container_name: xnat-nginx
@@ -133,4 +144,3 @@ services:
 networks:
   xnat-network:
     name: xnat-network
-
