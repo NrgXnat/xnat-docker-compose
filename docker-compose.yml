@@ -3,6 +3,9 @@
 # these variables on every start, then runs the image's own entrypoint.
 x-xnat-node: &xnat-node
   image: ${XNAT_IMAGE}:${XNAT_VERSION}
+  # The published XNAT images are built for amd64 only. This lets them run on
+  # ARM hosts such as Apple Silicon Macs through emulation, and changes nothing on amd64 hosts.
+  platform: linux/amd64
   entrypoint: ["/bin/sh", "/usr/local/bin/xnat-start.sh"]
   # Runs as XNAT_UID in the image's group (1000), which can write the image's paths.
   # On Linux, XNAT_UID is your own uid, so XNAT can write the directories mounted here.
