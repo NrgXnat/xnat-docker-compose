@@ -58,6 +58,8 @@ $ cp default.env .env
 
     XNAT is served at the root of the site (`http://localhost`).
 
+    The published XNAT images are amd64 only, so `docker-compose.yml` sets `platform: linux/amd64` for the XNAT nodes. On an ARM machine such as an Apple Silicon Mac, Docker runs XNAT under emulation, which works but is slower to start.
+
 4. On Linux only, set two values in `.env` and create the data directories before the first start. Docker Desktop on macOS and Windows doesn't need this.
 
     - `XNAT_UID`: your uid, from `id -u`. XNAT runs as this user, so it can write the directories you create here, and you can edit what XNAT writes.
